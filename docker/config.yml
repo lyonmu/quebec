@@ -1,0 +1,15 @@
+system:
+  id: 924
+  name: auth
+log:
+  level: info # 日志级别
+  save_file: false # 是否写入文件
+  path: /var/log/auth.log # 日志路径
+  max_size: 500 # 日志文件大小MB
+  max_day: 7 # 保留天数
+auth:
+  port: 30924
+redis:
+  addr: ["auth-redis:6379"]
+  password: "root"
+  db: 9

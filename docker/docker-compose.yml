@@ -1,0 +1,74 @@
+services:
+  auth-envoy:
+    image: bitnami/envoy:latest
+    restart: unless-stopped
+    pull_policy: always
+    container_name: auth-envoy
+    hostname: auth-envoy
+    ports: ["30811:30811","38080:38080"]
+    volumes: ["/home/mu/code/mu/auth/test/config/envoy.yaml:/opt/bitnami/envoy/conf/envoy.yaml","/home/mu/code/mu/auth/test/log/envoy:/var/log/envoy"]
+    networks: ["auth"]
+
+  auth-redis:
+    restart: unless-stopped
+    image: redis:alpine
+    pull_policy: always
+    container_name: auth-redis
+    hostname: auth-redis
+    environment: {REDIS_PASSWORD: "root"}
+    ports: ["36379:6379"]
+    command: ["redis-server", "--requirepass","root","--notify-keyspace-events", "AKE"]
+    volumes: ["/home/mu/code/mu/auth/test/data/redis:/data"]
+    networks: ["auth"]
+
+  auth-prometheus:
+    restart: unless-stopped
+    image: bitnami/prometheus:latest
+    pull_policy: always
+    container_name: auth-prometheus
+    hostname: auth-prometheus
+    ports: ["39090:9090"]
+    command: ["--web.enable-lifecycle"]
+    volumes: ["/home/mu/code/mu/auth/test/data/prometheus:/opt/bitnami/prometheus/data","/home/mu/code/mu/auth/test/config/prometheus.yml:/opt/bitnami/prometheus/prometheus.yml"]
+    networks: ["auth"]
+
+  auth-node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    pull_policy: always
+    container_name: auth-node_exporter
+    hostname: auth-node_exporter
+    command: ["--web.listen-address=:39100","--path.rootfs=/host"]
+    network_mode: host
+    pid: host
+    restart: unless-stopped
+    volumes: ["/:/host:ro,rslave"]
+
+  auth-redis_exporter:
+    restart: unless-stopped
+    image: quay.io/oliver006/redis_exporter
+    pull_policy: always
+    container_name: auth-redis_exporter
+    hostname: auth-redis_exporter
+    ports: ["39121:9121"]
+    networks: ["auth"]
+    environment: {REDIS_ADDR: "redis://auth-redis:6379",REDIS_PASSWORD: root}
+
+  auth-grafana:
+    restart: unless-stopped
+    image: grafana/grafana:latest
+    pull_policy: always
+    container_name: auth-grafana
+    hostname: auth-grafana
+    volumes: ["/home/mu/code/mu/auth/test/data/grafana:/var/lib/grafana"]
+    ports: ["33000:3000"]
+    environment: {GF_LOG_LEVEL: "debug",GF_INSTALL_PLUGINS: "grafana-clock-panel"}
+    networks: ["auth"]
+
+
+networks:
+  auth:
+    name: auth
+    driver: bridge
+    ipam:
+      driver: default
+      config: [{subnet: 192.16.10.0/24,gateway: 192.16.10.1}]
