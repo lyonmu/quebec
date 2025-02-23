@@ -5,5 +5,5 @@ import (
 )
 
 var (
-	Config authconfig.AuthConfig
+	System authconfig.SystemConfig
 )
