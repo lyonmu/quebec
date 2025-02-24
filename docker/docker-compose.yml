@@ -2,7 +2,7 @@ services:
   quebec-envoy:
     image: bitnami/envoy:latest
     restart: unless-stopped
-    # pull_policy: always
+    pull_policy: always
     container_name: quebec-envoy
     hostname: quebec-envoy
     ports: ["30811:30811","38080:38080"]
@@ -12,7 +12,7 @@ services:
   quebec-redis:
     restart: unless-stopped
     image: redis:alpine
-    # pull_policy: always
+    pull_policy: always
     container_name: quebec-redis
     hostname: quebec-redis
     environment: {REDIS_PASSWORD: "root"}
@@ -24,7 +24,7 @@ services:
   quebec-prometheus:
     restart: unless-stopped
     image: bitnami/prometheus:latest
-    # pull_policy: always
+    pull_policy: always
     container_name: quebec-prometheus
     hostname: quebec-prometheus
     ports: ["39090:9090"]
@@ -34,7 +34,7 @@ services:
 
   quebec-node-exporter:
     image: quay.io/prometheus/node-exporter:latest
-    # pull_policy: always
+    pull_policy: always
     container_name: quebec-node-exporter
     hostname: quebec-node-exporter
     command: ["--web.listen-address=:39100","--path.rootfs=/host"]
@@ -46,7 +46,7 @@ services:
   quebec-redis-exporter:
     restart: unless-stopped
     image: quay.io/oliver006/redis_exporter
-    # pull_policy: always
+    pull_policy: always
     container_name: quebec-redis-exporter
     hostname: quebec-redis-exporter
     ports: ["39121:9121"]
@@ -56,7 +56,7 @@ services:
   quebec-grafana:
     restart: unless-stopped
     image: grafana/grafana:latest
-    # pull_policy: always
+    pull_policy: always
     container_name: quebec-grafana
     hostname: quebec-grafana
     volumes: ["./data/grafana:/var/lib/grafana"]
@@ -65,8 +65,8 @@ services:
     networks: ["quebec-component"]
   
   quebec-mysql:
-    restart: always
-    # pull_policy: always
+    restart: unless-stopped
+    pull_policy: always
     image: bitnami/mysql:latest  
     container_name: quebec-mysql
     hostname: quebec-mysql
@@ -81,8 +81,8 @@ services:
       - quebec-component
 
   quebec-mysqld-exporter:
-    restart: always
-    # pull_policy: always
+    restart: unless-stopped
+    pull_policy: always
     image: prom/mysqld-exporter:latest 
     container_name: quebec-mysqld-exporter
     hostname: quebec-mysqld-exporter
