@@ -38,3 +38,4 @@ tmp/
 logs/
 *.log
 dev/
+.DS_Store

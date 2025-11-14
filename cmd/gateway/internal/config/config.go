@@ -2,18 +2,15 @@ package config
 
 import (
 	"github.com/lyonmu/quebec/cmd/gateway/internal/common"
-	cfg "github.com/lyonmu/quebec/pkg/config"
 	log "github.com/lyonmu/quebec/pkg/logger"
 )
 
 type Config struct {
-	Version bool             `short:"v" long:"version" help:"版本信息" default:"false" mapstructure:"version" json:"version" yaml:"version"`
-	Host    string           `long:"host" env:"HOST" help:"服务IP" default:"127.0.0.1" mapstructure:"host" json:"host" yaml:"host"`
-	Mode    string           `enum:"local,consul" short:"m" long:"mode" env:"MODE" help:"配置文件模式:local、consul" default:"local" mapstructure:"mode" json:"mode" yaml:"mode"`
-	Log     log.LogConfig    `embed:"" prefix:"log." mapstructure:"log" json:"log" yaml:"log"`
-	Local   cfg.LocalConfig  `embed:"" prefix:"local." mapstructure:"local" json:"local" yaml:"local"`
-	Consul  cfg.ConsulConfig `embed:"" prefix:"consul." mapstructure:"consul" json:"consul" yaml:"consul"`
-	Gateway GatewayConfig    `embed:"" prefix:"gateway." mapstructure:"gateway" json:"gateway" yaml:"gateway"`
+	Version bool          `short:"v" long:"version" help:"版本信息" default:"false" mapstructure:"version" json:"version" yaml:"version"`
+	Host    string        `long:"host" env:"HOST" help:"服务IP" default:"127.0.0.1" mapstructure:"host" json:"host" yaml:"host"`
+	Mode    string        `enum:"local,consul" short:"m" long:"mode" env:"MODE" help:"配置文件模式:local、consul" default:"local" mapstructure:"mode" json:"mode" yaml:"mode"`
+	Log     log.LogConfig `embed:"" prefix:"log." mapstructure:"log" json:"log" yaml:"log"`
+	Gateway GatewayConfig `embed:"" prefix:"gateway." mapstructure:"gateway" json:"gateway" yaml:"gateway"`
 }
 
 type GatewayConfig struct {

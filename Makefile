@@ -15,6 +15,10 @@ FLAGS = -ldflags "-extldflags '-static' \
 build-gateway:
 	CGO_ENABLED=0 go mod download && go build ${FLAGS} -o bin/gateway cmd/gateway/gateway.go
 
+.PHONY: build-core
+build-core:
+	CGO_ENABLED=0 go mod download && go build ${FLAGS} -o bin/core cmd/core/core.go
+
 .PHONY: clean
 clean:
 	rm -rf bin
