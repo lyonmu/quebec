@@ -1,8 +1,7 @@
-package init
+package bootstrap
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"entgo.io/ent/dialect"
@@ -12,9 +11,16 @@ import (
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/migrate"
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
 	"github.com/lyonmu/quebec/pkg/config"
+	"github.com/lyonmu/quebec/pkg/tools"
 )
 
 func InitMySQL(cfg config.MySQLConfig) error {
+	// 确保数据库存在
+	if err := cfg.EnsureDatabase(); err != nil {
+		global.Logger.Sugar().Error("ensure database failed: %v", err)
+		return err
+	}
+
 	options := make([]ent.Option, 0)
 	if strings.ToLower(gin.Mode()) == gin.DebugMode {
 		options = append(options, ent.Debug())
@@ -22,12 +28,17 @@ func InitMySQL(cfg config.MySQLConfig) error {
 
 	client, openErr := ent.Open(dialect.MySQL, cfg.DSN(), options...)
 	if openErr != nil {
-		return fmt.Errorf("init mysql client failed:: %v", openErr)
+		global.Logger.Sugar().Error("init mysql client failed:: %v", openErr)
+		return openErr
 	}
 	global.EntClient = client
 
+	// 注册全局时间戳 hooks
+	tools.RegisterTimeHooks(client)
+
 	if createErr := client.Schema.Create(context.Background(), migrate.WithForeignKeys(false)); createErr != nil {
-		return fmt.Errorf("failed to create mysql schema: %v", createErr)
+		global.Logger.Sugar().Error("failed to create mysql schema: %v", createErr)
+		return createErr
 	}
 
 	return nil

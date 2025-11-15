@@ -1,0 +1,26 @@
+package bootstrap
+
+import (
+	"github.com/lyonmu/quebec/cmd/core/internal/global"
+	"github.com/lyonmu/quebec/pkg/common"
+	"github.com/lyonmu/quebec/pkg/tools"
+)
+
+func InitServer() error {
+
+	grpcServer, err := tools.NewGRPCServer(string(common.ModuleNameCore))
+	if err != nil {
+		return err
+	}
+
+	ginEngine, err := tools.NewGin()
+	if err != nil {
+		return err
+	}
+
+	if err = tools.NewCmux(global.Cfg.Core.Port, ginEngine, grpcServer); err != nil {
+		return err
+	}
+
+	return nil
+}

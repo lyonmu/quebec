@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -28,6 +29,112 @@ func (_u *CoreUserUpdate) Where(ps ...predicate.CoreUser) *CoreUserUpdate {
 	return _u
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (_u *CoreUserUpdate) SetUpdatedAt(v time.Time) *CoreUserUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *CoreUserUpdate) SetDeletedAt(v time.Time) *CoreUserUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *CoreUserUpdate) SetNillableDeletedAt(v *time.Time) *CoreUserUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *CoreUserUpdate) ClearDeletedAt() *CoreUserUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
+// SetUsername sets the "username" field.
+func (_u *CoreUserUpdate) SetUsername(v string) *CoreUserUpdate {
+	_u.mutation.SetUsername(v)
+	return _u
+}
+
+// SetNillableUsername sets the "username" field if the given value is not nil.
+func (_u *CoreUserUpdate) SetNillableUsername(v *string) *CoreUserUpdate {
+	if v != nil {
+		_u.SetUsername(*v)
+	}
+	return _u
+}
+
+// ClearUsername clears the value of the "username" field.
+func (_u *CoreUserUpdate) ClearUsername() *CoreUserUpdate {
+	_u.mutation.ClearUsername()
+	return _u
+}
+
+// SetPassword sets the "password" field.
+func (_u *CoreUserUpdate) SetPassword(v string) *CoreUserUpdate {
+	_u.mutation.SetPassword(v)
+	return _u
+}
+
+// SetNillablePassword sets the "password" field if the given value is not nil.
+func (_u *CoreUserUpdate) SetNillablePassword(v *string) *CoreUserUpdate {
+	if v != nil {
+		_u.SetPassword(*v)
+	}
+	return _u
+}
+
+// ClearPassword clears the value of the "password" field.
+func (_u *CoreUserUpdate) ClearPassword() *CoreUserUpdate {
+	_u.mutation.ClearPassword()
+	return _u
+}
+
+// SetEmail sets the "email" field.
+func (_u *CoreUserUpdate) SetEmail(v string) *CoreUserUpdate {
+	_u.mutation.SetEmail(v)
+	return _u
+}
+
+// SetNillableEmail sets the "email" field if the given value is not nil.
+func (_u *CoreUserUpdate) SetNillableEmail(v *string) *CoreUserUpdate {
+	if v != nil {
+		_u.SetEmail(*v)
+	}
+	return _u
+}
+
+// ClearEmail clears the value of the "email" field.
+func (_u *CoreUserUpdate) ClearEmail() *CoreUserUpdate {
+	_u.mutation.ClearEmail()
+	return _u
+}
+
+// SetNickname sets the "nickname" field.
+func (_u *CoreUserUpdate) SetNickname(v string) *CoreUserUpdate {
+	_u.mutation.SetNickname(v)
+	return _u
+}
+
+// SetNillableNickname sets the "nickname" field if the given value is not nil.
+func (_u *CoreUserUpdate) SetNillableNickname(v *string) *CoreUserUpdate {
+	if v != nil {
+		_u.SetNickname(*v)
+	}
+	return _u
+}
+
+// ClearNickname clears the value of the "nickname" field.
+func (_u *CoreUserUpdate) ClearNickname() *CoreUserUpdate {
+	_u.mutation.ClearNickname()
+	return _u
+}
+
 // Mutation returns the CoreUserMutation object of the builder.
 func (_u *CoreUserUpdate) Mutation() *CoreUserMutation {
 	return _u.mutation
@@ -35,6 +142,9 @@ func (_u *CoreUserUpdate) Mutation() *CoreUserMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CoreUserUpdate) Save(ctx context.Context) (int, error) {
+	if err := _u.defaults(); err != nil {
+		return 0, err
+	}
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -60,6 +170,18 @@ func (_u *CoreUserUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_u *CoreUserUpdate) defaults() error {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		if coreuser.UpdateDefaultUpdatedAt == nil {
+			return fmt.Errorf("ent: uninitialized coreuser.UpdateDefaultUpdatedAt (forgotten import ent/runtime?)")
+		}
+		v := coreuser.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
+	}
+	return nil
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *CoreUserUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *CoreUserUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -67,13 +189,46 @@ func (_u *CoreUserUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *CoreU
 }
 
 func (_u *CoreUserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(coreuser.Table, coreuser.Columns, sqlgraph.NewFieldSpec(coreuser.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(coreuser.Table, coreuser.Columns, sqlgraph.NewFieldSpec(coreuser.FieldID, field.TypeString))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(coreuser.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(coreuser.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(coreuser.FieldDeletedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.Username(); ok {
+		_spec.SetField(coreuser.FieldUsername, field.TypeString, value)
+	}
+	if _u.mutation.UsernameCleared() {
+		_spec.ClearField(coreuser.FieldUsername, field.TypeString)
+	}
+	if value, ok := _u.mutation.Password(); ok {
+		_spec.SetField(coreuser.FieldPassword, field.TypeString, value)
+	}
+	if _u.mutation.PasswordCleared() {
+		_spec.ClearField(coreuser.FieldPassword, field.TypeString)
+	}
+	if value, ok := _u.mutation.Email(); ok {
+		_spec.SetField(coreuser.FieldEmail, field.TypeString, value)
+	}
+	if _u.mutation.EmailCleared() {
+		_spec.ClearField(coreuser.FieldEmail, field.TypeString)
+	}
+	if value, ok := _u.mutation.Nickname(); ok {
+		_spec.SetField(coreuser.FieldNickname, field.TypeString, value)
+	}
+	if _u.mutation.NicknameCleared() {
+		_spec.ClearField(coreuser.FieldNickname, field.TypeString)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -97,6 +252,112 @@ type CoreUserUpdateOne struct {
 	modifiers []func(*sql.UpdateBuilder)
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (_u *CoreUserUpdateOne) SetUpdatedAt(v time.Time) *CoreUserUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *CoreUserUpdateOne) SetDeletedAt(v time.Time) *CoreUserUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *CoreUserUpdateOne) SetNillableDeletedAt(v *time.Time) *CoreUserUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *CoreUserUpdateOne) ClearDeletedAt() *CoreUserUpdateOne {
+	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
+// SetUsername sets the "username" field.
+func (_u *CoreUserUpdateOne) SetUsername(v string) *CoreUserUpdateOne {
+	_u.mutation.SetUsername(v)
+	return _u
+}
+
+// SetNillableUsername sets the "username" field if the given value is not nil.
+func (_u *CoreUserUpdateOne) SetNillableUsername(v *string) *CoreUserUpdateOne {
+	if v != nil {
+		_u.SetUsername(*v)
+	}
+	return _u
+}
+
+// ClearUsername clears the value of the "username" field.
+func (_u *CoreUserUpdateOne) ClearUsername() *CoreUserUpdateOne {
+	_u.mutation.ClearUsername()
+	return _u
+}
+
+// SetPassword sets the "password" field.
+func (_u *CoreUserUpdateOne) SetPassword(v string) *CoreUserUpdateOne {
+	_u.mutation.SetPassword(v)
+	return _u
+}
+
+// SetNillablePassword sets the "password" field if the given value is not nil.
+func (_u *CoreUserUpdateOne) SetNillablePassword(v *string) *CoreUserUpdateOne {
+	if v != nil {
+		_u.SetPassword(*v)
+	}
+	return _u
+}
+
+// ClearPassword clears the value of the "password" field.
+func (_u *CoreUserUpdateOne) ClearPassword() *CoreUserUpdateOne {
+	_u.mutation.ClearPassword()
+	return _u
+}
+
+// SetEmail sets the "email" field.
+func (_u *CoreUserUpdateOne) SetEmail(v string) *CoreUserUpdateOne {
+	_u.mutation.SetEmail(v)
+	return _u
+}
+
+// SetNillableEmail sets the "email" field if the given value is not nil.
+func (_u *CoreUserUpdateOne) SetNillableEmail(v *string) *CoreUserUpdateOne {
+	if v != nil {
+		_u.SetEmail(*v)
+	}
+	return _u
+}
+
+// ClearEmail clears the value of the "email" field.
+func (_u *CoreUserUpdateOne) ClearEmail() *CoreUserUpdateOne {
+	_u.mutation.ClearEmail()
+	return _u
+}
+
+// SetNickname sets the "nickname" field.
+func (_u *CoreUserUpdateOne) SetNickname(v string) *CoreUserUpdateOne {
+	_u.mutation.SetNickname(v)
+	return _u
+}
+
+// SetNillableNickname sets the "nickname" field if the given value is not nil.
+func (_u *CoreUserUpdateOne) SetNillableNickname(v *string) *CoreUserUpdateOne {
+	if v != nil {
+		_u.SetNickname(*v)
+	}
+	return _u
+}
+
+// ClearNickname clears the value of the "nickname" field.
+func (_u *CoreUserUpdateOne) ClearNickname() *CoreUserUpdateOne {
+	_u.mutation.ClearNickname()
+	return _u
+}
+
 // Mutation returns the CoreUserMutation object of the builder.
 func (_u *CoreUserUpdateOne) Mutation() *CoreUserMutation {
 	return _u.mutation
@@ -117,6 +378,9 @@ func (_u *CoreUserUpdateOne) Select(field string, fields ...string) *CoreUserUpd
 
 // Save executes the query and returns the updated CoreUser entity.
 func (_u *CoreUserUpdateOne) Save(ctx context.Context) (*CoreUser, error) {
+	if err := _u.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
@@ -142,6 +406,18 @@ func (_u *CoreUserUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_u *CoreUserUpdateOne) defaults() error {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
+		if coreuser.UpdateDefaultUpdatedAt == nil {
+			return fmt.Errorf("ent: uninitialized coreuser.UpdateDefaultUpdatedAt (forgotten import ent/runtime?)")
+		}
+		v := coreuser.UpdateDefaultUpdatedAt()
+		_u.mutation.SetUpdatedAt(v)
+	}
+	return nil
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *CoreUserUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *CoreUserUpdateOne {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -149,7 +425,7 @@ func (_u *CoreUserUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Co
 }
 
 func (_u *CoreUserUpdateOne) sqlSave(ctx context.Context) (_node *CoreUser, err error) {
-	_spec := sqlgraph.NewUpdateSpec(coreuser.Table, coreuser.Columns, sqlgraph.NewFieldSpec(coreuser.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(coreuser.Table, coreuser.Columns, sqlgraph.NewFieldSpec(coreuser.FieldID, field.TypeString))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "CoreUser.id" for update`)}
@@ -173,6 +449,39 @@ func (_u *CoreUserUpdateOne) sqlSave(ctx context.Context) (_node *CoreUser, err 
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := _u.mutation.UpdatedAt(); ok {
+		_spec.SetField(coreuser.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(coreuser.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(coreuser.FieldDeletedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.Username(); ok {
+		_spec.SetField(coreuser.FieldUsername, field.TypeString, value)
+	}
+	if _u.mutation.UsernameCleared() {
+		_spec.ClearField(coreuser.FieldUsername, field.TypeString)
+	}
+	if value, ok := _u.mutation.Password(); ok {
+		_spec.SetField(coreuser.FieldPassword, field.TypeString, value)
+	}
+	if _u.mutation.PasswordCleared() {
+		_spec.ClearField(coreuser.FieldPassword, field.TypeString)
+	}
+	if value, ok := _u.mutation.Email(); ok {
+		_spec.SetField(coreuser.FieldEmail, field.TypeString, value)
+	}
+	if _u.mutation.EmailCleared() {
+		_spec.ClearField(coreuser.FieldEmail, field.TypeString)
+	}
+	if value, ok := _u.mutation.Nickname(); ok {
+		_spec.SetField(coreuser.FieldNickname, field.TypeString, value)
+	}
+	if _u.mutation.NicknameCleared() {
+		_spec.ClearField(coreuser.FieldNickname, field.TypeString)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &CoreUser{config: _u.config}

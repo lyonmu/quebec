@@ -6,7 +6,7 @@ import (
 	sonyflakeV2 "github.com/sony/sonyflake/v2"
 )
 
-type iDGenerator interface {
+type IDGenerator interface {
 	GenID() int64
 }
 
@@ -14,7 +14,7 @@ type SonySnowFlake struct {
 	node *sonyflakeV2.Sonyflake
 }
 
-func NewSonySnowFlake(machineId func() (int, error)) (iDGenerator, error) {
+func NewSonySnowFlake(machineId func() (int, error)) (IDGenerator, error) {
 	settings := sonyflakeV2.Settings{
 		// 序列号所占的位数，越大能在同一时间窗口内生成的 ID 越多；0 表示使用默认 8 位，≥31 会报错
 		BitsSequence: 0,

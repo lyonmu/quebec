@@ -83,8 +83,8 @@ func (_q *CoreUserQuery) FirstX(ctx context.Context) *CoreUser {
 
 // FirstID returns the first CoreUser ID from the query.
 // Returns a *NotFoundError when no CoreUser ID was found.
-func (_q *CoreUserQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (_q *CoreUserQuery) FirstID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -96,7 +96,7 @@ func (_q *CoreUserQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *CoreUserQuery) FirstIDX(ctx context.Context) int {
+func (_q *CoreUserQuery) FirstIDX(ctx context.Context) string {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -134,8 +134,8 @@ func (_q *CoreUserQuery) OnlyX(ctx context.Context) *CoreUser {
 // OnlyID is like Only, but returns the only CoreUser ID in the query.
 // Returns a *NotSingularError when more than one CoreUser ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *CoreUserQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (_q *CoreUserQuery) OnlyID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -151,7 +151,7 @@ func (_q *CoreUserQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *CoreUserQuery) OnlyIDX(ctx context.Context) int {
+func (_q *CoreUserQuery) OnlyIDX(ctx context.Context) string {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -179,7 +179,7 @@ func (_q *CoreUserQuery) AllX(ctx context.Context) []*CoreUser {
 }
 
 // IDs executes the query and returns a list of CoreUser IDs.
-func (_q *CoreUserQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (_q *CoreUserQuery) IDs(ctx context.Context) (ids []string, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
@@ -191,7 +191,7 @@ func (_q *CoreUserQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *CoreUserQuery) IDsX(ctx context.Context) []int {
+func (_q *CoreUserQuery) IDsX(ctx context.Context) []string {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -260,6 +260,18 @@ func (_q *CoreUserQuery) Clone() *CoreUserQuery {
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.CoreUser.Query().
+//		GroupBy(coreuser.FieldCreatedAt).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
 func (_q *CoreUserQuery) GroupBy(field string, fields ...string) *CoreUserGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &CoreUserGroupBy{build: _q}
@@ -271,6 +283,16 @@ func (_q *CoreUserQuery) GroupBy(field string, fields ...string) *CoreUserGroupB
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		CreatedAt time.Time `json:"created_at,omitempty"`
+//	}
+//
+//	client.CoreUser.Query().
+//		Select(coreuser.FieldCreatedAt).
+//		Scan(ctx, &v)
 func (_q *CoreUserQuery) Select(fields ...string) *CoreUserSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
 	sbuild := &CoreUserSelect{CoreUserQuery: _q}
@@ -351,7 +373,7 @@ func (_q *CoreUserQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (_q *CoreUserQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(coreuser.Table, coreuser.Columns, sqlgraph.NewFieldSpec(coreuser.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(coreuser.Table, coreuser.Columns, sqlgraph.NewFieldSpec(coreuser.FieldID, field.TypeString))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

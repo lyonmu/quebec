@@ -2,7 +2,44 @@
 
 package runtime
 
-// The schema-stitching logic is generated in github.com/lyonmu/quebec/cmd/core/internal/ent/runtime.go
+import (
+	"time"
+
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/schema"
+)
+
+// The init function reads all schema descriptors with runtime code
+// (default values, validators, hooks and policies) and stitches it
+// to their package variables.
+func init() {
+	coreuserMixin := schema.CoreUser{}.Mixin()
+	coreuserMixinHooks1 := coreuserMixin[1].Hooks()
+	coreuser.Hooks[0] = coreuserMixinHooks1[0]
+	coreuser.Hooks[1] = coreuserMixinHooks1[1]
+	coreuserMixinFields0 := coreuserMixin[0].Fields()
+	_ = coreuserMixinFields0
+	coreuserMixinFields1 := coreuserMixin[1].Fields()
+	_ = coreuserMixinFields1
+	coreuserFields := schema.CoreUser{}.Fields()
+	_ = coreuserFields
+	// coreuserDescCreatedAt is the schema descriptor for created_at field.
+	coreuserDescCreatedAt := coreuserMixinFields1[0].Descriptor()
+	// coreuser.DefaultCreatedAt holds the default value on creation for the created_at field.
+	coreuser.DefaultCreatedAt = coreuserDescCreatedAt.Default.(func() time.Time)
+	// coreuserDescUpdatedAt is the schema descriptor for updated_at field.
+	coreuserDescUpdatedAt := coreuserMixinFields1[1].Descriptor()
+	// coreuser.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	coreuser.DefaultUpdatedAt = coreuserDescUpdatedAt.Default.(func() time.Time)
+	// coreuser.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	coreuser.UpdateDefaultUpdatedAt = coreuserDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// coreuserDescID is the schema descriptor for id field.
+	coreuserDescID := coreuserMixinFields0[0].Descriptor()
+	// coreuser.DefaultID holds the default value on creation for the id field.
+	coreuser.DefaultID = coreuserDescID.Default.(func() string)
+	// coreuser.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	coreuser.IDValidator = coreuserDescID.Validators[0].(func(string) error)
+}
 
 const (
 	Version = "v0.14.5"                                         // Version of ent codegen.

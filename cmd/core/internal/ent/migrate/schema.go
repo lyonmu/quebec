@@ -3,26 +3,77 @@
 package migrate
 
 import (
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/schema/field"
 )
 
 var (
-	// CoreUsersColumns holds the columns for the "core_users" table.
-	CoreUsersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+	// QuebecCoreUserColumns holds the columns for the "quebec_core_user" table.
+	QuebecCoreUserColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 64, Comment: "主键ID"},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "username", Type: field.TypeString, Unique: true, Nullable: true, Comment: "用户名"},
+		{Name: "password", Type: field.TypeString, Nullable: true, Comment: "密码"},
+		{Name: "email", Type: field.TypeString, Nullable: true, Comment: "邮箱"},
+		{Name: "nickname", Type: field.TypeString, Nullable: true, Comment: "昵称"},
 	}
-	// CoreUsersTable holds the schema information for the "core_users" table.
-	CoreUsersTable = &schema.Table{
-		Name:       "core_users",
-		Columns:    CoreUsersColumns,
-		PrimaryKey: []*schema.Column{CoreUsersColumns[0]},
+	// QuebecCoreUserTable holds the schema information for the "quebec_core_user" table.
+	QuebecCoreUserTable = &schema.Table{
+		Name:       "quebec_core_user",
+		Comment:    "用户信息表",
+		Columns:    QuebecCoreUserColumns,
+		PrimaryKey: []*schema.Column{QuebecCoreUserColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "coreuser_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUserColumns[1]},
+			},
+			{
+				Name:    "coreuser_updated_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUserColumns[2]},
+			},
+			{
+				Name:    "coreuser_deleted_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUserColumns[3]},
+			},
+			{
+				Name:    "coreuser_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUserColumns[0]},
+			},
+			{
+				Name:    "coreuser_username",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUserColumns[4]},
+			},
+			{
+				Name:    "coreuser_email",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUserColumns[6]},
+			},
+			{
+				Name:    "coreuser_nickname",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUserColumns[7]},
+			},
+		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		CoreUsersTable,
+		QuebecCoreUserTable,
 	}
 )
 
 func init() {
+	QuebecCoreUserTable.Annotation = &entsql.Annotation{
+		Table:     "quebec_core_user",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_general_ci",
+	}
 }

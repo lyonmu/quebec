@@ -6,7 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -21,6 +23,118 @@ type CoreUserCreate struct {
 	conflict []sql.ConflictOption
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (_c *CoreUserCreate) SetCreatedAt(v time.Time) *CoreUserCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (_c *CoreUserCreate) SetNillableCreatedAt(v *time.Time) *CoreUserCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
+	}
+	return _c
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (_c *CoreUserCreate) SetUpdatedAt(v time.Time) *CoreUserCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (_c *CoreUserCreate) SetNillableUpdatedAt(v *time.Time) *CoreUserCreate {
+	if v != nil {
+		_c.SetUpdatedAt(*v)
+	}
+	return _c
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (_c *CoreUserCreate) SetDeletedAt(v time.Time) *CoreUserCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *CoreUserCreate) SetNillableDeletedAt(v *time.Time) *CoreUserCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
+}
+
+// SetUsername sets the "username" field.
+func (_c *CoreUserCreate) SetUsername(v string) *CoreUserCreate {
+	_c.mutation.SetUsername(v)
+	return _c
+}
+
+// SetNillableUsername sets the "username" field if the given value is not nil.
+func (_c *CoreUserCreate) SetNillableUsername(v *string) *CoreUserCreate {
+	if v != nil {
+		_c.SetUsername(*v)
+	}
+	return _c
+}
+
+// SetPassword sets the "password" field.
+func (_c *CoreUserCreate) SetPassword(v string) *CoreUserCreate {
+	_c.mutation.SetPassword(v)
+	return _c
+}
+
+// SetNillablePassword sets the "password" field if the given value is not nil.
+func (_c *CoreUserCreate) SetNillablePassword(v *string) *CoreUserCreate {
+	if v != nil {
+		_c.SetPassword(*v)
+	}
+	return _c
+}
+
+// SetEmail sets the "email" field.
+func (_c *CoreUserCreate) SetEmail(v string) *CoreUserCreate {
+	_c.mutation.SetEmail(v)
+	return _c
+}
+
+// SetNillableEmail sets the "email" field if the given value is not nil.
+func (_c *CoreUserCreate) SetNillableEmail(v *string) *CoreUserCreate {
+	if v != nil {
+		_c.SetEmail(*v)
+	}
+	return _c
+}
+
+// SetNickname sets the "nickname" field.
+func (_c *CoreUserCreate) SetNickname(v string) *CoreUserCreate {
+	_c.mutation.SetNickname(v)
+	return _c
+}
+
+// SetNillableNickname sets the "nickname" field if the given value is not nil.
+func (_c *CoreUserCreate) SetNillableNickname(v *string) *CoreUserCreate {
+	if v != nil {
+		_c.SetNickname(*v)
+	}
+	return _c
+}
+
+// SetID sets the "id" field.
+func (_c *CoreUserCreate) SetID(v string) *CoreUserCreate {
+	_c.mutation.SetID(v)
+	return _c
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (_c *CoreUserCreate) SetNillableID(v *string) *CoreUserCreate {
+	if v != nil {
+		_c.SetID(*v)
+	}
+	return _c
+}
+
 // Mutation returns the CoreUserMutation object of the builder.
 func (_c *CoreUserCreate) Mutation() *CoreUserMutation {
 	return _c.mutation
@@ -28,6 +142,9 @@ func (_c *CoreUserCreate) Mutation() *CoreUserMutation {
 
 // Save creates the CoreUser in the database.
 func (_c *CoreUserCreate) Save(ctx context.Context) (*CoreUser, error) {
+	if err := _c.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -53,8 +170,45 @@ func (_c *CoreUserCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_c *CoreUserCreate) defaults() error {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
+		if coreuser.DefaultCreatedAt == nil {
+			return fmt.Errorf("ent: uninitialized coreuser.DefaultCreatedAt (forgotten import ent/runtime?)")
+		}
+		v := coreuser.DefaultCreatedAt()
+		_c.mutation.SetCreatedAt(v)
+	}
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		if coreuser.DefaultUpdatedAt == nil {
+			return fmt.Errorf("ent: uninitialized coreuser.DefaultUpdatedAt (forgotten import ent/runtime?)")
+		}
+		v := coreuser.DefaultUpdatedAt()
+		_c.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := _c.mutation.ID(); !ok {
+		if coreuser.DefaultID == nil {
+			return fmt.Errorf("ent: uninitialized coreuser.DefaultID (forgotten import ent/runtime?)")
+		}
+		v := coreuser.DefaultID()
+		_c.mutation.SetID(v)
+	}
+	return nil
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (_c *CoreUserCreate) check() error {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "CoreUser.created_at"`)}
+	}
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "CoreUser.updated_at"`)}
+	}
+	if v, ok := _c.mutation.ID(); ok {
+		if err := coreuser.IDValidator(v); err != nil {
+			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "CoreUser.id": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -69,8 +223,13 @@ func (_c *CoreUserCreate) sqlSave(ctx context.Context) (*CoreUser, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(string); ok {
+			_node.ID = id
+		} else {
+			return nil, fmt.Errorf("unexpected CoreUser.ID type: %T", _spec.ID.Value)
+		}
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
@@ -79,9 +238,41 @@ func (_c *CoreUserCreate) sqlSave(ctx context.Context) (*CoreUser, error) {
 func (_c *CoreUserCreate) createSpec() (*CoreUser, *sqlgraph.CreateSpec) {
 	var (
 		_node = &CoreUser{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(coreuser.Table, sqlgraph.NewFieldSpec(coreuser.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(coreuser.Table, sqlgraph.NewFieldSpec(coreuser.FieldID, field.TypeString))
 	)
 	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
+	if value, ok := _c.mutation.CreatedAt(); ok {
+		_spec.SetField(coreuser.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := _c.mutation.UpdatedAt(); ok {
+		_spec.SetField(coreuser.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(coreuser.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
+	if value, ok := _c.mutation.Username(); ok {
+		_spec.SetField(coreuser.FieldUsername, field.TypeString, value)
+		_node.Username = value
+	}
+	if value, ok := _c.mutation.Password(); ok {
+		_spec.SetField(coreuser.FieldPassword, field.TypeString, value)
+		_node.Password = value
+	}
+	if value, ok := _c.mutation.Email(); ok {
+		_spec.SetField(coreuser.FieldEmail, field.TypeString, value)
+		_node.Email = value
+	}
+	if value, ok := _c.mutation.Nickname(); ok {
+		_spec.SetField(coreuser.FieldNickname, field.TypeString, value)
+		_node.Nickname = value
+	}
 	return _node, _spec
 }
 
@@ -89,11 +280,17 @@ func (_c *CoreUserCreate) createSpec() (*CoreUser, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.CoreUser.Create().
+//		SetCreatedAt(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
 //			sql.ResolveWithNewValues(),
 //		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.CoreUserUpsert) {
+//			SetCreatedAt(v+v).
+//		}).
 //		Exec(ctx)
 func (_c *CoreUserCreate) OnConflict(opts ...sql.ConflictOption) *CoreUserUpsertOne {
 	_c.conflict = opts
@@ -128,16 +325,129 @@ type (
 	}
 )
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// SetUpdatedAt sets the "updated_at" field.
+func (u *CoreUserUpsert) SetUpdatedAt(v time.Time) *CoreUserUpsert {
+	u.Set(coreuser.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *CoreUserUpsert) UpdateUpdatedAt() *CoreUserUpsert {
+	u.SetExcluded(coreuser.FieldUpdatedAt)
+	return u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *CoreUserUpsert) SetDeletedAt(v time.Time) *CoreUserUpsert {
+	u.Set(coreuser.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *CoreUserUpsert) UpdateDeletedAt() *CoreUserUpsert {
+	u.SetExcluded(coreuser.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *CoreUserUpsert) ClearDeletedAt() *CoreUserUpsert {
+	u.SetNull(coreuser.FieldDeletedAt)
+	return u
+}
+
+// SetUsername sets the "username" field.
+func (u *CoreUserUpsert) SetUsername(v string) *CoreUserUpsert {
+	u.Set(coreuser.FieldUsername, v)
+	return u
+}
+
+// UpdateUsername sets the "username" field to the value that was provided on create.
+func (u *CoreUserUpsert) UpdateUsername() *CoreUserUpsert {
+	u.SetExcluded(coreuser.FieldUsername)
+	return u
+}
+
+// ClearUsername clears the value of the "username" field.
+func (u *CoreUserUpsert) ClearUsername() *CoreUserUpsert {
+	u.SetNull(coreuser.FieldUsername)
+	return u
+}
+
+// SetPassword sets the "password" field.
+func (u *CoreUserUpsert) SetPassword(v string) *CoreUserUpsert {
+	u.Set(coreuser.FieldPassword, v)
+	return u
+}
+
+// UpdatePassword sets the "password" field to the value that was provided on create.
+func (u *CoreUserUpsert) UpdatePassword() *CoreUserUpsert {
+	u.SetExcluded(coreuser.FieldPassword)
+	return u
+}
+
+// ClearPassword clears the value of the "password" field.
+func (u *CoreUserUpsert) ClearPassword() *CoreUserUpsert {
+	u.SetNull(coreuser.FieldPassword)
+	return u
+}
+
+// SetEmail sets the "email" field.
+func (u *CoreUserUpsert) SetEmail(v string) *CoreUserUpsert {
+	u.Set(coreuser.FieldEmail, v)
+	return u
+}
+
+// UpdateEmail sets the "email" field to the value that was provided on create.
+func (u *CoreUserUpsert) UpdateEmail() *CoreUserUpsert {
+	u.SetExcluded(coreuser.FieldEmail)
+	return u
+}
+
+// ClearEmail clears the value of the "email" field.
+func (u *CoreUserUpsert) ClearEmail() *CoreUserUpsert {
+	u.SetNull(coreuser.FieldEmail)
+	return u
+}
+
+// SetNickname sets the "nickname" field.
+func (u *CoreUserUpsert) SetNickname(v string) *CoreUserUpsert {
+	u.Set(coreuser.FieldNickname, v)
+	return u
+}
+
+// UpdateNickname sets the "nickname" field to the value that was provided on create.
+func (u *CoreUserUpsert) UpdateNickname() *CoreUserUpsert {
+	u.SetExcluded(coreuser.FieldNickname)
+	return u
+}
+
+// ClearNickname clears the value of the "nickname" field.
+func (u *CoreUserUpsert) ClearNickname() *CoreUserUpsert {
+	u.SetNull(coreuser.FieldNickname)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.CoreUser.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(coreuser.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *CoreUserUpsertOne) UpdateNewValues() *CoreUserUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(coreuser.FieldID)
+		}
+		if _, exists := u.create.mutation.CreatedAt(); exists {
+			s.SetIgnore(coreuser.FieldCreatedAt)
+		}
+	}))
 	return u
 }
 
@@ -168,6 +478,125 @@ func (u *CoreUserUpsertOne) Update(set func(*CoreUserUpsert)) *CoreUserUpsertOne
 	return u
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (u *CoreUserUpsertOne) SetUpdatedAt(v time.Time) *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *CoreUserUpsertOne) UpdateUpdatedAt() *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *CoreUserUpsertOne) SetDeletedAt(v time.Time) *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *CoreUserUpsertOne) UpdateDeletedAt() *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *CoreUserUpsertOne) ClearDeletedAt() *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.ClearDeletedAt()
+	})
+}
+
+// SetUsername sets the "username" field.
+func (u *CoreUserUpsertOne) SetUsername(v string) *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.SetUsername(v)
+	})
+}
+
+// UpdateUsername sets the "username" field to the value that was provided on create.
+func (u *CoreUserUpsertOne) UpdateUsername() *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.UpdateUsername()
+	})
+}
+
+// ClearUsername clears the value of the "username" field.
+func (u *CoreUserUpsertOne) ClearUsername() *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.ClearUsername()
+	})
+}
+
+// SetPassword sets the "password" field.
+func (u *CoreUserUpsertOne) SetPassword(v string) *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.SetPassword(v)
+	})
+}
+
+// UpdatePassword sets the "password" field to the value that was provided on create.
+func (u *CoreUserUpsertOne) UpdatePassword() *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.UpdatePassword()
+	})
+}
+
+// ClearPassword clears the value of the "password" field.
+func (u *CoreUserUpsertOne) ClearPassword() *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.ClearPassword()
+	})
+}
+
+// SetEmail sets the "email" field.
+func (u *CoreUserUpsertOne) SetEmail(v string) *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.SetEmail(v)
+	})
+}
+
+// UpdateEmail sets the "email" field to the value that was provided on create.
+func (u *CoreUserUpsertOne) UpdateEmail() *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.UpdateEmail()
+	})
+}
+
+// ClearEmail clears the value of the "email" field.
+func (u *CoreUserUpsertOne) ClearEmail() *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.ClearEmail()
+	})
+}
+
+// SetNickname sets the "nickname" field.
+func (u *CoreUserUpsertOne) SetNickname(v string) *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.SetNickname(v)
+	})
+}
+
+// UpdateNickname sets the "nickname" field to the value that was provided on create.
+func (u *CoreUserUpsertOne) UpdateNickname() *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.UpdateNickname()
+	})
+}
+
+// ClearNickname clears the value of the "nickname" field.
+func (u *CoreUserUpsertOne) ClearNickname() *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.ClearNickname()
+	})
+}
+
 // Exec executes the query.
 func (u *CoreUserUpsertOne) Exec(ctx context.Context) error {
 	if len(u.create.conflict) == 0 {
@@ -184,7 +613,12 @@ func (u *CoreUserUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *CoreUserUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *CoreUserUpsertOne) ID(ctx context.Context) (id string, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: CoreUserUpsertOne.ID is not supported by MySQL driver. Use CoreUserUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -193,7 +627,7 @@ func (u *CoreUserUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *CoreUserUpsertOne) IDX(ctx context.Context) int {
+func (u *CoreUserUpsertOne) IDX(ctx context.Context) string {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -220,6 +654,7 @@ func (_c *CoreUserCreateBulk) Save(ctx context.Context) ([]*CoreUser, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CoreUserMutation)
 				if !ok {
@@ -247,10 +682,6 @@ func (_c *CoreUserCreateBulk) Save(ctx context.Context) ([]*CoreUser, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -299,6 +730,11 @@ func (_c *CoreUserCreateBulk) ExecX(ctx context.Context) {
 //			// the was proposed for insertion.
 //			sql.ResolveWithNewValues(),
 //		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.CoreUserUpsert) {
+//			SetCreatedAt(v+v).
+//		}).
 //		Exec(ctx)
 func (_c *CoreUserCreateBulk) OnConflict(opts ...sql.ConflictOption) *CoreUserUpsertBulk {
 	_c.conflict = opts
@@ -332,10 +768,23 @@ type CoreUserUpsertBulk struct {
 //	client.CoreUser.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(coreuser.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *CoreUserUpsertBulk) UpdateNewValues() *CoreUserUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(coreuser.FieldID)
+			}
+			if _, exists := b.mutation.CreatedAt(); exists {
+				s.SetIgnore(coreuser.FieldCreatedAt)
+			}
+		}
+	}))
 	return u
 }
 
@@ -364,6 +813,125 @@ func (u *CoreUserUpsertBulk) Update(set func(*CoreUserUpsert)) *CoreUserUpsertBu
 		set(&CoreUserUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *CoreUserUpsertBulk) SetUpdatedAt(v time.Time) *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *CoreUserUpsertBulk) UpdateUpdatedAt() *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *CoreUserUpsertBulk) SetDeletedAt(v time.Time) *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *CoreUserUpsertBulk) UpdateDeletedAt() *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *CoreUserUpsertBulk) ClearDeletedAt() *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.ClearDeletedAt()
+	})
+}
+
+// SetUsername sets the "username" field.
+func (u *CoreUserUpsertBulk) SetUsername(v string) *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.SetUsername(v)
+	})
+}
+
+// UpdateUsername sets the "username" field to the value that was provided on create.
+func (u *CoreUserUpsertBulk) UpdateUsername() *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.UpdateUsername()
+	})
+}
+
+// ClearUsername clears the value of the "username" field.
+func (u *CoreUserUpsertBulk) ClearUsername() *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.ClearUsername()
+	})
+}
+
+// SetPassword sets the "password" field.
+func (u *CoreUserUpsertBulk) SetPassword(v string) *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.SetPassword(v)
+	})
+}
+
+// UpdatePassword sets the "password" field to the value that was provided on create.
+func (u *CoreUserUpsertBulk) UpdatePassword() *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.UpdatePassword()
+	})
+}
+
+// ClearPassword clears the value of the "password" field.
+func (u *CoreUserUpsertBulk) ClearPassword() *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.ClearPassword()
+	})
+}
+
+// SetEmail sets the "email" field.
+func (u *CoreUserUpsertBulk) SetEmail(v string) *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.SetEmail(v)
+	})
+}
+
+// UpdateEmail sets the "email" field to the value that was provided on create.
+func (u *CoreUserUpsertBulk) UpdateEmail() *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.UpdateEmail()
+	})
+}
+
+// ClearEmail clears the value of the "email" field.
+func (u *CoreUserUpsertBulk) ClearEmail() *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.ClearEmail()
+	})
+}
+
+// SetNickname sets the "nickname" field.
+func (u *CoreUserUpsertBulk) SetNickname(v string) *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.SetNickname(v)
+	})
+}
+
+// UpdateNickname sets the "nickname" field to the value that was provided on create.
+func (u *CoreUserUpsertBulk) UpdateNickname() *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.UpdateNickname()
+	})
+}
+
+// ClearNickname clears the value of the "nickname" field.
+func (u *CoreUserUpsertBulk) ClearNickname() *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.ClearNickname()
+	})
 }
 
 // Exec executes the query.

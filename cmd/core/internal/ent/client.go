@@ -259,7 +259,7 @@ func (c *CoreUserClient) UpdateOne(_m *CoreUser) *CoreUserUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *CoreUserClient) UpdateOneID(id int) *CoreUserUpdateOne {
+func (c *CoreUserClient) UpdateOneID(id string) *CoreUserUpdateOne {
 	mutation := newCoreUserMutation(c.config, OpUpdateOne, withCoreUserID(id))
 	return &CoreUserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -276,7 +276,7 @@ func (c *CoreUserClient) DeleteOne(_m *CoreUser) *CoreUserDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *CoreUserClient) DeleteOneID(id int) *CoreUserDeleteOne {
+func (c *CoreUserClient) DeleteOneID(id string) *CoreUserDeleteOne {
 	builder := c.Delete().Where(coreuser.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -293,12 +293,12 @@ func (c *CoreUserClient) Query() *CoreUserQuery {
 }
 
 // Get returns a CoreUser entity by its id.
-func (c *CoreUserClient) Get(ctx context.Context, id int) (*CoreUser, error) {
+func (c *CoreUserClient) Get(ctx context.Context, id string) (*CoreUser, error) {
 	return c.Query().Where(coreuser.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *CoreUserClient) GetX(ctx context.Context, id int) *CoreUser {
+func (c *CoreUserClient) GetX(ctx context.Context, id string) *CoreUser {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -308,7 +308,8 @@ func (c *CoreUserClient) GetX(ctx context.Context, id int) *CoreUser {
 
 // Hooks returns the client hooks.
 func (c *CoreUserClient) Hooks() []Hook {
-	return c.hooks.CoreUser
+	hooks := c.hooks.CoreUser
+	return append(hooks[:len(hooks):len(hooks)], coreuser.Hooks[:]...)
 }
 
 // Interceptors returns the client interceptors.
