@@ -1,0 +1,71 @@
+basePath: /core/api
+definitions:
+  code.Response:
+    properties:
+      code:
+        example: 50000
+        type: integer
+      data: {}
+      message:
+        example: success
+        type: string
+    type: object
+  response.CaptchaResponse:
+    properties:
+      id:
+        description: 验证码id
+        example: "1234567890"
+        type: string
+      length:
+        description: 验证码长度
+        example: 4
+        type: integer
+      pictures:
+        description: 验证码图片
+        example: base64
+        type: string
+    type: object
+host: http://localhost:59024
+info:
+  contact:
+    email: lyonmu@foxmail.com
+    name: Lyon Mu
+    url: https://github.com/lyonmu
+  description: quebec core 模块后端
+  license:
+    name: MIT
+    url: https://github.com/lyonmu/quebec/blob/master/LICENSE
+  title: quebec core Swagger API接口文档
+  version: v0.0.1
+paths:
+  /system/captcha:
+    get:
+      description: 获取验证码,返回包括随机数id,base64,验证码长度,是否开启验证码
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 50000,success
+          schema:
+            allOf:
+            - $ref: '#/definitions/code.Response'
+            - properties:
+                code:
+                  type: number
+                data:
+                  $ref: '#/definitions/response.CaptchaResponse'
+                message:
+                  type: string
+              type: object
+      summary: 获取验证码
+      tags:
+      - 系统管理
+schemes:
+- http
+securityDefinitions:
+  ApiKeyAuth:
+    description: token认证
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

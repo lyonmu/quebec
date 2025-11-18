@@ -42,6 +42,8 @@ func Start() {
 
 		global.Redis = global.Cfg.Redis.Client(global.Cfg.Log.Module)
 
+		global.CaptchaGenerator = global.Cfg.Core.Captcha.WithRedis(global.Redis)
+
 		if err := initialize.Init(global.EntClient); err != nil {
 			global.Logger.Sugar().Error("初始化数据失败: %v", err)
 			os.Exit(1)

@@ -5,15 +5,10 @@ import (
 	log "github.com/lyonmu/quebec/pkg/logger"
 )
 
-type Captcha struct {
-	Long   int `name:"long" env:"CAPTCHA_LONG" default:"4" help:"验证码长度" mapstructure:"long" yaml:"long" json:"long"`
-	Width  int `name:"width" env:"CAPTCHA_WIDTH" default:"240" help:"验证码宽度" mapstructure:"width" yaml:"width" json:"width"`
-	Height int `name:"height" env:"CAPTCHA_HEIGHT" default:"80" help:"证码高度" mapstructure:"height" yaml:"height" json:"height"`
-}
-
 type CoreConfig struct {
 	Port    uint16  `name:"port" env:"PORT" default:"59024" help:"端口" mapstructure:"port" yaml:"port" json:"port"`
 	Node    int     `name:"node" env:"NODE" default:"1" help:"节点编号" mapstructure:"node" yaml:"node" json:"node"`
+	Prefix  string  `name:"prefix" env:"PREFIX" default:"/core/api" help:"路由前缀" mapstructure:"prefix" yaml:"prefix" json:"prefix"`
 	Captcha Captcha `embed:"" prefix:"captcha." mapstructure:"captcha" json:"captcha" yaml:"captcha"`
 }
 
@@ -28,5 +23,4 @@ type Config struct {
 
 func (c *Config) MachineID() (int, error) {
 	return c.Core.Node, nil
-
 }

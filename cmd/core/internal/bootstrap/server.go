@@ -2,6 +2,7 @@ package bootstrap
 
 import (
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
+	"github.com/lyonmu/quebec/cmd/core/internal/router"
 	"github.com/lyonmu/quebec/pkg/common"
 	"github.com/lyonmu/quebec/pkg/tools"
 )
@@ -17,6 +18,7 @@ func InitServer() error {
 	if err != nil {
 		return err
 	}
+	router.InitRouter(ginEngine)
 
 	if err = tools.NewCmux(global.Cfg.Core.Port, ginEngine, grpcServer); err != nil {
 		return err
