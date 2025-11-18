@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/predicate"
 )
 
@@ -97,6 +98,21 @@ func Email(v string) predicate.CoreUser {
 // Nickname applies equality check predicate on the "nickname" field. It's identical to NicknameEQ.
 func Nickname(v string) predicate.CoreUser {
 	return predicate.CoreUser(sql.FieldEQ(FieldNickname, v))
+}
+
+// Status applies equality check predicate on the "status" field. It's identical to StatusEQ.
+func Status(v int8) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldEQ(FieldStatus, v))
+}
+
+// RoleID applies equality check predicate on the "role_id" field. It's identical to RoleIDEQ.
+func RoleID(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldEQ(FieldRoleID, v))
+}
+
+// Remark applies equality check predicate on the "remark" field. It's identical to RemarkEQ.
+func Remark(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldEQ(FieldRemark, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -527,6 +543,229 @@ func NicknameEqualFold(v string) predicate.CoreUser {
 // NicknameContainsFold applies the ContainsFold predicate on the "nickname" field.
 func NicknameContainsFold(v string) predicate.CoreUser {
 	return predicate.CoreUser(sql.FieldContainsFold(FieldNickname, v))
+}
+
+// StatusEQ applies the EQ predicate on the "status" field.
+func StatusEQ(v int8) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldEQ(FieldStatus, v))
+}
+
+// StatusNEQ applies the NEQ predicate on the "status" field.
+func StatusNEQ(v int8) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldNEQ(FieldStatus, v))
+}
+
+// StatusIn applies the In predicate on the "status" field.
+func StatusIn(vs ...int8) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldIn(FieldStatus, vs...))
+}
+
+// StatusNotIn applies the NotIn predicate on the "status" field.
+func StatusNotIn(vs ...int8) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldNotIn(FieldStatus, vs...))
+}
+
+// StatusGT applies the GT predicate on the "status" field.
+func StatusGT(v int8) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldGT(FieldStatus, v))
+}
+
+// StatusGTE applies the GTE predicate on the "status" field.
+func StatusGTE(v int8) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldGTE(FieldStatus, v))
+}
+
+// StatusLT applies the LT predicate on the "status" field.
+func StatusLT(v int8) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldLT(FieldStatus, v))
+}
+
+// StatusLTE applies the LTE predicate on the "status" field.
+func StatusLTE(v int8) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldLTE(FieldStatus, v))
+}
+
+// StatusIsNil applies the IsNil predicate on the "status" field.
+func StatusIsNil() predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldIsNull(FieldStatus))
+}
+
+// StatusNotNil applies the NotNil predicate on the "status" field.
+func StatusNotNil() predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldNotNull(FieldStatus))
+}
+
+// RoleIDEQ applies the EQ predicate on the "role_id" field.
+func RoleIDEQ(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldEQ(FieldRoleID, v))
+}
+
+// RoleIDNEQ applies the NEQ predicate on the "role_id" field.
+func RoleIDNEQ(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldNEQ(FieldRoleID, v))
+}
+
+// RoleIDIn applies the In predicate on the "role_id" field.
+func RoleIDIn(vs ...string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldIn(FieldRoleID, vs...))
+}
+
+// RoleIDNotIn applies the NotIn predicate on the "role_id" field.
+func RoleIDNotIn(vs ...string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldNotIn(FieldRoleID, vs...))
+}
+
+// RoleIDGT applies the GT predicate on the "role_id" field.
+func RoleIDGT(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldGT(FieldRoleID, v))
+}
+
+// RoleIDGTE applies the GTE predicate on the "role_id" field.
+func RoleIDGTE(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldGTE(FieldRoleID, v))
+}
+
+// RoleIDLT applies the LT predicate on the "role_id" field.
+func RoleIDLT(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldLT(FieldRoleID, v))
+}
+
+// RoleIDLTE applies the LTE predicate on the "role_id" field.
+func RoleIDLTE(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldLTE(FieldRoleID, v))
+}
+
+// RoleIDContains applies the Contains predicate on the "role_id" field.
+func RoleIDContains(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldContains(FieldRoleID, v))
+}
+
+// RoleIDHasPrefix applies the HasPrefix predicate on the "role_id" field.
+func RoleIDHasPrefix(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldHasPrefix(FieldRoleID, v))
+}
+
+// RoleIDHasSuffix applies the HasSuffix predicate on the "role_id" field.
+func RoleIDHasSuffix(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldHasSuffix(FieldRoleID, v))
+}
+
+// RoleIDIsNil applies the IsNil predicate on the "role_id" field.
+func RoleIDIsNil() predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldIsNull(FieldRoleID))
+}
+
+// RoleIDNotNil applies the NotNil predicate on the "role_id" field.
+func RoleIDNotNil() predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldNotNull(FieldRoleID))
+}
+
+// RoleIDEqualFold applies the EqualFold predicate on the "role_id" field.
+func RoleIDEqualFold(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldEqualFold(FieldRoleID, v))
+}
+
+// RoleIDContainsFold applies the ContainsFold predicate on the "role_id" field.
+func RoleIDContainsFold(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldContainsFold(FieldRoleID, v))
+}
+
+// RemarkEQ applies the EQ predicate on the "remark" field.
+func RemarkEQ(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldEQ(FieldRemark, v))
+}
+
+// RemarkNEQ applies the NEQ predicate on the "remark" field.
+func RemarkNEQ(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldNEQ(FieldRemark, v))
+}
+
+// RemarkIn applies the In predicate on the "remark" field.
+func RemarkIn(vs ...string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldIn(FieldRemark, vs...))
+}
+
+// RemarkNotIn applies the NotIn predicate on the "remark" field.
+func RemarkNotIn(vs ...string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldNotIn(FieldRemark, vs...))
+}
+
+// RemarkGT applies the GT predicate on the "remark" field.
+func RemarkGT(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldGT(FieldRemark, v))
+}
+
+// RemarkGTE applies the GTE predicate on the "remark" field.
+func RemarkGTE(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldGTE(FieldRemark, v))
+}
+
+// RemarkLT applies the LT predicate on the "remark" field.
+func RemarkLT(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldLT(FieldRemark, v))
+}
+
+// RemarkLTE applies the LTE predicate on the "remark" field.
+func RemarkLTE(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldLTE(FieldRemark, v))
+}
+
+// RemarkContains applies the Contains predicate on the "remark" field.
+func RemarkContains(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldContains(FieldRemark, v))
+}
+
+// RemarkHasPrefix applies the HasPrefix predicate on the "remark" field.
+func RemarkHasPrefix(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldHasPrefix(FieldRemark, v))
+}
+
+// RemarkHasSuffix applies the HasSuffix predicate on the "remark" field.
+func RemarkHasSuffix(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldHasSuffix(FieldRemark, v))
+}
+
+// RemarkIsNil applies the IsNil predicate on the "remark" field.
+func RemarkIsNil() predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldIsNull(FieldRemark))
+}
+
+// RemarkNotNil applies the NotNil predicate on the "remark" field.
+func RemarkNotNil() predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldNotNull(FieldRemark))
+}
+
+// RemarkEqualFold applies the EqualFold predicate on the "remark" field.
+func RemarkEqualFold(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldEqualFold(FieldRemark, v))
+}
+
+// RemarkContainsFold applies the ContainsFold predicate on the "remark" field.
+func RemarkContainsFold(v string) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldContainsFold(FieldRemark, v))
+}
+
+// HasUserFromRole applies the HasEdge predicate on the "user_from_role" edge.
+func HasUserFromRole() predicate.CoreUser {
+	return predicate.CoreUser(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, UserFromRoleTable, UserFromRoleColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasUserFromRoleWith applies the HasEdge predicate on the "user_from_role" edge with a given conditions (other predicates).
+func HasUserFromRoleWith(preds ...predicate.CoreRole) predicate.CoreUser {
+	return predicate.CoreUser(func(s *sql.Selector) {
+		step := newUserFromRoleStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

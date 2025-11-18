@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
@@ -23,15 +24,21 @@ type CoreUser struct {
 func (CoreUser) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("username").Unique().Optional().Comment("用户名"),
-		field.String("password").Optional().Comment("密码"),
+		field.String("password").SchemaType(map[string]string{dialect.MySQL: "text", dialect.SQLite: "text", dialect.Postgres: "text"}).Optional().Comment("密码"),
 		field.String("email").Optional().Comment("邮箱"),
-		field.String("nickname").Optional().Comment("昵称"),
+		field.String("nickname").SchemaType(map[string]string{dialect.MySQL: "text", dialect.SQLite: "text", dialect.Postgres: "text"}).Optional().Comment("昵称"),
+		field.Int8("status").Optional().Comment("用户状态 [1: 启用, 2: 禁用]").Default(1),
+		field.String("role_id").Optional().Comment("角色ID"),
+		field.String("remark").SchemaType(map[string]string{dialect.MySQL: "text", dialect.SQLite: "text", dialect.Postgres: "text"}).Optional().Comment("用户备注"),
 	}
 }
 
 // Edges of the CoreUser.
+// 用户与角色多对一关系
 func (CoreUser) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.From("user_from_role", CoreRole.Type).Ref("role_to_user").Field("role_id").Unique(),
+	}
 }
 
 func (CoreUser) Mixin() []ent.Mixin {
@@ -46,7 +53,8 @@ func (CoreUser) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("username"),
 		index.Fields("email"),
-		index.Fields("nickname"),
+		index.Fields("status"),
+		index.Fields("role_id"),
 	}
 }
 

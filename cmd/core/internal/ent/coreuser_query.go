@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/predicate"
 )
@@ -18,11 +19,12 @@ import (
 // CoreUserQuery is the builder for querying CoreUser entities.
 type CoreUserQuery struct {
 	config
-	ctx        *QueryContext
-	order      []coreuser.OrderOption
-	inters     []Interceptor
-	predicates []predicate.CoreUser
-	modifiers  []func(*sql.Selector)
+	ctx              *QueryContext
+	order            []coreuser.OrderOption
+	inters           []Interceptor
+	predicates       []predicate.CoreUser
+	withUserFromRole *CoreRoleQuery
+	modifiers        []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -57,6 +59,28 @@ func (_q *CoreUserQuery) Unique(unique bool) *CoreUserQuery {
 func (_q *CoreUserQuery) Order(o ...coreuser.OrderOption) *CoreUserQuery {
 	_q.order = append(_q.order, o...)
 	return _q
+}
+
+// QueryUserFromRole chains the current query on the "user_from_role" edge.
+func (_q *CoreUserQuery) QueryUserFromRole() *CoreRoleQuery {
+	query := (&CoreRoleClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(coreuser.Table, coreuser.FieldID, selector),
+			sqlgraph.To(corerole.Table, corerole.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, coreuser.UserFromRoleTable, coreuser.UserFromRoleColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first CoreUser entity from the query.
@@ -246,16 +270,28 @@ func (_q *CoreUserQuery) Clone() *CoreUserQuery {
 		return nil
 	}
 	return &CoreUserQuery{
-		config:     _q.config,
-		ctx:        _q.ctx.Clone(),
-		order:      append([]coreuser.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.CoreUser{}, _q.predicates...),
+		config:           _q.config,
+		ctx:              _q.ctx.Clone(),
+		order:            append([]coreuser.OrderOption{}, _q.order...),
+		inters:           append([]Interceptor{}, _q.inters...),
+		predicates:       append([]predicate.CoreUser{}, _q.predicates...),
+		withUserFromRole: _q.withUserFromRole.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
 		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
+}
+
+// WithUserFromRole tells the query-builder to eager-load the nodes that are connected to
+// the "user_from_role" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *CoreUserQuery) WithUserFromRole(opts ...func(*CoreRoleQuery)) *CoreUserQuery {
+	query := (&CoreRoleClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withUserFromRole = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -334,8 +370,11 @@ func (_q *CoreUserQuery) prepareQuery(ctx context.Context) error {
 
 func (_q *CoreUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CoreUser, error) {
 	var (
-		nodes = []*CoreUser{}
-		_spec = _q.querySpec()
+		nodes       = []*CoreUser{}
+		_spec       = _q.querySpec()
+		loadedTypes = [1]bool{
+			_q.withUserFromRole != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*CoreUser).scanValues(nil, columns)
@@ -343,6 +382,7 @@ func (_q *CoreUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Cor
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &CoreUser{config: _q.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if len(_q.modifiers) > 0 {
@@ -357,7 +397,43 @@ func (_q *CoreUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Cor
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := _q.withUserFromRole; query != nil {
+		if err := _q.loadUserFromRole(ctx, query, nodes, nil,
+			func(n *CoreUser, e *CoreRole) { n.Edges.UserFromRole = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (_q *CoreUserQuery) loadUserFromRole(ctx context.Context, query *CoreRoleQuery, nodes []*CoreUser, init func(*CoreUser), assign func(*CoreUser, *CoreRole)) error {
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*CoreUser)
+	for i := range nodes {
+		fk := nodes[i].RoleID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(corerole.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "role_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (_q *CoreUserQuery) sqlCount(ctx context.Context) (int, error) {
@@ -387,6 +463,9 @@ func (_q *CoreUserQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != coreuser.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if _q.withUserFromRole != nil {
+			_spec.Node.AddColumnOnce(coreuser.FieldRoleID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
+	"github.com/lyonmu/quebec/cmd/core/internal/initialize"
 	"github.com/lyonmu/quebec/pkg/logger"
 	"github.com/lyonmu/quebec/pkg/tools"
 	"gopkg.in/yaml.v3"
@@ -40,6 +41,11 @@ func Start() {
 		}
 
 		global.Redis = global.Cfg.Redis.Client(global.Cfg.Log.Module)
+
+		if err := initialize.Init(global.EntClient); err != nil {
+			global.Logger.Sugar().Error("初始化数据失败: %v", err)
+			os.Exit(1)
+		}
 
 		if err := InitServer(); err != nil {
 			global.Logger.Sugar().Error("初始化服务失败: %v", err)

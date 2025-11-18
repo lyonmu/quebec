@@ -14,6 +14,12 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// CoreDataRelationship is the client for interacting with the CoreDataRelationship builders.
+	CoreDataRelationship *CoreDataRelationshipClient
+	// CoreMenu is the client for interacting with the CoreMenu builders.
+	CoreMenu *CoreMenuClient
+	// CoreRole is the client for interacting with the CoreRole builders.
+	CoreRole *CoreRoleClient
 	// CoreUser is the client for interacting with the CoreUser builders.
 	CoreUser *CoreUserClient
 
@@ -147,6 +153,9 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.CoreDataRelationship = NewCoreDataRelationshipClient(tx.config)
+	tx.CoreMenu = NewCoreMenuClient(tx.config)
+	tx.CoreRole = NewCoreRoleClient(tx.config)
 	tx.CoreUser = NewCoreUserClient(tx.config)
 }
 
@@ -157,7 +166,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: CoreUser.QueryXXX(), the query will be executed
+// applies a query, for example: CoreDataRelationship.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

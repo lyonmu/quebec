@@ -9,6 +9,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/migrate"
+	_ "github.com/lyonmu/quebec/cmd/core/internal/ent/runtime"
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
 	"github.com/lyonmu/quebec/pkg/config"
 	"github.com/lyonmu/quebec/pkg/tools"

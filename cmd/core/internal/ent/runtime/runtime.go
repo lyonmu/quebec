@@ -5,14 +5,112 @@ package runtime
 import (
 	"time"
 
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coredatarelationship"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/schema"
+	"github.com/lyonmu/quebec/pkg/common"
 )
 
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	coredatarelationshipMixin := schema.CoreDataRelationship{}.Mixin()
+	coredatarelationshipMixinHooks1 := coredatarelationshipMixin[1].Hooks()
+	coredatarelationship.Hooks[0] = coredatarelationshipMixinHooks1[0]
+	coredatarelationship.Hooks[1] = coredatarelationshipMixinHooks1[1]
+	coredatarelationshipMixinFields0 := coredatarelationshipMixin[0].Fields()
+	_ = coredatarelationshipMixinFields0
+	coredatarelationshipMixinFields1 := coredatarelationshipMixin[1].Fields()
+	_ = coredatarelationshipMixinFields1
+	coredatarelationshipFields := schema.CoreDataRelationship{}.Fields()
+	_ = coredatarelationshipFields
+	// coredatarelationshipDescCreatedAt is the schema descriptor for created_at field.
+	coredatarelationshipDescCreatedAt := coredatarelationshipMixinFields1[0].Descriptor()
+	// coredatarelationship.DefaultCreatedAt holds the default value on creation for the created_at field.
+	coredatarelationship.DefaultCreatedAt = coredatarelationshipDescCreatedAt.Default.(func() time.Time)
+	// coredatarelationshipDescUpdatedAt is the schema descriptor for updated_at field.
+	coredatarelationshipDescUpdatedAt := coredatarelationshipMixinFields1[1].Descriptor()
+	// coredatarelationship.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	coredatarelationship.DefaultUpdatedAt = coredatarelationshipDescUpdatedAt.Default.(func() time.Time)
+	// coredatarelationship.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	coredatarelationship.UpdateDefaultUpdatedAt = coredatarelationshipDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// coredatarelationshipDescID is the schema descriptor for id field.
+	coredatarelationshipDescID := coredatarelationshipMixinFields0[0].Descriptor()
+	// coredatarelationship.DefaultID holds the default value on creation for the id field.
+	coredatarelationship.DefaultID = coredatarelationshipDescID.Default.(func() string)
+	// coredatarelationship.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	coredatarelationship.IDValidator = coredatarelationshipDescID.Validators[0].(func(string) error)
+	coremenuMixin := schema.CoreMenu{}.Mixin()
+	coremenuMixinHooks1 := coremenuMixin[1].Hooks()
+	coremenu.Hooks[0] = coremenuMixinHooks1[0]
+	coremenu.Hooks[1] = coremenuMixinHooks1[1]
+	coremenuMixinFields0 := coremenuMixin[0].Fields()
+	_ = coremenuMixinFields0
+	coremenuMixinFields1 := coremenuMixin[1].Fields()
+	_ = coremenuMixinFields1
+	coremenuFields := schema.CoreMenu{}.Fields()
+	_ = coremenuFields
+	// coremenuDescCreatedAt is the schema descriptor for created_at field.
+	coremenuDescCreatedAt := coremenuMixinFields1[0].Descriptor()
+	// coremenu.DefaultCreatedAt holds the default value on creation for the created_at field.
+	coremenu.DefaultCreatedAt = coremenuDescCreatedAt.Default.(func() time.Time)
+	// coremenuDescUpdatedAt is the schema descriptor for updated_at field.
+	coremenuDescUpdatedAt := coremenuMixinFields1[1].Descriptor()
+	// coremenu.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	coremenu.DefaultUpdatedAt = coremenuDescUpdatedAt.Default.(func() time.Time)
+	// coremenu.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	coremenu.UpdateDefaultUpdatedAt = coremenuDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// coremenuDescMenuType is the schema descriptor for menu_type field.
+	coremenuDescMenuType := coremenuFields[1].Descriptor()
+	// coremenu.DefaultMenuType holds the default value on creation for the menu_type field.
+	coremenu.DefaultMenuType = common.MenuType(coremenuDescMenuType.Default.(int8))
+	// coremenuDescOrder is the schema descriptor for order field.
+	coremenuDescOrder := coremenuFields[4].Descriptor()
+	// coremenu.DefaultOrder holds the default value on creation for the order field.
+	coremenu.DefaultOrder = coremenuDescOrder.Default.(int8)
+	// coremenuDescStatus is the schema descriptor for status field.
+	coremenuDescStatus := coremenuFields[6].Descriptor()
+	// coremenu.DefaultStatus holds the default value on creation for the status field.
+	coremenu.DefaultStatus = common.YesOrNo(coremenuDescStatus.Default.(int8))
+	// coremenuDescID is the schema descriptor for id field.
+	coremenuDescID := coremenuMixinFields0[0].Descriptor()
+	// coremenu.DefaultID holds the default value on creation for the id field.
+	coremenu.DefaultID = coremenuDescID.Default.(func() string)
+	// coremenu.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	coremenu.IDValidator = coremenuDescID.Validators[0].(func(string) error)
+	coreroleMixin := schema.CoreRole{}.Mixin()
+	coreroleMixinHooks1 := coreroleMixin[1].Hooks()
+	corerole.Hooks[0] = coreroleMixinHooks1[0]
+	corerole.Hooks[1] = coreroleMixinHooks1[1]
+	coreroleMixinFields0 := coreroleMixin[0].Fields()
+	_ = coreroleMixinFields0
+	coreroleMixinFields1 := coreroleMixin[1].Fields()
+	_ = coreroleMixinFields1
+	coreroleFields := schema.CoreRole{}.Fields()
+	_ = coreroleFields
+	// coreroleDescCreatedAt is the schema descriptor for created_at field.
+	coreroleDescCreatedAt := coreroleMixinFields1[0].Descriptor()
+	// corerole.DefaultCreatedAt holds the default value on creation for the created_at field.
+	corerole.DefaultCreatedAt = coreroleDescCreatedAt.Default.(func() time.Time)
+	// coreroleDescUpdatedAt is the schema descriptor for updated_at field.
+	coreroleDescUpdatedAt := coreroleMixinFields1[1].Descriptor()
+	// corerole.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	corerole.DefaultUpdatedAt = coreroleDescUpdatedAt.Default.(func() time.Time)
+	// corerole.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	corerole.UpdateDefaultUpdatedAt = coreroleDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// coreroleDescStatus is the schema descriptor for status field.
+	coreroleDescStatus := coreroleFields[2].Descriptor()
+	// corerole.DefaultStatus holds the default value on creation for the status field.
+	corerole.DefaultStatus = coreroleDescStatus.Default.(int8)
+	// coreroleDescID is the schema descriptor for id field.
+	coreroleDescID := coreroleMixinFields0[0].Descriptor()
+	// corerole.DefaultID holds the default value on creation for the id field.
+	corerole.DefaultID = coreroleDescID.Default.(func() string)
+	// corerole.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	corerole.IDValidator = coreroleDescID.Validators[0].(func(string) error)
 	coreuserMixin := schema.CoreUser{}.Mixin()
 	coreuserMixinHooks1 := coreuserMixin[1].Hooks()
 	coreuser.Hooks[0] = coreuserMixinHooks1[0]
@@ -33,6 +131,10 @@ func init() {
 	coreuser.DefaultUpdatedAt = coreuserDescUpdatedAt.Default.(func() time.Time)
 	// coreuser.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	coreuser.UpdateDefaultUpdatedAt = coreuserDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// coreuserDescStatus is the schema descriptor for status field.
+	coreuserDescStatus := coreuserFields[4].Descriptor()
+	// coreuser.DefaultStatus holds the default value on creation for the status field.
+	coreuser.DefaultStatus = coreuserDescStatus.Default.(int8)
 	// coreuserDescID is the schema descriptor for id field.
 	coreuserDescID := coreuserMixinFields0[0].Descriptor()
 	// coreuser.DefaultID holds the default value on creation for the id field.

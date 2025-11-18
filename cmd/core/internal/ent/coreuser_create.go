@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 )
 
@@ -121,6 +122,48 @@ func (_c *CoreUserCreate) SetNillableNickname(v *string) *CoreUserCreate {
 	return _c
 }
 
+// SetStatus sets the "status" field.
+func (_c *CoreUserCreate) SetStatus(v int8) *CoreUserCreate {
+	_c.mutation.SetStatus(v)
+	return _c
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_c *CoreUserCreate) SetNillableStatus(v *int8) *CoreUserCreate {
+	if v != nil {
+		_c.SetStatus(*v)
+	}
+	return _c
+}
+
+// SetRoleID sets the "role_id" field.
+func (_c *CoreUserCreate) SetRoleID(v string) *CoreUserCreate {
+	_c.mutation.SetRoleID(v)
+	return _c
+}
+
+// SetNillableRoleID sets the "role_id" field if the given value is not nil.
+func (_c *CoreUserCreate) SetNillableRoleID(v *string) *CoreUserCreate {
+	if v != nil {
+		_c.SetRoleID(*v)
+	}
+	return _c
+}
+
+// SetRemark sets the "remark" field.
+func (_c *CoreUserCreate) SetRemark(v string) *CoreUserCreate {
+	_c.mutation.SetRemark(v)
+	return _c
+}
+
+// SetNillableRemark sets the "remark" field if the given value is not nil.
+func (_c *CoreUserCreate) SetNillableRemark(v *string) *CoreUserCreate {
+	if v != nil {
+		_c.SetRemark(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *CoreUserCreate) SetID(v string) *CoreUserCreate {
 	_c.mutation.SetID(v)
@@ -133,6 +176,25 @@ func (_c *CoreUserCreate) SetNillableID(v *string) *CoreUserCreate {
 		_c.SetID(*v)
 	}
 	return _c
+}
+
+// SetUserFromRoleID sets the "user_from_role" edge to the CoreRole entity by ID.
+func (_c *CoreUserCreate) SetUserFromRoleID(id string) *CoreUserCreate {
+	_c.mutation.SetUserFromRoleID(id)
+	return _c
+}
+
+// SetNillableUserFromRoleID sets the "user_from_role" edge to the CoreRole entity by ID if the given value is not nil.
+func (_c *CoreUserCreate) SetNillableUserFromRoleID(id *string) *CoreUserCreate {
+	if id != nil {
+		_c = _c.SetUserFromRoleID(*id)
+	}
+	return _c
+}
+
+// SetUserFromRole sets the "user_from_role" edge to the CoreRole entity.
+func (_c *CoreUserCreate) SetUserFromRole(v *CoreRole) *CoreUserCreate {
+	return _c.SetUserFromRoleID(v.ID)
 }
 
 // Mutation returns the CoreUserMutation object of the builder.
@@ -185,6 +247,10 @@ func (_c *CoreUserCreate) defaults() error {
 		}
 		v := coreuser.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		v := coreuser.DefaultStatus
+		_c.mutation.SetStatus(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		if coreuser.DefaultID == nil {
@@ -272,6 +338,31 @@ func (_c *CoreUserCreate) createSpec() (*CoreUser, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Nickname(); ok {
 		_spec.SetField(coreuser.FieldNickname, field.TypeString, value)
 		_node.Nickname = value
+	}
+	if value, ok := _c.mutation.Status(); ok {
+		_spec.SetField(coreuser.FieldStatus, field.TypeInt8, value)
+		_node.Status = value
+	}
+	if value, ok := _c.mutation.Remark(); ok {
+		_spec.SetField(coreuser.FieldRemark, field.TypeString, value)
+		_node.Remark = value
+	}
+	if nodes := _c.mutation.UserFromRoleIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   coreuser.UserFromRoleTable,
+			Columns: []string{coreuser.UserFromRoleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(corerole.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.RoleID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
@@ -424,6 +515,66 @@ func (u *CoreUserUpsert) UpdateNickname() *CoreUserUpsert {
 // ClearNickname clears the value of the "nickname" field.
 func (u *CoreUserUpsert) ClearNickname() *CoreUserUpsert {
 	u.SetNull(coreuser.FieldNickname)
+	return u
+}
+
+// SetStatus sets the "status" field.
+func (u *CoreUserUpsert) SetStatus(v int8) *CoreUserUpsert {
+	u.Set(coreuser.FieldStatus, v)
+	return u
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *CoreUserUpsert) UpdateStatus() *CoreUserUpsert {
+	u.SetExcluded(coreuser.FieldStatus)
+	return u
+}
+
+// AddStatus adds v to the "status" field.
+func (u *CoreUserUpsert) AddStatus(v int8) *CoreUserUpsert {
+	u.Add(coreuser.FieldStatus, v)
+	return u
+}
+
+// ClearStatus clears the value of the "status" field.
+func (u *CoreUserUpsert) ClearStatus() *CoreUserUpsert {
+	u.SetNull(coreuser.FieldStatus)
+	return u
+}
+
+// SetRoleID sets the "role_id" field.
+func (u *CoreUserUpsert) SetRoleID(v string) *CoreUserUpsert {
+	u.Set(coreuser.FieldRoleID, v)
+	return u
+}
+
+// UpdateRoleID sets the "role_id" field to the value that was provided on create.
+func (u *CoreUserUpsert) UpdateRoleID() *CoreUserUpsert {
+	u.SetExcluded(coreuser.FieldRoleID)
+	return u
+}
+
+// ClearRoleID clears the value of the "role_id" field.
+func (u *CoreUserUpsert) ClearRoleID() *CoreUserUpsert {
+	u.SetNull(coreuser.FieldRoleID)
+	return u
+}
+
+// SetRemark sets the "remark" field.
+func (u *CoreUserUpsert) SetRemark(v string) *CoreUserUpsert {
+	u.Set(coreuser.FieldRemark, v)
+	return u
+}
+
+// UpdateRemark sets the "remark" field to the value that was provided on create.
+func (u *CoreUserUpsert) UpdateRemark() *CoreUserUpsert {
+	u.SetExcluded(coreuser.FieldRemark)
+	return u
+}
+
+// ClearRemark clears the value of the "remark" field.
+func (u *CoreUserUpsert) ClearRemark() *CoreUserUpsert {
+	u.SetNull(coreuser.FieldRemark)
 	return u
 }
 
@@ -594,6 +745,76 @@ func (u *CoreUserUpsertOne) UpdateNickname() *CoreUserUpsertOne {
 func (u *CoreUserUpsertOne) ClearNickname() *CoreUserUpsertOne {
 	return u.Update(func(s *CoreUserUpsert) {
 		s.ClearNickname()
+	})
+}
+
+// SetStatus sets the "status" field.
+func (u *CoreUserUpsertOne) SetStatus(v int8) *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.SetStatus(v)
+	})
+}
+
+// AddStatus adds v to the "status" field.
+func (u *CoreUserUpsertOne) AddStatus(v int8) *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.AddStatus(v)
+	})
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *CoreUserUpsertOne) UpdateStatus() *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.UpdateStatus()
+	})
+}
+
+// ClearStatus clears the value of the "status" field.
+func (u *CoreUserUpsertOne) ClearStatus() *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.ClearStatus()
+	})
+}
+
+// SetRoleID sets the "role_id" field.
+func (u *CoreUserUpsertOne) SetRoleID(v string) *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.SetRoleID(v)
+	})
+}
+
+// UpdateRoleID sets the "role_id" field to the value that was provided on create.
+func (u *CoreUserUpsertOne) UpdateRoleID() *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.UpdateRoleID()
+	})
+}
+
+// ClearRoleID clears the value of the "role_id" field.
+func (u *CoreUserUpsertOne) ClearRoleID() *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.ClearRoleID()
+	})
+}
+
+// SetRemark sets the "remark" field.
+func (u *CoreUserUpsertOne) SetRemark(v string) *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.SetRemark(v)
+	})
+}
+
+// UpdateRemark sets the "remark" field to the value that was provided on create.
+func (u *CoreUserUpsertOne) UpdateRemark() *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.UpdateRemark()
+	})
+}
+
+// ClearRemark clears the value of the "remark" field.
+func (u *CoreUserUpsertOne) ClearRemark() *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.ClearRemark()
 	})
 }
 
@@ -931,6 +1152,76 @@ func (u *CoreUserUpsertBulk) UpdateNickname() *CoreUserUpsertBulk {
 func (u *CoreUserUpsertBulk) ClearNickname() *CoreUserUpsertBulk {
 	return u.Update(func(s *CoreUserUpsert) {
 		s.ClearNickname()
+	})
+}
+
+// SetStatus sets the "status" field.
+func (u *CoreUserUpsertBulk) SetStatus(v int8) *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.SetStatus(v)
+	})
+}
+
+// AddStatus adds v to the "status" field.
+func (u *CoreUserUpsertBulk) AddStatus(v int8) *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.AddStatus(v)
+	})
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *CoreUserUpsertBulk) UpdateStatus() *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.UpdateStatus()
+	})
+}
+
+// ClearStatus clears the value of the "status" field.
+func (u *CoreUserUpsertBulk) ClearStatus() *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.ClearStatus()
+	})
+}
+
+// SetRoleID sets the "role_id" field.
+func (u *CoreUserUpsertBulk) SetRoleID(v string) *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.SetRoleID(v)
+	})
+}
+
+// UpdateRoleID sets the "role_id" field to the value that was provided on create.
+func (u *CoreUserUpsertBulk) UpdateRoleID() *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.UpdateRoleID()
+	})
+}
+
+// ClearRoleID clears the value of the "role_id" field.
+func (u *CoreUserUpsertBulk) ClearRoleID() *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.ClearRoleID()
+	})
+}
+
+// SetRemark sets the "remark" field.
+func (u *CoreUserUpsertBulk) SetRemark(v string) *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.SetRemark(v)
+	})
+}
+
+// UpdateRemark sets the "remark" field to the value that was provided on create.
+func (u *CoreUserUpsertBulk) UpdateRemark() *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.UpdateRemark()
+	})
+}
+
+// ClearRemark clears the value of the "remark" field.
+func (u *CoreUserUpsertBulk) ClearRemark() *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.ClearRemark()
 	})
 }
 

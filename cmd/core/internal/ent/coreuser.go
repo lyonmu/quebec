@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 )
 
@@ -31,8 +32,37 @@ type CoreUser struct {
 	// 邮箱
 	Email string `json:"email,omitempty"`
 	// 昵称
-	Nickname     string `json:"nickname,omitempty"`
+	Nickname string `json:"nickname,omitempty"`
+	// 用户状态 [1: 启用, 2: 禁用]
+	Status int8 `json:"status,omitempty"`
+	// 角色ID
+	RoleID string `json:"role_id,omitempty"`
+	// 用户备注
+	Remark string `json:"remark,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the CoreUserQuery when eager-loading is set.
+	Edges        CoreUserEdges `json:"-" gorm:"-"`
 	selectValues sql.SelectValues
+}
+
+// CoreUserEdges holds the relations/edges for other nodes in the graph.
+type CoreUserEdges struct {
+	// UserFromRole holds the value of the user_from_role edge.
+	UserFromRole *CoreRole `json:"user_from_role,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// UserFromRoleOrErr returns the UserFromRole value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e CoreUserEdges) UserFromRoleOrErr() (*CoreRole, error) {
+	if e.UserFromRole != nil {
+		return e.UserFromRole, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: corerole.Label}
+	}
+	return nil, &NotLoadedError{edge: "user_from_role"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -40,7 +70,9 @@ func (*CoreUser) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case coreuser.FieldID, coreuser.FieldUsername, coreuser.FieldPassword, coreuser.FieldEmail, coreuser.FieldNickname:
+		case coreuser.FieldStatus:
+			values[i] = new(sql.NullInt64)
+		case coreuser.FieldID, coreuser.FieldUsername, coreuser.FieldPassword, coreuser.FieldEmail, coreuser.FieldNickname, coreuser.FieldRoleID, coreuser.FieldRemark:
 			values[i] = new(sql.NullString)
 		case coreuser.FieldCreatedAt, coreuser.FieldUpdatedAt, coreuser.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -108,6 +140,24 @@ func (_m *CoreUser) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Nickname = value.String
 			}
+		case coreuser.FieldStatus:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field status", values[i])
+			} else if value.Valid {
+				_m.Status = int8(value.Int64)
+			}
+		case coreuser.FieldRoleID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field role_id", values[i])
+			} else if value.Valid {
+				_m.RoleID = value.String
+			}
+		case coreuser.FieldRemark:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field remark", values[i])
+			} else if value.Valid {
+				_m.Remark = value.String
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -119,6 +169,11 @@ func (_m *CoreUser) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *CoreUser) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryUserFromRole queries the "user_from_role" edge of the CoreUser entity.
+func (_m *CoreUser) QueryUserFromRole() *CoreRoleQuery {
+	return NewCoreUserClient(_m.config).QueryUserFromRole(_m)
 }
 
 // Update returns a builder for updating this CoreUser.
@@ -166,6 +221,15 @@ func (_m *CoreUser) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("nickname=")
 	builder.WriteString(_m.Nickname)
+	builder.WriteString(", ")
+	builder.WriteString("status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Status))
+	builder.WriteString(", ")
+	builder.WriteString("role_id=")
+	builder.WriteString(_m.RoleID)
+	builder.WriteString(", ")
+	builder.WriteString("remark=")
+	builder.WriteString(_m.Remark)
 	builder.WriteByte(')')
 	return builder.String()
 }

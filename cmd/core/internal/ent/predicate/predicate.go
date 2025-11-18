@@ -6,5 +6,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// CoreDataRelationship is the predicate function for coredatarelationship builders.
+type CoreDataRelationship func(*sql.Selector)
+
+// CoreMenu is the predicate function for coremenu builders.
+type CoreMenu func(*sql.Selector)
+
+// CoreRole is the predicate function for corerole builders.
+type CoreRole func(*sql.Selector)
+
 // CoreUser is the predicate function for coreuser builders.
 type CoreUser func(*sql.Selector)

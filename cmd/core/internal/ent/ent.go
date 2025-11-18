@@ -12,6 +12,9 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coredatarelationship"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 )
 
@@ -73,7 +76,10 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			coreuser.Table: coreuser.ValidColumn,
+			coredatarelationship.Table: coredatarelationship.ValidColumn,
+			coremenu.Table:             coremenu.ValidColumn,
+			corerole.Table:             corerole.ValidColumn,
+			coreuser.Table:             coreuser.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

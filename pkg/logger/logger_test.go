@@ -4,49 +4,57 @@ package logger
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestZapLogger(t *testing.T) {
 
 	t.Run("Test File Rotation", func(t *testing.T) {
+		tempLogPath := t.TempDir()
+
 		config := LogConfig{
-			Path:    t.TempDir(),
+			Path:    tempLogPath,
 			Module:  "test",
 			Level:   "debug",
-			Size:    3, // 3 MB for testing
-			Age:     7,
+			Size:    1, // 1 MB for testing
+			Age:     1,
 			Backups: 3,
-			Console: true,
+			Console: false,
 			Format:  "console",
 		}
 
 		logger := NewZapLogger(config)
-		logDir := filepath.Join(config.Path, "test")
-		defer logger.Sync()
-
-		logger.Sugar().Info("Starting file rotation test ", logDir)
+		sugar := logger.Sugar()
+		logDir := filepath.Join(config.Path, config.Module)
 
 		// 生成大量日志以触发文件轮转
-		for range 12 {
-			logger.Sugar().Info("自定义配置日志")
-			logger.Sugar().Debug("这是一条调试日志")
-			logger.Sugar().Warn("这是一条警告日志")
-			logger.Sugar().Error("这是一条错误日志")
+		payload := strings.Repeat("日志内容 ", 256)
+		for i := 0; i < 5000; i++ {
+			sugar.Infof("自定义配置日志 %d %s", i, payload)
+			sugar.Debugf("这是一条调试日志 %d %s", i, payload)
+			sugar.Warnf("这是一条警告日志 %d %s", i, payload)
+			sugar.Errorf("这是一条错误日志 %d %s", i, payload)
 		}
 
 		// 同步确保所有日志写入
-		logger.Sync()
+		require.NoError(t, logger.Sync())
 
 		// 验证文件是否创建
-
 		files, err := os.ReadDir(logDir)
 		assert.NoError(t, err)
-		assert.NotEmpty(t, files, "应该有日志文件被创建")
+		assert.GreaterOrEqual(t, len(files), 2, "应该存在至少一个轮转日志")
 
-		// 删除临时文件夹
-		os.RemoveAll(logDir)
+		hasCompressed := false
+		for _, file := range files {
+			if strings.HasSuffix(file.Name(), ".gz") {
+				hasCompressed = true
+				break
+			}
+		}
+		assert.True(t, hasCompressed, "轮转日志应该被压缩为.gz文件")
 	})
 }

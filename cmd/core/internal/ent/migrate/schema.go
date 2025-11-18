@@ -9,6 +9,186 @@ import (
 )
 
 var (
+	// QuebecCoreDataRelationshipColumns holds the columns for the "quebec_core_data_relationship" table.
+	QuebecCoreDataRelationshipColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 64, Comment: "主键ID"},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "data_relationship_type", Type: field.TypeInt8, Nullable: true, Comment: "数据关系类型"},
+		{Name: "menu_id", Type: field.TypeString, Nullable: true, Size: 64, Comment: "菜单ID"},
+		{Name: "role_id", Type: field.TypeString, Nullable: true, Size: 64, Comment: "角色ID"},
+	}
+	// QuebecCoreDataRelationshipTable holds the schema information for the "quebec_core_data_relationship" table.
+	QuebecCoreDataRelationshipTable = &schema.Table{
+		Name:       "quebec_core_data_relationship",
+		Comment:    "数据关系信息表",
+		Columns:    QuebecCoreDataRelationshipColumns,
+		PrimaryKey: []*schema.Column{QuebecCoreDataRelationshipColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "quebec_core_data_relationship_quebec_core_menu_menu_to_data_relationship",
+				Columns:    []*schema.Column{QuebecCoreDataRelationshipColumns[5]},
+				RefColumns: []*schema.Column{QuebecCoreMenuColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "quebec_core_data_relationship_quebec_core_role_role_to_data_relationship",
+				Columns:    []*schema.Column{QuebecCoreDataRelationshipColumns[6]},
+				RefColumns: []*schema.Column{QuebecCoreRoleColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "coredatarelationship_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreDataRelationshipColumns[1]},
+			},
+			{
+				Name:    "coredatarelationship_updated_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreDataRelationshipColumns[2]},
+			},
+			{
+				Name:    "coredatarelationship_deleted_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreDataRelationshipColumns[3]},
+			},
+			{
+				Name:    "coredatarelationship_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreDataRelationshipColumns[0]},
+			},
+		},
+	}
+	// QuebecCoreMenuColumns holds the columns for the "quebec_core_menu" table.
+	QuebecCoreMenuColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 64, Comment: "主键ID"},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "name", Type: field.TypeString, Nullable: true, Comment: "菜单名称"},
+		{Name: "menu_type", Type: field.TypeInt8, Nullable: true, Comment: "菜单类型 [1: 目录, 2: 菜单, 3: 按钮]", Default: 1},
+		{Name: "api_path", Type: field.TypeString, Nullable: true, Comment: "菜单API路径"},
+		{Name: "api_path_method", Type: field.TypeString, Nullable: true, Comment: "菜单API方法"},
+		{Name: "order", Type: field.TypeInt8, Nullable: true, Comment: "菜单排序", Default: 1},
+		{Name: "status", Type: field.TypeInt8, Nullable: true, Comment: "菜单状态 [1: 启用, 2: 禁用]", Default: 1},
+		{Name: "component", Type: field.TypeString, Nullable: true, Comment: "菜单组件"},
+		{Name: "remark", Type: field.TypeString, Nullable: true, Comment: "菜单备注", SchemaType: map[string]string{"mysql": "text", "postgres": "text", "sqlite3": "text"}},
+		{Name: "parent_id", Type: field.TypeString, Nullable: true, Size: 64, Comment: "父菜单ID"},
+	}
+	// QuebecCoreMenuTable holds the schema information for the "quebec_core_menu" table.
+	QuebecCoreMenuTable = &schema.Table{
+		Name:       "quebec_core_menu",
+		Comment:    "菜单信息表",
+		Columns:    QuebecCoreMenuColumns,
+		PrimaryKey: []*schema.Column{QuebecCoreMenuColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "quebec_core_menu_quebec_core_menu_menu_to_children",
+				Columns:    []*schema.Column{QuebecCoreMenuColumns[12]},
+				RefColumns: []*schema.Column{QuebecCoreMenuColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "coremenu_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreMenuColumns[1]},
+			},
+			{
+				Name:    "coremenu_updated_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreMenuColumns[2]},
+			},
+			{
+				Name:    "coremenu_deleted_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreMenuColumns[3]},
+			},
+			{
+				Name:    "coremenu_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreMenuColumns[0]},
+			},
+			{
+				Name:    "coremenu_name",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreMenuColumns[4]},
+			},
+			{
+				Name:    "coremenu_menu_type",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreMenuColumns[5]},
+			},
+			{
+				Name:    "coremenu_api_path",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreMenuColumns[6]},
+			},
+			{
+				Name:    "coremenu_status",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreMenuColumns[9]},
+			},
+			{
+				Name:    "coremenu_parent_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreMenuColumns[12]},
+			},
+		},
+	}
+	// QuebecCoreRoleColumns holds the columns for the "quebec_core_role" table.
+	QuebecCoreRoleColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 64, Comment: "主键ID"},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "name", Type: field.TypeString, Nullable: true, Comment: "角色名称"},
+		{Name: "remark", Type: field.TypeString, Nullable: true, Comment: "角色备注"},
+		{Name: "status", Type: field.TypeInt8, Nullable: true, Comment: "角色状态 [1: 启用, 2: 禁用]", Default: 2},
+	}
+	// QuebecCoreRoleTable holds the schema information for the "quebec_core_role" table.
+	QuebecCoreRoleTable = &schema.Table{
+		Name:       "quebec_core_role",
+		Comment:    "角色信息表",
+		Columns:    QuebecCoreRoleColumns,
+		PrimaryKey: []*schema.Column{QuebecCoreRoleColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "corerole_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreRoleColumns[1]},
+			},
+			{
+				Name:    "corerole_updated_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreRoleColumns[2]},
+			},
+			{
+				Name:    "corerole_deleted_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreRoleColumns[3]},
+			},
+			{
+				Name:    "corerole_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreRoleColumns[0]},
+			},
+			{
+				Name:    "corerole_name",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreRoleColumns[4]},
+			},
+			{
+				Name:    "corerole_status",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreRoleColumns[6]},
+			},
+		},
+	}
 	// QuebecCoreUserColumns holds the columns for the "quebec_core_user" table.
 	QuebecCoreUserColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 64, Comment: "主键ID"},
@@ -16,9 +196,12 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
 		{Name: "username", Type: field.TypeString, Unique: true, Nullable: true, Comment: "用户名"},
-		{Name: "password", Type: field.TypeString, Nullable: true, Comment: "密码"},
+		{Name: "password", Type: field.TypeString, Nullable: true, Comment: "密码", SchemaType: map[string]string{"mysql": "text", "postgres": "text", "sqlite3": "text"}},
 		{Name: "email", Type: field.TypeString, Nullable: true, Comment: "邮箱"},
-		{Name: "nickname", Type: field.TypeString, Nullable: true, Comment: "昵称"},
+		{Name: "nickname", Type: field.TypeString, Nullable: true, Comment: "昵称", SchemaType: map[string]string{"mysql": "text", "postgres": "text", "sqlite3": "text"}},
+		{Name: "status", Type: field.TypeInt8, Nullable: true, Comment: "用户状态 [1: 启用, 2: 禁用]", Default: 1},
+		{Name: "remark", Type: field.TypeString, Nullable: true, Comment: "用户备注", SchemaType: map[string]string{"mysql": "text", "postgres": "text", "sqlite3": "text"}},
+		{Name: "role_id", Type: field.TypeString, Nullable: true, Size: 64, Comment: "角色ID"},
 	}
 	// QuebecCoreUserTable holds the schema information for the "quebec_core_user" table.
 	QuebecCoreUserTable = &schema.Table{
@@ -26,6 +209,14 @@ var (
 		Comment:    "用户信息表",
 		Columns:    QuebecCoreUserColumns,
 		PrimaryKey: []*schema.Column{QuebecCoreUserColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "quebec_core_user_quebec_core_role_role_to_user",
+				Columns:    []*schema.Column{QuebecCoreUserColumns[10]},
+				RefColumns: []*schema.Column{QuebecCoreRoleColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "coreuser_created_at",
@@ -58,19 +249,46 @@ var (
 				Columns: []*schema.Column{QuebecCoreUserColumns[6]},
 			},
 			{
-				Name:    "coreuser_nickname",
+				Name:    "coreuser_status",
 				Unique:  false,
-				Columns: []*schema.Column{QuebecCoreUserColumns[7]},
+				Columns: []*schema.Column{QuebecCoreUserColumns[8]},
+			},
+			{
+				Name:    "coreuser_role_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUserColumns[10]},
 			},
 		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		QuebecCoreDataRelationshipTable,
+		QuebecCoreMenuTable,
+		QuebecCoreRoleTable,
 		QuebecCoreUserTable,
 	}
 )
 
 func init() {
+	QuebecCoreDataRelationshipTable.ForeignKeys[0].RefTable = QuebecCoreMenuTable
+	QuebecCoreDataRelationshipTable.ForeignKeys[1].RefTable = QuebecCoreRoleTable
+	QuebecCoreDataRelationshipTable.Annotation = &entsql.Annotation{
+		Table:     "quebec_core_data_relationship",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_general_ci",
+	}
+	QuebecCoreMenuTable.ForeignKeys[0].RefTable = QuebecCoreMenuTable
+	QuebecCoreMenuTable.Annotation = &entsql.Annotation{
+		Table:     "quebec_core_menu",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_general_ci",
+	}
+	QuebecCoreRoleTable.Annotation = &entsql.Annotation{
+		Table:     "quebec_core_role",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_general_ci",
+	}
+	QuebecCoreUserTable.ForeignKeys[0].RefTable = QuebecCoreRoleTable
 	QuebecCoreUserTable.Annotation = &entsql.Annotation{
 		Table:     "quebec_core_user",
 		Charset:   "utf8mb4",

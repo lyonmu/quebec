@@ -14,6 +14,10 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coredatarelationship"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 
 	stdsql "database/sql"
@@ -24,6 +28,12 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// CoreDataRelationship is the client for interacting with the CoreDataRelationship builders.
+	CoreDataRelationship *CoreDataRelationshipClient
+	// CoreMenu is the client for interacting with the CoreMenu builders.
+	CoreMenu *CoreMenuClient
+	// CoreRole is the client for interacting with the CoreRole builders.
+	CoreRole *CoreRoleClient
 	// CoreUser is the client for interacting with the CoreUser builders.
 	CoreUser *CoreUserClient
 }
@@ -37,6 +47,9 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.CoreDataRelationship = NewCoreDataRelationshipClient(c.config)
+	c.CoreMenu = NewCoreMenuClient(c.config)
+	c.CoreRole = NewCoreRoleClient(c.config)
 	c.CoreUser = NewCoreUserClient(c.config)
 }
 
@@ -128,9 +141,12 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:      ctx,
-		config:   cfg,
-		CoreUser: NewCoreUserClient(cfg),
+		ctx:                  ctx,
+		config:               cfg,
+		CoreDataRelationship: NewCoreDataRelationshipClient(cfg),
+		CoreMenu:             NewCoreMenuClient(cfg),
+		CoreRole:             NewCoreRoleClient(cfg),
+		CoreUser:             NewCoreUserClient(cfg),
 	}, nil
 }
 
@@ -148,16 +164,19 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:      ctx,
-		config:   cfg,
-		CoreUser: NewCoreUserClient(cfg),
+		ctx:                  ctx,
+		config:               cfg,
+		CoreDataRelationship: NewCoreDataRelationshipClient(cfg),
+		CoreMenu:             NewCoreMenuClient(cfg),
+		CoreRole:             NewCoreRoleClient(cfg),
+		CoreUser:             NewCoreUserClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		CoreUser.
+//		CoreDataRelationship.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -179,22 +198,548 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.CoreDataRelationship.Use(hooks...)
+	c.CoreMenu.Use(hooks...)
+	c.CoreRole.Use(hooks...)
 	c.CoreUser.Use(hooks...)
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.CoreDataRelationship.Intercept(interceptors...)
+	c.CoreMenu.Intercept(interceptors...)
+	c.CoreRole.Intercept(interceptors...)
 	c.CoreUser.Intercept(interceptors...)
 }
 
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *CoreDataRelationshipMutation:
+		return c.CoreDataRelationship.mutate(ctx, m)
+	case *CoreMenuMutation:
+		return c.CoreMenu.mutate(ctx, m)
+	case *CoreRoleMutation:
+		return c.CoreRole.mutate(ctx, m)
 	case *CoreUserMutation:
 		return c.CoreUser.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// CoreDataRelationshipClient is a client for the CoreDataRelationship schema.
+type CoreDataRelationshipClient struct {
+	config
+}
+
+// NewCoreDataRelationshipClient returns a client for the CoreDataRelationship from the given config.
+func NewCoreDataRelationshipClient(c config) *CoreDataRelationshipClient {
+	return &CoreDataRelationshipClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `coredatarelationship.Hooks(f(g(h())))`.
+func (c *CoreDataRelationshipClient) Use(hooks ...Hook) {
+	c.hooks.CoreDataRelationship = append(c.hooks.CoreDataRelationship, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `coredatarelationship.Intercept(f(g(h())))`.
+func (c *CoreDataRelationshipClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CoreDataRelationship = append(c.inters.CoreDataRelationship, interceptors...)
+}
+
+// Create returns a builder for creating a CoreDataRelationship entity.
+func (c *CoreDataRelationshipClient) Create() *CoreDataRelationshipCreate {
+	mutation := newCoreDataRelationshipMutation(c.config, OpCreate)
+	return &CoreDataRelationshipCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CoreDataRelationship entities.
+func (c *CoreDataRelationshipClient) CreateBulk(builders ...*CoreDataRelationshipCreate) *CoreDataRelationshipCreateBulk {
+	return &CoreDataRelationshipCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CoreDataRelationshipClient) MapCreateBulk(slice any, setFunc func(*CoreDataRelationshipCreate, int)) *CoreDataRelationshipCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CoreDataRelationshipCreateBulk{err: fmt.Errorf("calling to CoreDataRelationshipClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CoreDataRelationshipCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CoreDataRelationshipCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CoreDataRelationship.
+func (c *CoreDataRelationshipClient) Update() *CoreDataRelationshipUpdate {
+	mutation := newCoreDataRelationshipMutation(c.config, OpUpdate)
+	return &CoreDataRelationshipUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CoreDataRelationshipClient) UpdateOne(_m *CoreDataRelationship) *CoreDataRelationshipUpdateOne {
+	mutation := newCoreDataRelationshipMutation(c.config, OpUpdateOne, withCoreDataRelationship(_m))
+	return &CoreDataRelationshipUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CoreDataRelationshipClient) UpdateOneID(id string) *CoreDataRelationshipUpdateOne {
+	mutation := newCoreDataRelationshipMutation(c.config, OpUpdateOne, withCoreDataRelationshipID(id))
+	return &CoreDataRelationshipUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CoreDataRelationship.
+func (c *CoreDataRelationshipClient) Delete() *CoreDataRelationshipDelete {
+	mutation := newCoreDataRelationshipMutation(c.config, OpDelete)
+	return &CoreDataRelationshipDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CoreDataRelationshipClient) DeleteOne(_m *CoreDataRelationship) *CoreDataRelationshipDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CoreDataRelationshipClient) DeleteOneID(id string) *CoreDataRelationshipDeleteOne {
+	builder := c.Delete().Where(coredatarelationship.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CoreDataRelationshipDeleteOne{builder}
+}
+
+// Query returns a query builder for CoreDataRelationship.
+func (c *CoreDataRelationshipClient) Query() *CoreDataRelationshipQuery {
+	return &CoreDataRelationshipQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCoreDataRelationship},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CoreDataRelationship entity by its id.
+func (c *CoreDataRelationshipClient) Get(ctx context.Context, id string) (*CoreDataRelationship, error) {
+	return c.Query().Where(coredatarelationship.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CoreDataRelationshipClient) GetX(ctx context.Context, id string) *CoreDataRelationship {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryDataRelationshipFromMenu queries the data_relationship_from_menu edge of a CoreDataRelationship.
+func (c *CoreDataRelationshipClient) QueryDataRelationshipFromMenu(_m *CoreDataRelationship) *CoreMenuQuery {
+	query := (&CoreMenuClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(coredatarelationship.Table, coredatarelationship.FieldID, id),
+			sqlgraph.To(coremenu.Table, coremenu.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, coredatarelationship.DataRelationshipFromMenuTable, coredatarelationship.DataRelationshipFromMenuColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDataRelationshipFromRole queries the data_relationship_from_role edge of a CoreDataRelationship.
+func (c *CoreDataRelationshipClient) QueryDataRelationshipFromRole(_m *CoreDataRelationship) *CoreRoleQuery {
+	query := (&CoreRoleClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(coredatarelationship.Table, coredatarelationship.FieldID, id),
+			sqlgraph.To(corerole.Table, corerole.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, coredatarelationship.DataRelationshipFromRoleTable, coredatarelationship.DataRelationshipFromRoleColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CoreDataRelationshipClient) Hooks() []Hook {
+	hooks := c.hooks.CoreDataRelationship
+	return append(hooks[:len(hooks):len(hooks)], coredatarelationship.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *CoreDataRelationshipClient) Interceptors() []Interceptor {
+	return c.inters.CoreDataRelationship
+}
+
+func (c *CoreDataRelationshipClient) mutate(ctx context.Context, m *CoreDataRelationshipMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CoreDataRelationshipCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CoreDataRelationshipUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CoreDataRelationshipUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CoreDataRelationshipDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CoreDataRelationship mutation op: %q", m.Op())
+	}
+}
+
+// CoreMenuClient is a client for the CoreMenu schema.
+type CoreMenuClient struct {
+	config
+}
+
+// NewCoreMenuClient returns a client for the CoreMenu from the given config.
+func NewCoreMenuClient(c config) *CoreMenuClient {
+	return &CoreMenuClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `coremenu.Hooks(f(g(h())))`.
+func (c *CoreMenuClient) Use(hooks ...Hook) {
+	c.hooks.CoreMenu = append(c.hooks.CoreMenu, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `coremenu.Intercept(f(g(h())))`.
+func (c *CoreMenuClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CoreMenu = append(c.inters.CoreMenu, interceptors...)
+}
+
+// Create returns a builder for creating a CoreMenu entity.
+func (c *CoreMenuClient) Create() *CoreMenuCreate {
+	mutation := newCoreMenuMutation(c.config, OpCreate)
+	return &CoreMenuCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CoreMenu entities.
+func (c *CoreMenuClient) CreateBulk(builders ...*CoreMenuCreate) *CoreMenuCreateBulk {
+	return &CoreMenuCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CoreMenuClient) MapCreateBulk(slice any, setFunc func(*CoreMenuCreate, int)) *CoreMenuCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CoreMenuCreateBulk{err: fmt.Errorf("calling to CoreMenuClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CoreMenuCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CoreMenuCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CoreMenu.
+func (c *CoreMenuClient) Update() *CoreMenuUpdate {
+	mutation := newCoreMenuMutation(c.config, OpUpdate)
+	return &CoreMenuUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CoreMenuClient) UpdateOne(_m *CoreMenu) *CoreMenuUpdateOne {
+	mutation := newCoreMenuMutation(c.config, OpUpdateOne, withCoreMenu(_m))
+	return &CoreMenuUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CoreMenuClient) UpdateOneID(id string) *CoreMenuUpdateOne {
+	mutation := newCoreMenuMutation(c.config, OpUpdateOne, withCoreMenuID(id))
+	return &CoreMenuUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CoreMenu.
+func (c *CoreMenuClient) Delete() *CoreMenuDelete {
+	mutation := newCoreMenuMutation(c.config, OpDelete)
+	return &CoreMenuDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CoreMenuClient) DeleteOne(_m *CoreMenu) *CoreMenuDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CoreMenuClient) DeleteOneID(id string) *CoreMenuDeleteOne {
+	builder := c.Delete().Where(coremenu.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CoreMenuDeleteOne{builder}
+}
+
+// Query returns a query builder for CoreMenu.
+func (c *CoreMenuClient) Query() *CoreMenuQuery {
+	return &CoreMenuQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCoreMenu},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CoreMenu entity by its id.
+func (c *CoreMenuClient) Get(ctx context.Context, id string) (*CoreMenu, error) {
+	return c.Query().Where(coremenu.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CoreMenuClient) GetX(ctx context.Context, id string) *CoreMenu {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryMenuFromParent queries the menu_from_parent edge of a CoreMenu.
+func (c *CoreMenuClient) QueryMenuFromParent(_m *CoreMenu) *CoreMenuQuery {
+	query := (&CoreMenuClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(coremenu.Table, coremenu.FieldID, id),
+			sqlgraph.To(coremenu.Table, coremenu.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, coremenu.MenuFromParentTable, coremenu.MenuFromParentColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMenuToDataRelationship queries the menu_to_data_relationship edge of a CoreMenu.
+func (c *CoreMenuClient) QueryMenuToDataRelationship(_m *CoreMenu) *CoreDataRelationshipQuery {
+	query := (&CoreDataRelationshipClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(coremenu.Table, coremenu.FieldID, id),
+			sqlgraph.To(coredatarelationship.Table, coredatarelationship.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, coremenu.MenuToDataRelationshipTable, coremenu.MenuToDataRelationshipColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMenuToChildren queries the menu_to_children edge of a CoreMenu.
+func (c *CoreMenuClient) QueryMenuToChildren(_m *CoreMenu) *CoreMenuQuery {
+	query := (&CoreMenuClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(coremenu.Table, coremenu.FieldID, id),
+			sqlgraph.To(coremenu.Table, coremenu.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, coremenu.MenuToChildrenTable, coremenu.MenuToChildrenColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CoreMenuClient) Hooks() []Hook {
+	hooks := c.hooks.CoreMenu
+	return append(hooks[:len(hooks):len(hooks)], coremenu.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *CoreMenuClient) Interceptors() []Interceptor {
+	return c.inters.CoreMenu
+}
+
+func (c *CoreMenuClient) mutate(ctx context.Context, m *CoreMenuMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CoreMenuCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CoreMenuUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CoreMenuUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CoreMenuDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CoreMenu mutation op: %q", m.Op())
+	}
+}
+
+// CoreRoleClient is a client for the CoreRole schema.
+type CoreRoleClient struct {
+	config
+}
+
+// NewCoreRoleClient returns a client for the CoreRole from the given config.
+func NewCoreRoleClient(c config) *CoreRoleClient {
+	return &CoreRoleClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `corerole.Hooks(f(g(h())))`.
+func (c *CoreRoleClient) Use(hooks ...Hook) {
+	c.hooks.CoreRole = append(c.hooks.CoreRole, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `corerole.Intercept(f(g(h())))`.
+func (c *CoreRoleClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CoreRole = append(c.inters.CoreRole, interceptors...)
+}
+
+// Create returns a builder for creating a CoreRole entity.
+func (c *CoreRoleClient) Create() *CoreRoleCreate {
+	mutation := newCoreRoleMutation(c.config, OpCreate)
+	return &CoreRoleCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CoreRole entities.
+func (c *CoreRoleClient) CreateBulk(builders ...*CoreRoleCreate) *CoreRoleCreateBulk {
+	return &CoreRoleCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CoreRoleClient) MapCreateBulk(slice any, setFunc func(*CoreRoleCreate, int)) *CoreRoleCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CoreRoleCreateBulk{err: fmt.Errorf("calling to CoreRoleClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CoreRoleCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CoreRoleCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CoreRole.
+func (c *CoreRoleClient) Update() *CoreRoleUpdate {
+	mutation := newCoreRoleMutation(c.config, OpUpdate)
+	return &CoreRoleUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CoreRoleClient) UpdateOne(_m *CoreRole) *CoreRoleUpdateOne {
+	mutation := newCoreRoleMutation(c.config, OpUpdateOne, withCoreRole(_m))
+	return &CoreRoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CoreRoleClient) UpdateOneID(id string) *CoreRoleUpdateOne {
+	mutation := newCoreRoleMutation(c.config, OpUpdateOne, withCoreRoleID(id))
+	return &CoreRoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CoreRole.
+func (c *CoreRoleClient) Delete() *CoreRoleDelete {
+	mutation := newCoreRoleMutation(c.config, OpDelete)
+	return &CoreRoleDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CoreRoleClient) DeleteOne(_m *CoreRole) *CoreRoleDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CoreRoleClient) DeleteOneID(id string) *CoreRoleDeleteOne {
+	builder := c.Delete().Where(corerole.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CoreRoleDeleteOne{builder}
+}
+
+// Query returns a query builder for CoreRole.
+func (c *CoreRoleClient) Query() *CoreRoleQuery {
+	return &CoreRoleQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCoreRole},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CoreRole entity by its id.
+func (c *CoreRoleClient) Get(ctx context.Context, id string) (*CoreRole, error) {
+	return c.Query().Where(corerole.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CoreRoleClient) GetX(ctx context.Context, id string) *CoreRole {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryRoleToUser queries the role_to_user edge of a CoreRole.
+func (c *CoreRoleClient) QueryRoleToUser(_m *CoreRole) *CoreUserQuery {
+	query := (&CoreUserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(corerole.Table, corerole.FieldID, id),
+			sqlgraph.To(coreuser.Table, coreuser.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, corerole.RoleToUserTable, corerole.RoleToUserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRoleToDataRelationship queries the role_to_data_relationship edge of a CoreRole.
+func (c *CoreRoleClient) QueryRoleToDataRelationship(_m *CoreRole) *CoreDataRelationshipQuery {
+	query := (&CoreDataRelationshipClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(corerole.Table, corerole.FieldID, id),
+			sqlgraph.To(coredatarelationship.Table, coredatarelationship.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, corerole.RoleToDataRelationshipTable, corerole.RoleToDataRelationshipColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CoreRoleClient) Hooks() []Hook {
+	hooks := c.hooks.CoreRole
+	return append(hooks[:len(hooks):len(hooks)], corerole.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *CoreRoleClient) Interceptors() []Interceptor {
+	return c.inters.CoreRole
+}
+
+func (c *CoreRoleClient) mutate(ctx context.Context, m *CoreRoleMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CoreRoleCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CoreRoleUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CoreRoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CoreRoleDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CoreRole mutation op: %q", m.Op())
 	}
 }
 
@@ -306,6 +851,22 @@ func (c *CoreUserClient) GetX(ctx context.Context, id string) *CoreUser {
 	return obj
 }
 
+// QueryUserFromRole queries the user_from_role edge of a CoreUser.
+func (c *CoreUserClient) QueryUserFromRole(_m *CoreUser) *CoreRoleQuery {
+	query := (&CoreRoleClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(coreuser.Table, coreuser.FieldID, id),
+			sqlgraph.To(corerole.Table, corerole.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, coreuser.UserFromRoleTable, coreuser.UserFromRoleColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *CoreUserClient) Hooks() []Hook {
 	hooks := c.hooks.CoreUser
@@ -335,10 +896,10 @@ func (c *CoreUserClient) mutate(ctx context.Context, m *CoreUserMutation) (Value
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		CoreUser []ent.Hook
+		CoreDataRelationship, CoreMenu, CoreRole, CoreUser []ent.Hook
 	}
 	inters struct {
-		CoreUser []ent.Interceptor
+		CoreDataRelationship, CoreMenu, CoreRole, CoreUser []ent.Interceptor
 	}
 )
 

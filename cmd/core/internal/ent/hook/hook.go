@@ -9,6 +9,42 @@ import (
 	"github.com/lyonmu/quebec/cmd/core/internal/ent"
 )
 
+// The CoreDataRelationshipFunc type is an adapter to allow the use of ordinary
+// function as CoreDataRelationship mutator.
+type CoreDataRelationshipFunc func(context.Context, *ent.CoreDataRelationshipMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CoreDataRelationshipFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CoreDataRelationshipMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CoreDataRelationshipMutation", m)
+}
+
+// The CoreMenuFunc type is an adapter to allow the use of ordinary
+// function as CoreMenu mutator.
+type CoreMenuFunc func(context.Context, *ent.CoreMenuMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CoreMenuFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CoreMenuMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CoreMenuMutation", m)
+}
+
+// The CoreRoleFunc type is an adapter to allow the use of ordinary
+// function as CoreRole mutator.
+type CoreRoleFunc func(context.Context, *ent.CoreRoleMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CoreRoleFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CoreRoleMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CoreRoleMutation", m)
+}
+
 // The CoreUserFunc type is an adapter to allow the use of ordinary
 // function as CoreUser mutator.
 type CoreUserFunc func(context.Context, *ent.CoreUserMutation) (ent.Value, error)

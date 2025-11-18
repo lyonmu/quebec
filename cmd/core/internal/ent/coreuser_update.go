@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/predicate"
 )
@@ -135,9 +136,101 @@ func (_u *CoreUserUpdate) ClearNickname() *CoreUserUpdate {
 	return _u
 }
 
+// SetStatus sets the "status" field.
+func (_u *CoreUserUpdate) SetStatus(v int8) *CoreUserUpdate {
+	_u.mutation.ResetStatus()
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *CoreUserUpdate) SetNillableStatus(v *int8) *CoreUserUpdate {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
+// AddStatus adds value to the "status" field.
+func (_u *CoreUserUpdate) AddStatus(v int8) *CoreUserUpdate {
+	_u.mutation.AddStatus(v)
+	return _u
+}
+
+// ClearStatus clears the value of the "status" field.
+func (_u *CoreUserUpdate) ClearStatus() *CoreUserUpdate {
+	_u.mutation.ClearStatus()
+	return _u
+}
+
+// SetRoleID sets the "role_id" field.
+func (_u *CoreUserUpdate) SetRoleID(v string) *CoreUserUpdate {
+	_u.mutation.SetRoleID(v)
+	return _u
+}
+
+// SetNillableRoleID sets the "role_id" field if the given value is not nil.
+func (_u *CoreUserUpdate) SetNillableRoleID(v *string) *CoreUserUpdate {
+	if v != nil {
+		_u.SetRoleID(*v)
+	}
+	return _u
+}
+
+// ClearRoleID clears the value of the "role_id" field.
+func (_u *CoreUserUpdate) ClearRoleID() *CoreUserUpdate {
+	_u.mutation.ClearRoleID()
+	return _u
+}
+
+// SetRemark sets the "remark" field.
+func (_u *CoreUserUpdate) SetRemark(v string) *CoreUserUpdate {
+	_u.mutation.SetRemark(v)
+	return _u
+}
+
+// SetNillableRemark sets the "remark" field if the given value is not nil.
+func (_u *CoreUserUpdate) SetNillableRemark(v *string) *CoreUserUpdate {
+	if v != nil {
+		_u.SetRemark(*v)
+	}
+	return _u
+}
+
+// ClearRemark clears the value of the "remark" field.
+func (_u *CoreUserUpdate) ClearRemark() *CoreUserUpdate {
+	_u.mutation.ClearRemark()
+	return _u
+}
+
+// SetUserFromRoleID sets the "user_from_role" edge to the CoreRole entity by ID.
+func (_u *CoreUserUpdate) SetUserFromRoleID(id string) *CoreUserUpdate {
+	_u.mutation.SetUserFromRoleID(id)
+	return _u
+}
+
+// SetNillableUserFromRoleID sets the "user_from_role" edge to the CoreRole entity by ID if the given value is not nil.
+func (_u *CoreUserUpdate) SetNillableUserFromRoleID(id *string) *CoreUserUpdate {
+	if id != nil {
+		_u = _u.SetUserFromRoleID(*id)
+	}
+	return _u
+}
+
+// SetUserFromRole sets the "user_from_role" edge to the CoreRole entity.
+func (_u *CoreUserUpdate) SetUserFromRole(v *CoreRole) *CoreUserUpdate {
+	return _u.SetUserFromRoleID(v.ID)
+}
+
 // Mutation returns the CoreUserMutation object of the builder.
 func (_u *CoreUserUpdate) Mutation() *CoreUserMutation {
 	return _u.mutation
+}
+
+// ClearUserFromRole clears the "user_from_role" edge to the CoreRole entity.
+func (_u *CoreUserUpdate) ClearUserFromRole() *CoreUserUpdate {
+	_u.mutation.ClearUserFromRole()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -229,6 +322,50 @@ func (_u *CoreUserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.NicknameCleared() {
 		_spec.ClearField(coreuser.FieldNickname, field.TypeString)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(coreuser.FieldStatus, field.TypeInt8, value)
+	}
+	if value, ok := _u.mutation.AddedStatus(); ok {
+		_spec.AddField(coreuser.FieldStatus, field.TypeInt8, value)
+	}
+	if _u.mutation.StatusCleared() {
+		_spec.ClearField(coreuser.FieldStatus, field.TypeInt8)
+	}
+	if value, ok := _u.mutation.Remark(); ok {
+		_spec.SetField(coreuser.FieldRemark, field.TypeString, value)
+	}
+	if _u.mutation.RemarkCleared() {
+		_spec.ClearField(coreuser.FieldRemark, field.TypeString)
+	}
+	if _u.mutation.UserFromRoleCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   coreuser.UserFromRoleTable,
+			Columns: []string{coreuser.UserFromRoleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(corerole.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.UserFromRoleIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   coreuser.UserFromRoleTable,
+			Columns: []string{coreuser.UserFromRoleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(corerole.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -358,9 +495,101 @@ func (_u *CoreUserUpdateOne) ClearNickname() *CoreUserUpdateOne {
 	return _u
 }
 
+// SetStatus sets the "status" field.
+func (_u *CoreUserUpdateOne) SetStatus(v int8) *CoreUserUpdateOne {
+	_u.mutation.ResetStatus()
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *CoreUserUpdateOne) SetNillableStatus(v *int8) *CoreUserUpdateOne {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
+// AddStatus adds value to the "status" field.
+func (_u *CoreUserUpdateOne) AddStatus(v int8) *CoreUserUpdateOne {
+	_u.mutation.AddStatus(v)
+	return _u
+}
+
+// ClearStatus clears the value of the "status" field.
+func (_u *CoreUserUpdateOne) ClearStatus() *CoreUserUpdateOne {
+	_u.mutation.ClearStatus()
+	return _u
+}
+
+// SetRoleID sets the "role_id" field.
+func (_u *CoreUserUpdateOne) SetRoleID(v string) *CoreUserUpdateOne {
+	_u.mutation.SetRoleID(v)
+	return _u
+}
+
+// SetNillableRoleID sets the "role_id" field if the given value is not nil.
+func (_u *CoreUserUpdateOne) SetNillableRoleID(v *string) *CoreUserUpdateOne {
+	if v != nil {
+		_u.SetRoleID(*v)
+	}
+	return _u
+}
+
+// ClearRoleID clears the value of the "role_id" field.
+func (_u *CoreUserUpdateOne) ClearRoleID() *CoreUserUpdateOne {
+	_u.mutation.ClearRoleID()
+	return _u
+}
+
+// SetRemark sets the "remark" field.
+func (_u *CoreUserUpdateOne) SetRemark(v string) *CoreUserUpdateOne {
+	_u.mutation.SetRemark(v)
+	return _u
+}
+
+// SetNillableRemark sets the "remark" field if the given value is not nil.
+func (_u *CoreUserUpdateOne) SetNillableRemark(v *string) *CoreUserUpdateOne {
+	if v != nil {
+		_u.SetRemark(*v)
+	}
+	return _u
+}
+
+// ClearRemark clears the value of the "remark" field.
+func (_u *CoreUserUpdateOne) ClearRemark() *CoreUserUpdateOne {
+	_u.mutation.ClearRemark()
+	return _u
+}
+
+// SetUserFromRoleID sets the "user_from_role" edge to the CoreRole entity by ID.
+func (_u *CoreUserUpdateOne) SetUserFromRoleID(id string) *CoreUserUpdateOne {
+	_u.mutation.SetUserFromRoleID(id)
+	return _u
+}
+
+// SetNillableUserFromRoleID sets the "user_from_role" edge to the CoreRole entity by ID if the given value is not nil.
+func (_u *CoreUserUpdateOne) SetNillableUserFromRoleID(id *string) *CoreUserUpdateOne {
+	if id != nil {
+		_u = _u.SetUserFromRoleID(*id)
+	}
+	return _u
+}
+
+// SetUserFromRole sets the "user_from_role" edge to the CoreRole entity.
+func (_u *CoreUserUpdateOne) SetUserFromRole(v *CoreRole) *CoreUserUpdateOne {
+	return _u.SetUserFromRoleID(v.ID)
+}
+
 // Mutation returns the CoreUserMutation object of the builder.
 func (_u *CoreUserUpdateOne) Mutation() *CoreUserMutation {
 	return _u.mutation
+}
+
+// ClearUserFromRole clears the "user_from_role" edge to the CoreRole entity.
+func (_u *CoreUserUpdateOne) ClearUserFromRole() *CoreUserUpdateOne {
+	_u.mutation.ClearUserFromRole()
+	return _u
 }
 
 // Where appends a list predicates to the CoreUserUpdate builder.
@@ -482,6 +711,50 @@ func (_u *CoreUserUpdateOne) sqlSave(ctx context.Context) (_node *CoreUser, err 
 	}
 	if _u.mutation.NicknameCleared() {
 		_spec.ClearField(coreuser.FieldNickname, field.TypeString)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(coreuser.FieldStatus, field.TypeInt8, value)
+	}
+	if value, ok := _u.mutation.AddedStatus(); ok {
+		_spec.AddField(coreuser.FieldStatus, field.TypeInt8, value)
+	}
+	if _u.mutation.StatusCleared() {
+		_spec.ClearField(coreuser.FieldStatus, field.TypeInt8)
+	}
+	if value, ok := _u.mutation.Remark(); ok {
+		_spec.SetField(coreuser.FieldRemark, field.TypeString, value)
+	}
+	if _u.mutation.RemarkCleared() {
+		_spec.ClearField(coreuser.FieldRemark, field.TypeString)
+	}
+	if _u.mutation.UserFromRoleCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   coreuser.UserFromRoleTable,
+			Columns: []string{coreuser.UserFromRoleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(corerole.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.UserFromRoleIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   coreuser.UserFromRoleTable,
+			Columns: []string{coreuser.UserFromRoleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(corerole.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &CoreUser{config: _u.config}

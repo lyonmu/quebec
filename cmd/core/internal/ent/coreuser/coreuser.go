@@ -7,6 +7,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -28,8 +29,23 @@ const (
 	FieldEmail = "email"
 	// FieldNickname holds the string denoting the nickname field in the database.
 	FieldNickname = "nickname"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
+	// FieldRoleID holds the string denoting the role_id field in the database.
+	FieldRoleID = "role_id"
+	// FieldRemark holds the string denoting the remark field in the database.
+	FieldRemark = "remark"
+	// EdgeUserFromRole holds the string denoting the user_from_role edge name in mutations.
+	EdgeUserFromRole = "user_from_role"
 	// Table holds the table name of the coreuser in the database.
 	Table = "quebec_core_user"
+	// UserFromRoleTable is the table that holds the user_from_role relation/edge.
+	UserFromRoleTable = "quebec_core_user"
+	// UserFromRoleInverseTable is the table name for the CoreRole entity.
+	// It exists in this package in order to avoid circular dependency with the "corerole" package.
+	UserFromRoleInverseTable = "quebec_core_role"
+	// UserFromRoleColumn is the table column denoting the user_from_role relation/edge.
+	UserFromRoleColumn = "role_id"
 )
 
 // Columns holds all SQL columns for coreuser fields.
@@ -42,6 +58,9 @@ var Columns = []string{
 	FieldPassword,
 	FieldEmail,
 	FieldNickname,
+	FieldStatus,
+	FieldRoleID,
+	FieldRemark,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -67,6 +86,8 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultStatus holds the default value on creation for the "status" field.
+	DefaultStatus int8
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -114,4 +135,33 @@ func ByEmail(opts ...sql.OrderTermOption) OrderOption {
 // ByNickname orders the results by the nickname field.
 func ByNickname(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNickname, opts...).ToFunc()
+}
+
+// ByStatus orders the results by the status field.
+func ByStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// ByRoleID orders the results by the role_id field.
+func ByRoleID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRoleID, opts...).ToFunc()
+}
+
+// ByRemark orders the results by the remark field.
+func ByRemark(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRemark, opts...).ToFunc()
+}
+
+// ByUserFromRoleField orders the results by user_from_role field.
+func ByUserFromRoleField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newUserFromRoleStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newUserFromRoleStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(UserFromRoleInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, UserFromRoleTable, UserFromRoleColumn),
+	)
 }

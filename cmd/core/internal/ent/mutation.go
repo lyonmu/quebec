@@ -11,8 +11,12 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coredatarelationship"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/predicate"
+	"github.com/lyonmu/quebec/pkg/common"
 )
 
 const (
@@ -24,26 +28,3231 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeCoreUser = "CoreUser"
+	TypeCoreDataRelationship = "CoreDataRelationship"
+	TypeCoreMenu             = "CoreMenu"
+	TypeCoreRole             = "CoreRole"
+	TypeCoreUser             = "CoreUser"
 )
+
+// CoreDataRelationshipMutation represents an operation that mutates the CoreDataRelationship nodes in the graph.
+type CoreDataRelationshipMutation struct {
+	config
+	op                                 Op
+	typ                                string
+	id                                 *string
+	created_at                         *time.Time
+	updated_at                         *time.Time
+	deleted_at                         *time.Time
+	data_relationship_type             *common.DataRelationshipType
+	adddata_relationship_type          *common.DataRelationshipType
+	clearedFields                      map[string]struct{}
+	data_relationship_from_menu        *string
+	cleareddata_relationship_from_menu bool
+	data_relationship_from_role        *string
+	cleareddata_relationship_from_role bool
+	done                               bool
+	oldValue                           func(context.Context) (*CoreDataRelationship, error)
+	predicates                         []predicate.CoreDataRelationship
+}
+
+var _ ent.Mutation = (*CoreDataRelationshipMutation)(nil)
+
+// coredatarelationshipOption allows management of the mutation configuration using functional options.
+type coredatarelationshipOption func(*CoreDataRelationshipMutation)
+
+// newCoreDataRelationshipMutation creates new mutation for the CoreDataRelationship entity.
+func newCoreDataRelationshipMutation(c config, op Op, opts ...coredatarelationshipOption) *CoreDataRelationshipMutation {
+	m := &CoreDataRelationshipMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCoreDataRelationship,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCoreDataRelationshipID sets the ID field of the mutation.
+func withCoreDataRelationshipID(id string) coredatarelationshipOption {
+	return func(m *CoreDataRelationshipMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CoreDataRelationship
+		)
+		m.oldValue = func(ctx context.Context) (*CoreDataRelationship, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CoreDataRelationship.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCoreDataRelationship sets the old CoreDataRelationship of the mutation.
+func withCoreDataRelationship(node *CoreDataRelationship) coredatarelationshipOption {
+	return func(m *CoreDataRelationshipMutation) {
+		m.oldValue = func(context.Context) (*CoreDataRelationship, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CoreDataRelationshipMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CoreDataRelationshipMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of CoreDataRelationship entities.
+func (m *CoreDataRelationshipMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CoreDataRelationshipMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CoreDataRelationshipMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CoreDataRelationship.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *CoreDataRelationshipMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *CoreDataRelationshipMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the CoreDataRelationship entity.
+// If the CoreDataRelationship object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreDataRelationshipMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *CoreDataRelationshipMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *CoreDataRelationshipMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *CoreDataRelationshipMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the CoreDataRelationship entity.
+// If the CoreDataRelationship object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreDataRelationshipMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *CoreDataRelationshipMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *CoreDataRelationshipMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *CoreDataRelationshipMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the CoreDataRelationship entity.
+// If the CoreDataRelationship object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreDataRelationshipMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *CoreDataRelationshipMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[coredatarelationship.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *CoreDataRelationshipMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[coredatarelationship.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *CoreDataRelationshipMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, coredatarelationship.FieldDeletedAt)
+}
+
+// SetDataRelationshipType sets the "data_relationship_type" field.
+func (m *CoreDataRelationshipMutation) SetDataRelationshipType(crt common.DataRelationshipType) {
+	m.data_relationship_type = &crt
+	m.adddata_relationship_type = nil
+}
+
+// DataRelationshipType returns the value of the "data_relationship_type" field in the mutation.
+func (m *CoreDataRelationshipMutation) DataRelationshipType() (r common.DataRelationshipType, exists bool) {
+	v := m.data_relationship_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDataRelationshipType returns the old "data_relationship_type" field's value of the CoreDataRelationship entity.
+// If the CoreDataRelationship object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreDataRelationshipMutation) OldDataRelationshipType(ctx context.Context) (v common.DataRelationshipType, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDataRelationshipType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDataRelationshipType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDataRelationshipType: %w", err)
+	}
+	return oldValue.DataRelationshipType, nil
+}
+
+// AddDataRelationshipType adds crt to the "data_relationship_type" field.
+func (m *CoreDataRelationshipMutation) AddDataRelationshipType(crt common.DataRelationshipType) {
+	if m.adddata_relationship_type != nil {
+		*m.adddata_relationship_type += crt
+	} else {
+		m.adddata_relationship_type = &crt
+	}
+}
+
+// AddedDataRelationshipType returns the value that was added to the "data_relationship_type" field in this mutation.
+func (m *CoreDataRelationshipMutation) AddedDataRelationshipType() (r common.DataRelationshipType, exists bool) {
+	v := m.adddata_relationship_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearDataRelationshipType clears the value of the "data_relationship_type" field.
+func (m *CoreDataRelationshipMutation) ClearDataRelationshipType() {
+	m.data_relationship_type = nil
+	m.adddata_relationship_type = nil
+	m.clearedFields[coredatarelationship.FieldDataRelationshipType] = struct{}{}
+}
+
+// DataRelationshipTypeCleared returns if the "data_relationship_type" field was cleared in this mutation.
+func (m *CoreDataRelationshipMutation) DataRelationshipTypeCleared() bool {
+	_, ok := m.clearedFields[coredatarelationship.FieldDataRelationshipType]
+	return ok
+}
+
+// ResetDataRelationshipType resets all changes to the "data_relationship_type" field.
+func (m *CoreDataRelationshipMutation) ResetDataRelationshipType() {
+	m.data_relationship_type = nil
+	m.adddata_relationship_type = nil
+	delete(m.clearedFields, coredatarelationship.FieldDataRelationshipType)
+}
+
+// SetMenuID sets the "menu_id" field.
+func (m *CoreDataRelationshipMutation) SetMenuID(s string) {
+	m.data_relationship_from_menu = &s
+}
+
+// MenuID returns the value of the "menu_id" field in the mutation.
+func (m *CoreDataRelationshipMutation) MenuID() (r string, exists bool) {
+	v := m.data_relationship_from_menu
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMenuID returns the old "menu_id" field's value of the CoreDataRelationship entity.
+// If the CoreDataRelationship object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreDataRelationshipMutation) OldMenuID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMenuID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMenuID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMenuID: %w", err)
+	}
+	return oldValue.MenuID, nil
+}
+
+// ClearMenuID clears the value of the "menu_id" field.
+func (m *CoreDataRelationshipMutation) ClearMenuID() {
+	m.data_relationship_from_menu = nil
+	m.clearedFields[coredatarelationship.FieldMenuID] = struct{}{}
+}
+
+// MenuIDCleared returns if the "menu_id" field was cleared in this mutation.
+func (m *CoreDataRelationshipMutation) MenuIDCleared() bool {
+	_, ok := m.clearedFields[coredatarelationship.FieldMenuID]
+	return ok
+}
+
+// ResetMenuID resets all changes to the "menu_id" field.
+func (m *CoreDataRelationshipMutation) ResetMenuID() {
+	m.data_relationship_from_menu = nil
+	delete(m.clearedFields, coredatarelationship.FieldMenuID)
+}
+
+// SetRoleID sets the "role_id" field.
+func (m *CoreDataRelationshipMutation) SetRoleID(s string) {
+	m.data_relationship_from_role = &s
+}
+
+// RoleID returns the value of the "role_id" field in the mutation.
+func (m *CoreDataRelationshipMutation) RoleID() (r string, exists bool) {
+	v := m.data_relationship_from_role
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRoleID returns the old "role_id" field's value of the CoreDataRelationship entity.
+// If the CoreDataRelationship object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreDataRelationshipMutation) OldRoleID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRoleID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRoleID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRoleID: %w", err)
+	}
+	return oldValue.RoleID, nil
+}
+
+// ClearRoleID clears the value of the "role_id" field.
+func (m *CoreDataRelationshipMutation) ClearRoleID() {
+	m.data_relationship_from_role = nil
+	m.clearedFields[coredatarelationship.FieldRoleID] = struct{}{}
+}
+
+// RoleIDCleared returns if the "role_id" field was cleared in this mutation.
+func (m *CoreDataRelationshipMutation) RoleIDCleared() bool {
+	_, ok := m.clearedFields[coredatarelationship.FieldRoleID]
+	return ok
+}
+
+// ResetRoleID resets all changes to the "role_id" field.
+func (m *CoreDataRelationshipMutation) ResetRoleID() {
+	m.data_relationship_from_role = nil
+	delete(m.clearedFields, coredatarelationship.FieldRoleID)
+}
+
+// SetDataRelationshipFromMenuID sets the "data_relationship_from_menu" edge to the CoreMenu entity by id.
+func (m *CoreDataRelationshipMutation) SetDataRelationshipFromMenuID(id string) {
+	m.data_relationship_from_menu = &id
+}
+
+// ClearDataRelationshipFromMenu clears the "data_relationship_from_menu" edge to the CoreMenu entity.
+func (m *CoreDataRelationshipMutation) ClearDataRelationshipFromMenu() {
+	m.cleareddata_relationship_from_menu = true
+	m.clearedFields[coredatarelationship.FieldMenuID] = struct{}{}
+}
+
+// DataRelationshipFromMenuCleared reports if the "data_relationship_from_menu" edge to the CoreMenu entity was cleared.
+func (m *CoreDataRelationshipMutation) DataRelationshipFromMenuCleared() bool {
+	return m.MenuIDCleared() || m.cleareddata_relationship_from_menu
+}
+
+// DataRelationshipFromMenuID returns the "data_relationship_from_menu" edge ID in the mutation.
+func (m *CoreDataRelationshipMutation) DataRelationshipFromMenuID() (id string, exists bool) {
+	if m.data_relationship_from_menu != nil {
+		return *m.data_relationship_from_menu, true
+	}
+	return
+}
+
+// DataRelationshipFromMenuIDs returns the "data_relationship_from_menu" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// DataRelationshipFromMenuID instead. It exists only for internal usage by the builders.
+func (m *CoreDataRelationshipMutation) DataRelationshipFromMenuIDs() (ids []string) {
+	if id := m.data_relationship_from_menu; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetDataRelationshipFromMenu resets all changes to the "data_relationship_from_menu" edge.
+func (m *CoreDataRelationshipMutation) ResetDataRelationshipFromMenu() {
+	m.data_relationship_from_menu = nil
+	m.cleareddata_relationship_from_menu = false
+}
+
+// SetDataRelationshipFromRoleID sets the "data_relationship_from_role" edge to the CoreRole entity by id.
+func (m *CoreDataRelationshipMutation) SetDataRelationshipFromRoleID(id string) {
+	m.data_relationship_from_role = &id
+}
+
+// ClearDataRelationshipFromRole clears the "data_relationship_from_role" edge to the CoreRole entity.
+func (m *CoreDataRelationshipMutation) ClearDataRelationshipFromRole() {
+	m.cleareddata_relationship_from_role = true
+	m.clearedFields[coredatarelationship.FieldRoleID] = struct{}{}
+}
+
+// DataRelationshipFromRoleCleared reports if the "data_relationship_from_role" edge to the CoreRole entity was cleared.
+func (m *CoreDataRelationshipMutation) DataRelationshipFromRoleCleared() bool {
+	return m.RoleIDCleared() || m.cleareddata_relationship_from_role
+}
+
+// DataRelationshipFromRoleID returns the "data_relationship_from_role" edge ID in the mutation.
+func (m *CoreDataRelationshipMutation) DataRelationshipFromRoleID() (id string, exists bool) {
+	if m.data_relationship_from_role != nil {
+		return *m.data_relationship_from_role, true
+	}
+	return
+}
+
+// DataRelationshipFromRoleIDs returns the "data_relationship_from_role" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// DataRelationshipFromRoleID instead. It exists only for internal usage by the builders.
+func (m *CoreDataRelationshipMutation) DataRelationshipFromRoleIDs() (ids []string) {
+	if id := m.data_relationship_from_role; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetDataRelationshipFromRole resets all changes to the "data_relationship_from_role" edge.
+func (m *CoreDataRelationshipMutation) ResetDataRelationshipFromRole() {
+	m.data_relationship_from_role = nil
+	m.cleareddata_relationship_from_role = false
+}
+
+// Where appends a list predicates to the CoreDataRelationshipMutation builder.
+func (m *CoreDataRelationshipMutation) Where(ps ...predicate.CoreDataRelationship) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CoreDataRelationshipMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CoreDataRelationshipMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CoreDataRelationship, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CoreDataRelationshipMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CoreDataRelationshipMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CoreDataRelationship).
+func (m *CoreDataRelationshipMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CoreDataRelationshipMutation) Fields() []string {
+	fields := make([]string, 0, 6)
+	if m.created_at != nil {
+		fields = append(fields, coredatarelationship.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, coredatarelationship.FieldUpdatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, coredatarelationship.FieldDeletedAt)
+	}
+	if m.data_relationship_type != nil {
+		fields = append(fields, coredatarelationship.FieldDataRelationshipType)
+	}
+	if m.data_relationship_from_menu != nil {
+		fields = append(fields, coredatarelationship.FieldMenuID)
+	}
+	if m.data_relationship_from_role != nil {
+		fields = append(fields, coredatarelationship.FieldRoleID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CoreDataRelationshipMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case coredatarelationship.FieldCreatedAt:
+		return m.CreatedAt()
+	case coredatarelationship.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case coredatarelationship.FieldDeletedAt:
+		return m.DeletedAt()
+	case coredatarelationship.FieldDataRelationshipType:
+		return m.DataRelationshipType()
+	case coredatarelationship.FieldMenuID:
+		return m.MenuID()
+	case coredatarelationship.FieldRoleID:
+		return m.RoleID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CoreDataRelationshipMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case coredatarelationship.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case coredatarelationship.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case coredatarelationship.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
+	case coredatarelationship.FieldDataRelationshipType:
+		return m.OldDataRelationshipType(ctx)
+	case coredatarelationship.FieldMenuID:
+		return m.OldMenuID(ctx)
+	case coredatarelationship.FieldRoleID:
+		return m.OldRoleID(ctx)
+	}
+	return nil, fmt.Errorf("unknown CoreDataRelationship field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoreDataRelationshipMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case coredatarelationship.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case coredatarelationship.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case coredatarelationship.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
+	case coredatarelationship.FieldDataRelationshipType:
+		v, ok := value.(common.DataRelationshipType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDataRelationshipType(v)
+		return nil
+	case coredatarelationship.FieldMenuID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMenuID(v)
+		return nil
+	case coredatarelationship.FieldRoleID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRoleID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CoreDataRelationship field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CoreDataRelationshipMutation) AddedFields() []string {
+	var fields []string
+	if m.adddata_relationship_type != nil {
+		fields = append(fields, coredatarelationship.FieldDataRelationshipType)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CoreDataRelationshipMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case coredatarelationship.FieldDataRelationshipType:
+		return m.AddedDataRelationshipType()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoreDataRelationshipMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case coredatarelationship.FieldDataRelationshipType:
+		v, ok := value.(common.DataRelationshipType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDataRelationshipType(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CoreDataRelationship numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CoreDataRelationshipMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(coredatarelationship.FieldDeletedAt) {
+		fields = append(fields, coredatarelationship.FieldDeletedAt)
+	}
+	if m.FieldCleared(coredatarelationship.FieldDataRelationshipType) {
+		fields = append(fields, coredatarelationship.FieldDataRelationshipType)
+	}
+	if m.FieldCleared(coredatarelationship.FieldMenuID) {
+		fields = append(fields, coredatarelationship.FieldMenuID)
+	}
+	if m.FieldCleared(coredatarelationship.FieldRoleID) {
+		fields = append(fields, coredatarelationship.FieldRoleID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CoreDataRelationshipMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CoreDataRelationshipMutation) ClearField(name string) error {
+	switch name {
+	case coredatarelationship.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	case coredatarelationship.FieldDataRelationshipType:
+		m.ClearDataRelationshipType()
+		return nil
+	case coredatarelationship.FieldMenuID:
+		m.ClearMenuID()
+		return nil
+	case coredatarelationship.FieldRoleID:
+		m.ClearRoleID()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreDataRelationship nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CoreDataRelationshipMutation) ResetField(name string) error {
+	switch name {
+	case coredatarelationship.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case coredatarelationship.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case coredatarelationship.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
+	case coredatarelationship.FieldDataRelationshipType:
+		m.ResetDataRelationshipType()
+		return nil
+	case coredatarelationship.FieldMenuID:
+		m.ResetMenuID()
+		return nil
+	case coredatarelationship.FieldRoleID:
+		m.ResetRoleID()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreDataRelationship field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CoreDataRelationshipMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.data_relationship_from_menu != nil {
+		edges = append(edges, coredatarelationship.EdgeDataRelationshipFromMenu)
+	}
+	if m.data_relationship_from_role != nil {
+		edges = append(edges, coredatarelationship.EdgeDataRelationshipFromRole)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CoreDataRelationshipMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case coredatarelationship.EdgeDataRelationshipFromMenu:
+		if id := m.data_relationship_from_menu; id != nil {
+			return []ent.Value{*id}
+		}
+	case coredatarelationship.EdgeDataRelationshipFromRole:
+		if id := m.data_relationship_from_role; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CoreDataRelationshipMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CoreDataRelationshipMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CoreDataRelationshipMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.cleareddata_relationship_from_menu {
+		edges = append(edges, coredatarelationship.EdgeDataRelationshipFromMenu)
+	}
+	if m.cleareddata_relationship_from_role {
+		edges = append(edges, coredatarelationship.EdgeDataRelationshipFromRole)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CoreDataRelationshipMutation) EdgeCleared(name string) bool {
+	switch name {
+	case coredatarelationship.EdgeDataRelationshipFromMenu:
+		return m.cleareddata_relationship_from_menu
+	case coredatarelationship.EdgeDataRelationshipFromRole:
+		return m.cleareddata_relationship_from_role
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CoreDataRelationshipMutation) ClearEdge(name string) error {
+	switch name {
+	case coredatarelationship.EdgeDataRelationshipFromMenu:
+		m.ClearDataRelationshipFromMenu()
+		return nil
+	case coredatarelationship.EdgeDataRelationshipFromRole:
+		m.ClearDataRelationshipFromRole()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreDataRelationship unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CoreDataRelationshipMutation) ResetEdge(name string) error {
+	switch name {
+	case coredatarelationship.EdgeDataRelationshipFromMenu:
+		m.ResetDataRelationshipFromMenu()
+		return nil
+	case coredatarelationship.EdgeDataRelationshipFromRole:
+		m.ResetDataRelationshipFromRole()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreDataRelationship edge %s", name)
+}
+
+// CoreMenuMutation represents an operation that mutates the CoreMenu nodes in the graph.
+type CoreMenuMutation struct {
+	config
+	op                               Op
+	typ                              string
+	id                               *string
+	created_at                       *time.Time
+	updated_at                       *time.Time
+	deleted_at                       *time.Time
+	name                             *string
+	menu_type                        *common.MenuType
+	addmenu_type                     *common.MenuType
+	api_path                         *string
+	api_path_method                  *string
+	_order                           *int8
+	add_order                        *int8
+	status                           *common.YesOrNo
+	addstatus                        *common.YesOrNo
+	component                        *string
+	remark                           *string
+	clearedFields                    map[string]struct{}
+	menu_from_parent                 *string
+	clearedmenu_from_parent          bool
+	menu_to_data_relationship        map[string]struct{}
+	removedmenu_to_data_relationship map[string]struct{}
+	clearedmenu_to_data_relationship bool
+	menu_to_children                 map[string]struct{}
+	removedmenu_to_children          map[string]struct{}
+	clearedmenu_to_children          bool
+	done                             bool
+	oldValue                         func(context.Context) (*CoreMenu, error)
+	predicates                       []predicate.CoreMenu
+}
+
+var _ ent.Mutation = (*CoreMenuMutation)(nil)
+
+// coremenuOption allows management of the mutation configuration using functional options.
+type coremenuOption func(*CoreMenuMutation)
+
+// newCoreMenuMutation creates new mutation for the CoreMenu entity.
+func newCoreMenuMutation(c config, op Op, opts ...coremenuOption) *CoreMenuMutation {
+	m := &CoreMenuMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCoreMenu,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCoreMenuID sets the ID field of the mutation.
+func withCoreMenuID(id string) coremenuOption {
+	return func(m *CoreMenuMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CoreMenu
+		)
+		m.oldValue = func(ctx context.Context) (*CoreMenu, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CoreMenu.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCoreMenu sets the old CoreMenu of the mutation.
+func withCoreMenu(node *CoreMenu) coremenuOption {
+	return func(m *CoreMenuMutation) {
+		m.oldValue = func(context.Context) (*CoreMenu, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CoreMenuMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CoreMenuMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of CoreMenu entities.
+func (m *CoreMenuMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CoreMenuMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CoreMenuMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CoreMenu.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *CoreMenuMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *CoreMenuMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the CoreMenu entity.
+// If the CoreMenu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreMenuMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *CoreMenuMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *CoreMenuMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *CoreMenuMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the CoreMenu entity.
+// If the CoreMenu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreMenuMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *CoreMenuMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *CoreMenuMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *CoreMenuMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the CoreMenu entity.
+// If the CoreMenu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreMenuMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *CoreMenuMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[coremenu.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *CoreMenuMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[coremenu.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *CoreMenuMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, coremenu.FieldDeletedAt)
+}
+
+// SetName sets the "name" field.
+func (m *CoreMenuMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *CoreMenuMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the CoreMenu entity.
+// If the CoreMenu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreMenuMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ClearName clears the value of the "name" field.
+func (m *CoreMenuMutation) ClearName() {
+	m.name = nil
+	m.clearedFields[coremenu.FieldName] = struct{}{}
+}
+
+// NameCleared returns if the "name" field was cleared in this mutation.
+func (m *CoreMenuMutation) NameCleared() bool {
+	_, ok := m.clearedFields[coremenu.FieldName]
+	return ok
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *CoreMenuMutation) ResetName() {
+	m.name = nil
+	delete(m.clearedFields, coremenu.FieldName)
+}
+
+// SetMenuType sets the "menu_type" field.
+func (m *CoreMenuMutation) SetMenuType(ct common.MenuType) {
+	m.menu_type = &ct
+	m.addmenu_type = nil
+}
+
+// MenuType returns the value of the "menu_type" field in the mutation.
+func (m *CoreMenuMutation) MenuType() (r common.MenuType, exists bool) {
+	v := m.menu_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMenuType returns the old "menu_type" field's value of the CoreMenu entity.
+// If the CoreMenu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreMenuMutation) OldMenuType(ctx context.Context) (v common.MenuType, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMenuType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMenuType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMenuType: %w", err)
+	}
+	return oldValue.MenuType, nil
+}
+
+// AddMenuType adds ct to the "menu_type" field.
+func (m *CoreMenuMutation) AddMenuType(ct common.MenuType) {
+	if m.addmenu_type != nil {
+		*m.addmenu_type += ct
+	} else {
+		m.addmenu_type = &ct
+	}
+}
+
+// AddedMenuType returns the value that was added to the "menu_type" field in this mutation.
+func (m *CoreMenuMutation) AddedMenuType() (r common.MenuType, exists bool) {
+	v := m.addmenu_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearMenuType clears the value of the "menu_type" field.
+func (m *CoreMenuMutation) ClearMenuType() {
+	m.menu_type = nil
+	m.addmenu_type = nil
+	m.clearedFields[coremenu.FieldMenuType] = struct{}{}
+}
+
+// MenuTypeCleared returns if the "menu_type" field was cleared in this mutation.
+func (m *CoreMenuMutation) MenuTypeCleared() bool {
+	_, ok := m.clearedFields[coremenu.FieldMenuType]
+	return ok
+}
+
+// ResetMenuType resets all changes to the "menu_type" field.
+func (m *CoreMenuMutation) ResetMenuType() {
+	m.menu_type = nil
+	m.addmenu_type = nil
+	delete(m.clearedFields, coremenu.FieldMenuType)
+}
+
+// SetAPIPath sets the "api_path" field.
+func (m *CoreMenuMutation) SetAPIPath(s string) {
+	m.api_path = &s
+}
+
+// APIPath returns the value of the "api_path" field in the mutation.
+func (m *CoreMenuMutation) APIPath() (r string, exists bool) {
+	v := m.api_path
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAPIPath returns the old "api_path" field's value of the CoreMenu entity.
+// If the CoreMenu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreMenuMutation) OldAPIPath(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAPIPath is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAPIPath requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAPIPath: %w", err)
+	}
+	return oldValue.APIPath, nil
+}
+
+// ClearAPIPath clears the value of the "api_path" field.
+func (m *CoreMenuMutation) ClearAPIPath() {
+	m.api_path = nil
+	m.clearedFields[coremenu.FieldAPIPath] = struct{}{}
+}
+
+// APIPathCleared returns if the "api_path" field was cleared in this mutation.
+func (m *CoreMenuMutation) APIPathCleared() bool {
+	_, ok := m.clearedFields[coremenu.FieldAPIPath]
+	return ok
+}
+
+// ResetAPIPath resets all changes to the "api_path" field.
+func (m *CoreMenuMutation) ResetAPIPath() {
+	m.api_path = nil
+	delete(m.clearedFields, coremenu.FieldAPIPath)
+}
+
+// SetAPIPathMethod sets the "api_path_method" field.
+func (m *CoreMenuMutation) SetAPIPathMethod(s string) {
+	m.api_path_method = &s
+}
+
+// APIPathMethod returns the value of the "api_path_method" field in the mutation.
+func (m *CoreMenuMutation) APIPathMethod() (r string, exists bool) {
+	v := m.api_path_method
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAPIPathMethod returns the old "api_path_method" field's value of the CoreMenu entity.
+// If the CoreMenu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreMenuMutation) OldAPIPathMethod(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAPIPathMethod is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAPIPathMethod requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAPIPathMethod: %w", err)
+	}
+	return oldValue.APIPathMethod, nil
+}
+
+// ClearAPIPathMethod clears the value of the "api_path_method" field.
+func (m *CoreMenuMutation) ClearAPIPathMethod() {
+	m.api_path_method = nil
+	m.clearedFields[coremenu.FieldAPIPathMethod] = struct{}{}
+}
+
+// APIPathMethodCleared returns if the "api_path_method" field was cleared in this mutation.
+func (m *CoreMenuMutation) APIPathMethodCleared() bool {
+	_, ok := m.clearedFields[coremenu.FieldAPIPathMethod]
+	return ok
+}
+
+// ResetAPIPathMethod resets all changes to the "api_path_method" field.
+func (m *CoreMenuMutation) ResetAPIPathMethod() {
+	m.api_path_method = nil
+	delete(m.clearedFields, coremenu.FieldAPIPathMethod)
+}
+
+// SetOrder sets the "order" field.
+func (m *CoreMenuMutation) SetOrder(i int8) {
+	m._order = &i
+	m.add_order = nil
+}
+
+// Order returns the value of the "order" field in the mutation.
+func (m *CoreMenuMutation) Order() (r int8, exists bool) {
+	v := m._order
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrder returns the old "order" field's value of the CoreMenu entity.
+// If the CoreMenu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreMenuMutation) OldOrder(ctx context.Context) (v int8, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrder is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrder requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrder: %w", err)
+	}
+	return oldValue.Order, nil
+}
+
+// AddOrder adds i to the "order" field.
+func (m *CoreMenuMutation) AddOrder(i int8) {
+	if m.add_order != nil {
+		*m.add_order += i
+	} else {
+		m.add_order = &i
+	}
+}
+
+// AddedOrder returns the value that was added to the "order" field in this mutation.
+func (m *CoreMenuMutation) AddedOrder() (r int8, exists bool) {
+	v := m.add_order
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearOrder clears the value of the "order" field.
+func (m *CoreMenuMutation) ClearOrder() {
+	m._order = nil
+	m.add_order = nil
+	m.clearedFields[coremenu.FieldOrder] = struct{}{}
+}
+
+// OrderCleared returns if the "order" field was cleared in this mutation.
+func (m *CoreMenuMutation) OrderCleared() bool {
+	_, ok := m.clearedFields[coremenu.FieldOrder]
+	return ok
+}
+
+// ResetOrder resets all changes to the "order" field.
+func (m *CoreMenuMutation) ResetOrder() {
+	m._order = nil
+	m.add_order = nil
+	delete(m.clearedFields, coremenu.FieldOrder)
+}
+
+// SetParentID sets the "parent_id" field.
+func (m *CoreMenuMutation) SetParentID(s string) {
+	m.menu_from_parent = &s
+}
+
+// ParentID returns the value of the "parent_id" field in the mutation.
+func (m *CoreMenuMutation) ParentID() (r string, exists bool) {
+	v := m.menu_from_parent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldParentID returns the old "parent_id" field's value of the CoreMenu entity.
+// If the CoreMenu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreMenuMutation) OldParentID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldParentID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldParentID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldParentID: %w", err)
+	}
+	return oldValue.ParentID, nil
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (m *CoreMenuMutation) ClearParentID() {
+	m.menu_from_parent = nil
+	m.clearedFields[coremenu.FieldParentID] = struct{}{}
+}
+
+// ParentIDCleared returns if the "parent_id" field was cleared in this mutation.
+func (m *CoreMenuMutation) ParentIDCleared() bool {
+	_, ok := m.clearedFields[coremenu.FieldParentID]
+	return ok
+}
+
+// ResetParentID resets all changes to the "parent_id" field.
+func (m *CoreMenuMutation) ResetParentID() {
+	m.menu_from_parent = nil
+	delete(m.clearedFields, coremenu.FieldParentID)
+}
+
+// SetStatus sets the "status" field.
+func (m *CoreMenuMutation) SetStatus(con common.YesOrNo) {
+	m.status = &con
+	m.addstatus = nil
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *CoreMenuMutation) Status() (r common.YesOrNo, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the CoreMenu entity.
+// If the CoreMenu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreMenuMutation) OldStatus(ctx context.Context) (v common.YesOrNo, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// AddStatus adds con to the "status" field.
+func (m *CoreMenuMutation) AddStatus(con common.YesOrNo) {
+	if m.addstatus != nil {
+		*m.addstatus += con
+	} else {
+		m.addstatus = &con
+	}
+}
+
+// AddedStatus returns the value that was added to the "status" field in this mutation.
+func (m *CoreMenuMutation) AddedStatus() (r common.YesOrNo, exists bool) {
+	v := m.addstatus
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearStatus clears the value of the "status" field.
+func (m *CoreMenuMutation) ClearStatus() {
+	m.status = nil
+	m.addstatus = nil
+	m.clearedFields[coremenu.FieldStatus] = struct{}{}
+}
+
+// StatusCleared returns if the "status" field was cleared in this mutation.
+func (m *CoreMenuMutation) StatusCleared() bool {
+	_, ok := m.clearedFields[coremenu.FieldStatus]
+	return ok
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *CoreMenuMutation) ResetStatus() {
+	m.status = nil
+	m.addstatus = nil
+	delete(m.clearedFields, coremenu.FieldStatus)
+}
+
+// SetComponent sets the "component" field.
+func (m *CoreMenuMutation) SetComponent(s string) {
+	m.component = &s
+}
+
+// Component returns the value of the "component" field in the mutation.
+func (m *CoreMenuMutation) Component() (r string, exists bool) {
+	v := m.component
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldComponent returns the old "component" field's value of the CoreMenu entity.
+// If the CoreMenu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreMenuMutation) OldComponent(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldComponent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldComponent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldComponent: %w", err)
+	}
+	return oldValue.Component, nil
+}
+
+// ClearComponent clears the value of the "component" field.
+func (m *CoreMenuMutation) ClearComponent() {
+	m.component = nil
+	m.clearedFields[coremenu.FieldComponent] = struct{}{}
+}
+
+// ComponentCleared returns if the "component" field was cleared in this mutation.
+func (m *CoreMenuMutation) ComponentCleared() bool {
+	_, ok := m.clearedFields[coremenu.FieldComponent]
+	return ok
+}
+
+// ResetComponent resets all changes to the "component" field.
+func (m *CoreMenuMutation) ResetComponent() {
+	m.component = nil
+	delete(m.clearedFields, coremenu.FieldComponent)
+}
+
+// SetRemark sets the "remark" field.
+func (m *CoreMenuMutation) SetRemark(s string) {
+	m.remark = &s
+}
+
+// Remark returns the value of the "remark" field in the mutation.
+func (m *CoreMenuMutation) Remark() (r string, exists bool) {
+	v := m.remark
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRemark returns the old "remark" field's value of the CoreMenu entity.
+// If the CoreMenu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreMenuMutation) OldRemark(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRemark is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRemark requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRemark: %w", err)
+	}
+	return oldValue.Remark, nil
+}
+
+// ClearRemark clears the value of the "remark" field.
+func (m *CoreMenuMutation) ClearRemark() {
+	m.remark = nil
+	m.clearedFields[coremenu.FieldRemark] = struct{}{}
+}
+
+// RemarkCleared returns if the "remark" field was cleared in this mutation.
+func (m *CoreMenuMutation) RemarkCleared() bool {
+	_, ok := m.clearedFields[coremenu.FieldRemark]
+	return ok
+}
+
+// ResetRemark resets all changes to the "remark" field.
+func (m *CoreMenuMutation) ResetRemark() {
+	m.remark = nil
+	delete(m.clearedFields, coremenu.FieldRemark)
+}
+
+// SetMenuFromParentID sets the "menu_from_parent" edge to the CoreMenu entity by id.
+func (m *CoreMenuMutation) SetMenuFromParentID(id string) {
+	m.menu_from_parent = &id
+}
+
+// ClearMenuFromParent clears the "menu_from_parent" edge to the CoreMenu entity.
+func (m *CoreMenuMutation) ClearMenuFromParent() {
+	m.clearedmenu_from_parent = true
+	m.clearedFields[coremenu.FieldParentID] = struct{}{}
+}
+
+// MenuFromParentCleared reports if the "menu_from_parent" edge to the CoreMenu entity was cleared.
+func (m *CoreMenuMutation) MenuFromParentCleared() bool {
+	return m.ParentIDCleared() || m.clearedmenu_from_parent
+}
+
+// MenuFromParentID returns the "menu_from_parent" edge ID in the mutation.
+func (m *CoreMenuMutation) MenuFromParentID() (id string, exists bool) {
+	if m.menu_from_parent != nil {
+		return *m.menu_from_parent, true
+	}
+	return
+}
+
+// MenuFromParentIDs returns the "menu_from_parent" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// MenuFromParentID instead. It exists only for internal usage by the builders.
+func (m *CoreMenuMutation) MenuFromParentIDs() (ids []string) {
+	if id := m.menu_from_parent; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetMenuFromParent resets all changes to the "menu_from_parent" edge.
+func (m *CoreMenuMutation) ResetMenuFromParent() {
+	m.menu_from_parent = nil
+	m.clearedmenu_from_parent = false
+}
+
+// AddMenuToDataRelationshipIDs adds the "menu_to_data_relationship" edge to the CoreDataRelationship entity by ids.
+func (m *CoreMenuMutation) AddMenuToDataRelationshipIDs(ids ...string) {
+	if m.menu_to_data_relationship == nil {
+		m.menu_to_data_relationship = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.menu_to_data_relationship[ids[i]] = struct{}{}
+	}
+}
+
+// ClearMenuToDataRelationship clears the "menu_to_data_relationship" edge to the CoreDataRelationship entity.
+func (m *CoreMenuMutation) ClearMenuToDataRelationship() {
+	m.clearedmenu_to_data_relationship = true
+}
+
+// MenuToDataRelationshipCleared reports if the "menu_to_data_relationship" edge to the CoreDataRelationship entity was cleared.
+func (m *CoreMenuMutation) MenuToDataRelationshipCleared() bool {
+	return m.clearedmenu_to_data_relationship
+}
+
+// RemoveMenuToDataRelationshipIDs removes the "menu_to_data_relationship" edge to the CoreDataRelationship entity by IDs.
+func (m *CoreMenuMutation) RemoveMenuToDataRelationshipIDs(ids ...string) {
+	if m.removedmenu_to_data_relationship == nil {
+		m.removedmenu_to_data_relationship = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.menu_to_data_relationship, ids[i])
+		m.removedmenu_to_data_relationship[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedMenuToDataRelationship returns the removed IDs of the "menu_to_data_relationship" edge to the CoreDataRelationship entity.
+func (m *CoreMenuMutation) RemovedMenuToDataRelationshipIDs() (ids []string) {
+	for id := range m.removedmenu_to_data_relationship {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// MenuToDataRelationshipIDs returns the "menu_to_data_relationship" edge IDs in the mutation.
+func (m *CoreMenuMutation) MenuToDataRelationshipIDs() (ids []string) {
+	for id := range m.menu_to_data_relationship {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetMenuToDataRelationship resets all changes to the "menu_to_data_relationship" edge.
+func (m *CoreMenuMutation) ResetMenuToDataRelationship() {
+	m.menu_to_data_relationship = nil
+	m.clearedmenu_to_data_relationship = false
+	m.removedmenu_to_data_relationship = nil
+}
+
+// AddMenuToChildIDs adds the "menu_to_children" edge to the CoreMenu entity by ids.
+func (m *CoreMenuMutation) AddMenuToChildIDs(ids ...string) {
+	if m.menu_to_children == nil {
+		m.menu_to_children = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.menu_to_children[ids[i]] = struct{}{}
+	}
+}
+
+// ClearMenuToChildren clears the "menu_to_children" edge to the CoreMenu entity.
+func (m *CoreMenuMutation) ClearMenuToChildren() {
+	m.clearedmenu_to_children = true
+}
+
+// MenuToChildrenCleared reports if the "menu_to_children" edge to the CoreMenu entity was cleared.
+func (m *CoreMenuMutation) MenuToChildrenCleared() bool {
+	return m.clearedmenu_to_children
+}
+
+// RemoveMenuToChildIDs removes the "menu_to_children" edge to the CoreMenu entity by IDs.
+func (m *CoreMenuMutation) RemoveMenuToChildIDs(ids ...string) {
+	if m.removedmenu_to_children == nil {
+		m.removedmenu_to_children = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.menu_to_children, ids[i])
+		m.removedmenu_to_children[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedMenuToChildren returns the removed IDs of the "menu_to_children" edge to the CoreMenu entity.
+func (m *CoreMenuMutation) RemovedMenuToChildrenIDs() (ids []string) {
+	for id := range m.removedmenu_to_children {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// MenuToChildrenIDs returns the "menu_to_children" edge IDs in the mutation.
+func (m *CoreMenuMutation) MenuToChildrenIDs() (ids []string) {
+	for id := range m.menu_to_children {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetMenuToChildren resets all changes to the "menu_to_children" edge.
+func (m *CoreMenuMutation) ResetMenuToChildren() {
+	m.menu_to_children = nil
+	m.clearedmenu_to_children = false
+	m.removedmenu_to_children = nil
+}
+
+// Where appends a list predicates to the CoreMenuMutation builder.
+func (m *CoreMenuMutation) Where(ps ...predicate.CoreMenu) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CoreMenuMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CoreMenuMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CoreMenu, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CoreMenuMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CoreMenuMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CoreMenu).
+func (m *CoreMenuMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CoreMenuMutation) Fields() []string {
+	fields := make([]string, 0, 12)
+	if m.created_at != nil {
+		fields = append(fields, coremenu.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, coremenu.FieldUpdatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, coremenu.FieldDeletedAt)
+	}
+	if m.name != nil {
+		fields = append(fields, coremenu.FieldName)
+	}
+	if m.menu_type != nil {
+		fields = append(fields, coremenu.FieldMenuType)
+	}
+	if m.api_path != nil {
+		fields = append(fields, coremenu.FieldAPIPath)
+	}
+	if m.api_path_method != nil {
+		fields = append(fields, coremenu.FieldAPIPathMethod)
+	}
+	if m._order != nil {
+		fields = append(fields, coremenu.FieldOrder)
+	}
+	if m.menu_from_parent != nil {
+		fields = append(fields, coremenu.FieldParentID)
+	}
+	if m.status != nil {
+		fields = append(fields, coremenu.FieldStatus)
+	}
+	if m.component != nil {
+		fields = append(fields, coremenu.FieldComponent)
+	}
+	if m.remark != nil {
+		fields = append(fields, coremenu.FieldRemark)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CoreMenuMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case coremenu.FieldCreatedAt:
+		return m.CreatedAt()
+	case coremenu.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case coremenu.FieldDeletedAt:
+		return m.DeletedAt()
+	case coremenu.FieldName:
+		return m.Name()
+	case coremenu.FieldMenuType:
+		return m.MenuType()
+	case coremenu.FieldAPIPath:
+		return m.APIPath()
+	case coremenu.FieldAPIPathMethod:
+		return m.APIPathMethod()
+	case coremenu.FieldOrder:
+		return m.Order()
+	case coremenu.FieldParentID:
+		return m.ParentID()
+	case coremenu.FieldStatus:
+		return m.Status()
+	case coremenu.FieldComponent:
+		return m.Component()
+	case coremenu.FieldRemark:
+		return m.Remark()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CoreMenuMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case coremenu.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case coremenu.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case coremenu.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
+	case coremenu.FieldName:
+		return m.OldName(ctx)
+	case coremenu.FieldMenuType:
+		return m.OldMenuType(ctx)
+	case coremenu.FieldAPIPath:
+		return m.OldAPIPath(ctx)
+	case coremenu.FieldAPIPathMethod:
+		return m.OldAPIPathMethod(ctx)
+	case coremenu.FieldOrder:
+		return m.OldOrder(ctx)
+	case coremenu.FieldParentID:
+		return m.OldParentID(ctx)
+	case coremenu.FieldStatus:
+		return m.OldStatus(ctx)
+	case coremenu.FieldComponent:
+		return m.OldComponent(ctx)
+	case coremenu.FieldRemark:
+		return m.OldRemark(ctx)
+	}
+	return nil, fmt.Errorf("unknown CoreMenu field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoreMenuMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case coremenu.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case coremenu.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case coremenu.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
+	case coremenu.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case coremenu.FieldMenuType:
+		v, ok := value.(common.MenuType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMenuType(v)
+		return nil
+	case coremenu.FieldAPIPath:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAPIPath(v)
+		return nil
+	case coremenu.FieldAPIPathMethod:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAPIPathMethod(v)
+		return nil
+	case coremenu.FieldOrder:
+		v, ok := value.(int8)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrder(v)
+		return nil
+	case coremenu.FieldParentID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetParentID(v)
+		return nil
+	case coremenu.FieldStatus:
+		v, ok := value.(common.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case coremenu.FieldComponent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetComponent(v)
+		return nil
+	case coremenu.FieldRemark:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRemark(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CoreMenu field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CoreMenuMutation) AddedFields() []string {
+	var fields []string
+	if m.addmenu_type != nil {
+		fields = append(fields, coremenu.FieldMenuType)
+	}
+	if m.add_order != nil {
+		fields = append(fields, coremenu.FieldOrder)
+	}
+	if m.addstatus != nil {
+		fields = append(fields, coremenu.FieldStatus)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CoreMenuMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case coremenu.FieldMenuType:
+		return m.AddedMenuType()
+	case coremenu.FieldOrder:
+		return m.AddedOrder()
+	case coremenu.FieldStatus:
+		return m.AddedStatus()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoreMenuMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case coremenu.FieldMenuType:
+		v, ok := value.(common.MenuType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMenuType(v)
+		return nil
+	case coremenu.FieldOrder:
+		v, ok := value.(int8)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOrder(v)
+		return nil
+	case coremenu.FieldStatus:
+		v, ok := value.(common.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStatus(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CoreMenu numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CoreMenuMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(coremenu.FieldDeletedAt) {
+		fields = append(fields, coremenu.FieldDeletedAt)
+	}
+	if m.FieldCleared(coremenu.FieldName) {
+		fields = append(fields, coremenu.FieldName)
+	}
+	if m.FieldCleared(coremenu.FieldMenuType) {
+		fields = append(fields, coremenu.FieldMenuType)
+	}
+	if m.FieldCleared(coremenu.FieldAPIPath) {
+		fields = append(fields, coremenu.FieldAPIPath)
+	}
+	if m.FieldCleared(coremenu.FieldAPIPathMethod) {
+		fields = append(fields, coremenu.FieldAPIPathMethod)
+	}
+	if m.FieldCleared(coremenu.FieldOrder) {
+		fields = append(fields, coremenu.FieldOrder)
+	}
+	if m.FieldCleared(coremenu.FieldParentID) {
+		fields = append(fields, coremenu.FieldParentID)
+	}
+	if m.FieldCleared(coremenu.FieldStatus) {
+		fields = append(fields, coremenu.FieldStatus)
+	}
+	if m.FieldCleared(coremenu.FieldComponent) {
+		fields = append(fields, coremenu.FieldComponent)
+	}
+	if m.FieldCleared(coremenu.FieldRemark) {
+		fields = append(fields, coremenu.FieldRemark)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CoreMenuMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CoreMenuMutation) ClearField(name string) error {
+	switch name {
+	case coremenu.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	case coremenu.FieldName:
+		m.ClearName()
+		return nil
+	case coremenu.FieldMenuType:
+		m.ClearMenuType()
+		return nil
+	case coremenu.FieldAPIPath:
+		m.ClearAPIPath()
+		return nil
+	case coremenu.FieldAPIPathMethod:
+		m.ClearAPIPathMethod()
+		return nil
+	case coremenu.FieldOrder:
+		m.ClearOrder()
+		return nil
+	case coremenu.FieldParentID:
+		m.ClearParentID()
+		return nil
+	case coremenu.FieldStatus:
+		m.ClearStatus()
+		return nil
+	case coremenu.FieldComponent:
+		m.ClearComponent()
+		return nil
+	case coremenu.FieldRemark:
+		m.ClearRemark()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreMenu nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CoreMenuMutation) ResetField(name string) error {
+	switch name {
+	case coremenu.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case coremenu.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case coremenu.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
+	case coremenu.FieldName:
+		m.ResetName()
+		return nil
+	case coremenu.FieldMenuType:
+		m.ResetMenuType()
+		return nil
+	case coremenu.FieldAPIPath:
+		m.ResetAPIPath()
+		return nil
+	case coremenu.FieldAPIPathMethod:
+		m.ResetAPIPathMethod()
+		return nil
+	case coremenu.FieldOrder:
+		m.ResetOrder()
+		return nil
+	case coremenu.FieldParentID:
+		m.ResetParentID()
+		return nil
+	case coremenu.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case coremenu.FieldComponent:
+		m.ResetComponent()
+		return nil
+	case coremenu.FieldRemark:
+		m.ResetRemark()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreMenu field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CoreMenuMutation) AddedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.menu_from_parent != nil {
+		edges = append(edges, coremenu.EdgeMenuFromParent)
+	}
+	if m.menu_to_data_relationship != nil {
+		edges = append(edges, coremenu.EdgeMenuToDataRelationship)
+	}
+	if m.menu_to_children != nil {
+		edges = append(edges, coremenu.EdgeMenuToChildren)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CoreMenuMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case coremenu.EdgeMenuFromParent:
+		if id := m.menu_from_parent; id != nil {
+			return []ent.Value{*id}
+		}
+	case coremenu.EdgeMenuToDataRelationship:
+		ids := make([]ent.Value, 0, len(m.menu_to_data_relationship))
+		for id := range m.menu_to_data_relationship {
+			ids = append(ids, id)
+		}
+		return ids
+	case coremenu.EdgeMenuToChildren:
+		ids := make([]ent.Value, 0, len(m.menu_to_children))
+		for id := range m.menu_to_children {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CoreMenuMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.removedmenu_to_data_relationship != nil {
+		edges = append(edges, coremenu.EdgeMenuToDataRelationship)
+	}
+	if m.removedmenu_to_children != nil {
+		edges = append(edges, coremenu.EdgeMenuToChildren)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CoreMenuMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case coremenu.EdgeMenuToDataRelationship:
+		ids := make([]ent.Value, 0, len(m.removedmenu_to_data_relationship))
+		for id := range m.removedmenu_to_data_relationship {
+			ids = append(ids, id)
+		}
+		return ids
+	case coremenu.EdgeMenuToChildren:
+		ids := make([]ent.Value, 0, len(m.removedmenu_to_children))
+		for id := range m.removedmenu_to_children {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CoreMenuMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.clearedmenu_from_parent {
+		edges = append(edges, coremenu.EdgeMenuFromParent)
+	}
+	if m.clearedmenu_to_data_relationship {
+		edges = append(edges, coremenu.EdgeMenuToDataRelationship)
+	}
+	if m.clearedmenu_to_children {
+		edges = append(edges, coremenu.EdgeMenuToChildren)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CoreMenuMutation) EdgeCleared(name string) bool {
+	switch name {
+	case coremenu.EdgeMenuFromParent:
+		return m.clearedmenu_from_parent
+	case coremenu.EdgeMenuToDataRelationship:
+		return m.clearedmenu_to_data_relationship
+	case coremenu.EdgeMenuToChildren:
+		return m.clearedmenu_to_children
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CoreMenuMutation) ClearEdge(name string) error {
+	switch name {
+	case coremenu.EdgeMenuFromParent:
+		m.ClearMenuFromParent()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreMenu unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CoreMenuMutation) ResetEdge(name string) error {
+	switch name {
+	case coremenu.EdgeMenuFromParent:
+		m.ResetMenuFromParent()
+		return nil
+	case coremenu.EdgeMenuToDataRelationship:
+		m.ResetMenuToDataRelationship()
+		return nil
+	case coremenu.EdgeMenuToChildren:
+		m.ResetMenuToChildren()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreMenu edge %s", name)
+}
+
+// CoreRoleMutation represents an operation that mutates the CoreRole nodes in the graph.
+type CoreRoleMutation struct {
+	config
+	op                               Op
+	typ                              string
+	id                               *string
+	created_at                       *time.Time
+	updated_at                       *time.Time
+	deleted_at                       *time.Time
+	name                             *string
+	remark                           *string
+	status                           *int8
+	addstatus                        *int8
+	clearedFields                    map[string]struct{}
+	role_to_user                     map[string]struct{}
+	removedrole_to_user              map[string]struct{}
+	clearedrole_to_user              bool
+	role_to_data_relationship        map[string]struct{}
+	removedrole_to_data_relationship map[string]struct{}
+	clearedrole_to_data_relationship bool
+	done                             bool
+	oldValue                         func(context.Context) (*CoreRole, error)
+	predicates                       []predicate.CoreRole
+}
+
+var _ ent.Mutation = (*CoreRoleMutation)(nil)
+
+// coreroleOption allows management of the mutation configuration using functional options.
+type coreroleOption func(*CoreRoleMutation)
+
+// newCoreRoleMutation creates new mutation for the CoreRole entity.
+func newCoreRoleMutation(c config, op Op, opts ...coreroleOption) *CoreRoleMutation {
+	m := &CoreRoleMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCoreRole,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCoreRoleID sets the ID field of the mutation.
+func withCoreRoleID(id string) coreroleOption {
+	return func(m *CoreRoleMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CoreRole
+		)
+		m.oldValue = func(ctx context.Context) (*CoreRole, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CoreRole.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCoreRole sets the old CoreRole of the mutation.
+func withCoreRole(node *CoreRole) coreroleOption {
+	return func(m *CoreRoleMutation) {
+		m.oldValue = func(context.Context) (*CoreRole, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CoreRoleMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CoreRoleMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of CoreRole entities.
+func (m *CoreRoleMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CoreRoleMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CoreRoleMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CoreRole.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *CoreRoleMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *CoreRoleMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the CoreRole entity.
+// If the CoreRole object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreRoleMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *CoreRoleMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *CoreRoleMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *CoreRoleMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the CoreRole entity.
+// If the CoreRole object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreRoleMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *CoreRoleMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *CoreRoleMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *CoreRoleMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the CoreRole entity.
+// If the CoreRole object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreRoleMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *CoreRoleMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[corerole.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *CoreRoleMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[corerole.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *CoreRoleMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, corerole.FieldDeletedAt)
+}
+
+// SetName sets the "name" field.
+func (m *CoreRoleMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *CoreRoleMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the CoreRole entity.
+// If the CoreRole object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreRoleMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ClearName clears the value of the "name" field.
+func (m *CoreRoleMutation) ClearName() {
+	m.name = nil
+	m.clearedFields[corerole.FieldName] = struct{}{}
+}
+
+// NameCleared returns if the "name" field was cleared in this mutation.
+func (m *CoreRoleMutation) NameCleared() bool {
+	_, ok := m.clearedFields[corerole.FieldName]
+	return ok
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *CoreRoleMutation) ResetName() {
+	m.name = nil
+	delete(m.clearedFields, corerole.FieldName)
+}
+
+// SetRemark sets the "remark" field.
+func (m *CoreRoleMutation) SetRemark(s string) {
+	m.remark = &s
+}
+
+// Remark returns the value of the "remark" field in the mutation.
+func (m *CoreRoleMutation) Remark() (r string, exists bool) {
+	v := m.remark
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRemark returns the old "remark" field's value of the CoreRole entity.
+// If the CoreRole object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreRoleMutation) OldRemark(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRemark is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRemark requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRemark: %w", err)
+	}
+	return oldValue.Remark, nil
+}
+
+// ClearRemark clears the value of the "remark" field.
+func (m *CoreRoleMutation) ClearRemark() {
+	m.remark = nil
+	m.clearedFields[corerole.FieldRemark] = struct{}{}
+}
+
+// RemarkCleared returns if the "remark" field was cleared in this mutation.
+func (m *CoreRoleMutation) RemarkCleared() bool {
+	_, ok := m.clearedFields[corerole.FieldRemark]
+	return ok
+}
+
+// ResetRemark resets all changes to the "remark" field.
+func (m *CoreRoleMutation) ResetRemark() {
+	m.remark = nil
+	delete(m.clearedFields, corerole.FieldRemark)
+}
+
+// SetStatus sets the "status" field.
+func (m *CoreRoleMutation) SetStatus(i int8) {
+	m.status = &i
+	m.addstatus = nil
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *CoreRoleMutation) Status() (r int8, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the CoreRole entity.
+// If the CoreRole object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreRoleMutation) OldStatus(ctx context.Context) (v int8, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// AddStatus adds i to the "status" field.
+func (m *CoreRoleMutation) AddStatus(i int8) {
+	if m.addstatus != nil {
+		*m.addstatus += i
+	} else {
+		m.addstatus = &i
+	}
+}
+
+// AddedStatus returns the value that was added to the "status" field in this mutation.
+func (m *CoreRoleMutation) AddedStatus() (r int8, exists bool) {
+	v := m.addstatus
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearStatus clears the value of the "status" field.
+func (m *CoreRoleMutation) ClearStatus() {
+	m.status = nil
+	m.addstatus = nil
+	m.clearedFields[corerole.FieldStatus] = struct{}{}
+}
+
+// StatusCleared returns if the "status" field was cleared in this mutation.
+func (m *CoreRoleMutation) StatusCleared() bool {
+	_, ok := m.clearedFields[corerole.FieldStatus]
+	return ok
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *CoreRoleMutation) ResetStatus() {
+	m.status = nil
+	m.addstatus = nil
+	delete(m.clearedFields, corerole.FieldStatus)
+}
+
+// AddRoleToUserIDs adds the "role_to_user" edge to the CoreUser entity by ids.
+func (m *CoreRoleMutation) AddRoleToUserIDs(ids ...string) {
+	if m.role_to_user == nil {
+		m.role_to_user = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.role_to_user[ids[i]] = struct{}{}
+	}
+}
+
+// ClearRoleToUser clears the "role_to_user" edge to the CoreUser entity.
+func (m *CoreRoleMutation) ClearRoleToUser() {
+	m.clearedrole_to_user = true
+}
+
+// RoleToUserCleared reports if the "role_to_user" edge to the CoreUser entity was cleared.
+func (m *CoreRoleMutation) RoleToUserCleared() bool {
+	return m.clearedrole_to_user
+}
+
+// RemoveRoleToUserIDs removes the "role_to_user" edge to the CoreUser entity by IDs.
+func (m *CoreRoleMutation) RemoveRoleToUserIDs(ids ...string) {
+	if m.removedrole_to_user == nil {
+		m.removedrole_to_user = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.role_to_user, ids[i])
+		m.removedrole_to_user[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedRoleToUser returns the removed IDs of the "role_to_user" edge to the CoreUser entity.
+func (m *CoreRoleMutation) RemovedRoleToUserIDs() (ids []string) {
+	for id := range m.removedrole_to_user {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// RoleToUserIDs returns the "role_to_user" edge IDs in the mutation.
+func (m *CoreRoleMutation) RoleToUserIDs() (ids []string) {
+	for id := range m.role_to_user {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetRoleToUser resets all changes to the "role_to_user" edge.
+func (m *CoreRoleMutation) ResetRoleToUser() {
+	m.role_to_user = nil
+	m.clearedrole_to_user = false
+	m.removedrole_to_user = nil
+}
+
+// AddRoleToDataRelationshipIDs adds the "role_to_data_relationship" edge to the CoreDataRelationship entity by ids.
+func (m *CoreRoleMutation) AddRoleToDataRelationshipIDs(ids ...string) {
+	if m.role_to_data_relationship == nil {
+		m.role_to_data_relationship = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.role_to_data_relationship[ids[i]] = struct{}{}
+	}
+}
+
+// ClearRoleToDataRelationship clears the "role_to_data_relationship" edge to the CoreDataRelationship entity.
+func (m *CoreRoleMutation) ClearRoleToDataRelationship() {
+	m.clearedrole_to_data_relationship = true
+}
+
+// RoleToDataRelationshipCleared reports if the "role_to_data_relationship" edge to the CoreDataRelationship entity was cleared.
+func (m *CoreRoleMutation) RoleToDataRelationshipCleared() bool {
+	return m.clearedrole_to_data_relationship
+}
+
+// RemoveRoleToDataRelationshipIDs removes the "role_to_data_relationship" edge to the CoreDataRelationship entity by IDs.
+func (m *CoreRoleMutation) RemoveRoleToDataRelationshipIDs(ids ...string) {
+	if m.removedrole_to_data_relationship == nil {
+		m.removedrole_to_data_relationship = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.role_to_data_relationship, ids[i])
+		m.removedrole_to_data_relationship[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedRoleToDataRelationship returns the removed IDs of the "role_to_data_relationship" edge to the CoreDataRelationship entity.
+func (m *CoreRoleMutation) RemovedRoleToDataRelationshipIDs() (ids []string) {
+	for id := range m.removedrole_to_data_relationship {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// RoleToDataRelationshipIDs returns the "role_to_data_relationship" edge IDs in the mutation.
+func (m *CoreRoleMutation) RoleToDataRelationshipIDs() (ids []string) {
+	for id := range m.role_to_data_relationship {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetRoleToDataRelationship resets all changes to the "role_to_data_relationship" edge.
+func (m *CoreRoleMutation) ResetRoleToDataRelationship() {
+	m.role_to_data_relationship = nil
+	m.clearedrole_to_data_relationship = false
+	m.removedrole_to_data_relationship = nil
+}
+
+// Where appends a list predicates to the CoreRoleMutation builder.
+func (m *CoreRoleMutation) Where(ps ...predicate.CoreRole) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CoreRoleMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CoreRoleMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CoreRole, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CoreRoleMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CoreRoleMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CoreRole).
+func (m *CoreRoleMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CoreRoleMutation) Fields() []string {
+	fields := make([]string, 0, 6)
+	if m.created_at != nil {
+		fields = append(fields, corerole.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, corerole.FieldUpdatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, corerole.FieldDeletedAt)
+	}
+	if m.name != nil {
+		fields = append(fields, corerole.FieldName)
+	}
+	if m.remark != nil {
+		fields = append(fields, corerole.FieldRemark)
+	}
+	if m.status != nil {
+		fields = append(fields, corerole.FieldStatus)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CoreRoleMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case corerole.FieldCreatedAt:
+		return m.CreatedAt()
+	case corerole.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case corerole.FieldDeletedAt:
+		return m.DeletedAt()
+	case corerole.FieldName:
+		return m.Name()
+	case corerole.FieldRemark:
+		return m.Remark()
+	case corerole.FieldStatus:
+		return m.Status()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CoreRoleMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case corerole.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case corerole.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case corerole.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
+	case corerole.FieldName:
+		return m.OldName(ctx)
+	case corerole.FieldRemark:
+		return m.OldRemark(ctx)
+	case corerole.FieldStatus:
+		return m.OldStatus(ctx)
+	}
+	return nil, fmt.Errorf("unknown CoreRole field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoreRoleMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case corerole.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case corerole.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case corerole.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
+	case corerole.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case corerole.FieldRemark:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRemark(v)
+		return nil
+	case corerole.FieldStatus:
+		v, ok := value.(int8)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CoreRole field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CoreRoleMutation) AddedFields() []string {
+	var fields []string
+	if m.addstatus != nil {
+		fields = append(fields, corerole.FieldStatus)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CoreRoleMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case corerole.FieldStatus:
+		return m.AddedStatus()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoreRoleMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case corerole.FieldStatus:
+		v, ok := value.(int8)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStatus(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CoreRole numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CoreRoleMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(corerole.FieldDeletedAt) {
+		fields = append(fields, corerole.FieldDeletedAt)
+	}
+	if m.FieldCleared(corerole.FieldName) {
+		fields = append(fields, corerole.FieldName)
+	}
+	if m.FieldCleared(corerole.FieldRemark) {
+		fields = append(fields, corerole.FieldRemark)
+	}
+	if m.FieldCleared(corerole.FieldStatus) {
+		fields = append(fields, corerole.FieldStatus)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CoreRoleMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CoreRoleMutation) ClearField(name string) error {
+	switch name {
+	case corerole.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	case corerole.FieldName:
+		m.ClearName()
+		return nil
+	case corerole.FieldRemark:
+		m.ClearRemark()
+		return nil
+	case corerole.FieldStatus:
+		m.ClearStatus()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreRole nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CoreRoleMutation) ResetField(name string) error {
+	switch name {
+	case corerole.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case corerole.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case corerole.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
+	case corerole.FieldName:
+		m.ResetName()
+		return nil
+	case corerole.FieldRemark:
+		m.ResetRemark()
+		return nil
+	case corerole.FieldStatus:
+		m.ResetStatus()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreRole field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CoreRoleMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.role_to_user != nil {
+		edges = append(edges, corerole.EdgeRoleToUser)
+	}
+	if m.role_to_data_relationship != nil {
+		edges = append(edges, corerole.EdgeRoleToDataRelationship)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CoreRoleMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case corerole.EdgeRoleToUser:
+		ids := make([]ent.Value, 0, len(m.role_to_user))
+		for id := range m.role_to_user {
+			ids = append(ids, id)
+		}
+		return ids
+	case corerole.EdgeRoleToDataRelationship:
+		ids := make([]ent.Value, 0, len(m.role_to_data_relationship))
+		for id := range m.role_to_data_relationship {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CoreRoleMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removedrole_to_user != nil {
+		edges = append(edges, corerole.EdgeRoleToUser)
+	}
+	if m.removedrole_to_data_relationship != nil {
+		edges = append(edges, corerole.EdgeRoleToDataRelationship)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CoreRoleMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case corerole.EdgeRoleToUser:
+		ids := make([]ent.Value, 0, len(m.removedrole_to_user))
+		for id := range m.removedrole_to_user {
+			ids = append(ids, id)
+		}
+		return ids
+	case corerole.EdgeRoleToDataRelationship:
+		ids := make([]ent.Value, 0, len(m.removedrole_to_data_relationship))
+		for id := range m.removedrole_to_data_relationship {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CoreRoleMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedrole_to_user {
+		edges = append(edges, corerole.EdgeRoleToUser)
+	}
+	if m.clearedrole_to_data_relationship {
+		edges = append(edges, corerole.EdgeRoleToDataRelationship)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CoreRoleMutation) EdgeCleared(name string) bool {
+	switch name {
+	case corerole.EdgeRoleToUser:
+		return m.clearedrole_to_user
+	case corerole.EdgeRoleToDataRelationship:
+		return m.clearedrole_to_data_relationship
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CoreRoleMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown CoreRole unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CoreRoleMutation) ResetEdge(name string) error {
+	switch name {
+	case corerole.EdgeRoleToUser:
+		m.ResetRoleToUser()
+		return nil
+	case corerole.EdgeRoleToDataRelationship:
+		m.ResetRoleToDataRelationship()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreRole edge %s", name)
+}
 
 // CoreUserMutation represents an operation that mutates the CoreUser nodes in the graph.
 type CoreUserMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *string
-	created_at    *time.Time
-	updated_at    *time.Time
-	deleted_at    *time.Time
-	username      *string
-	password      *string
-	email         *string
-	nickname      *string
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*CoreUser, error)
-	predicates    []predicate.CoreUser
+	op                    Op
+	typ                   string
+	id                    *string
+	created_at            *time.Time
+	updated_at            *time.Time
+	deleted_at            *time.Time
+	username              *string
+	password              *string
+	email                 *string
+	nickname              *string
+	status                *int8
+	addstatus             *int8
+	remark                *string
+	clearedFields         map[string]struct{}
+	user_from_role        *string
+	cleareduser_from_role bool
+	done                  bool
+	oldValue              func(context.Context) (*CoreUser, error)
+	predicates            []predicate.CoreUser
 }
 
 var _ ent.Mutation = (*CoreUserMutation)(nil)
@@ -467,6 +3676,214 @@ func (m *CoreUserMutation) ResetNickname() {
 	delete(m.clearedFields, coreuser.FieldNickname)
 }
 
+// SetStatus sets the "status" field.
+func (m *CoreUserMutation) SetStatus(i int8) {
+	m.status = &i
+	m.addstatus = nil
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *CoreUserMutation) Status() (r int8, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the CoreUser entity.
+// If the CoreUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUserMutation) OldStatus(ctx context.Context) (v int8, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// AddStatus adds i to the "status" field.
+func (m *CoreUserMutation) AddStatus(i int8) {
+	if m.addstatus != nil {
+		*m.addstatus += i
+	} else {
+		m.addstatus = &i
+	}
+}
+
+// AddedStatus returns the value that was added to the "status" field in this mutation.
+func (m *CoreUserMutation) AddedStatus() (r int8, exists bool) {
+	v := m.addstatus
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearStatus clears the value of the "status" field.
+func (m *CoreUserMutation) ClearStatus() {
+	m.status = nil
+	m.addstatus = nil
+	m.clearedFields[coreuser.FieldStatus] = struct{}{}
+}
+
+// StatusCleared returns if the "status" field was cleared in this mutation.
+func (m *CoreUserMutation) StatusCleared() bool {
+	_, ok := m.clearedFields[coreuser.FieldStatus]
+	return ok
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *CoreUserMutation) ResetStatus() {
+	m.status = nil
+	m.addstatus = nil
+	delete(m.clearedFields, coreuser.FieldStatus)
+}
+
+// SetRoleID sets the "role_id" field.
+func (m *CoreUserMutation) SetRoleID(s string) {
+	m.user_from_role = &s
+}
+
+// RoleID returns the value of the "role_id" field in the mutation.
+func (m *CoreUserMutation) RoleID() (r string, exists bool) {
+	v := m.user_from_role
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRoleID returns the old "role_id" field's value of the CoreUser entity.
+// If the CoreUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUserMutation) OldRoleID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRoleID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRoleID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRoleID: %w", err)
+	}
+	return oldValue.RoleID, nil
+}
+
+// ClearRoleID clears the value of the "role_id" field.
+func (m *CoreUserMutation) ClearRoleID() {
+	m.user_from_role = nil
+	m.clearedFields[coreuser.FieldRoleID] = struct{}{}
+}
+
+// RoleIDCleared returns if the "role_id" field was cleared in this mutation.
+func (m *CoreUserMutation) RoleIDCleared() bool {
+	_, ok := m.clearedFields[coreuser.FieldRoleID]
+	return ok
+}
+
+// ResetRoleID resets all changes to the "role_id" field.
+func (m *CoreUserMutation) ResetRoleID() {
+	m.user_from_role = nil
+	delete(m.clearedFields, coreuser.FieldRoleID)
+}
+
+// SetRemark sets the "remark" field.
+func (m *CoreUserMutation) SetRemark(s string) {
+	m.remark = &s
+}
+
+// Remark returns the value of the "remark" field in the mutation.
+func (m *CoreUserMutation) Remark() (r string, exists bool) {
+	v := m.remark
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRemark returns the old "remark" field's value of the CoreUser entity.
+// If the CoreUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUserMutation) OldRemark(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRemark is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRemark requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRemark: %w", err)
+	}
+	return oldValue.Remark, nil
+}
+
+// ClearRemark clears the value of the "remark" field.
+func (m *CoreUserMutation) ClearRemark() {
+	m.remark = nil
+	m.clearedFields[coreuser.FieldRemark] = struct{}{}
+}
+
+// RemarkCleared returns if the "remark" field was cleared in this mutation.
+func (m *CoreUserMutation) RemarkCleared() bool {
+	_, ok := m.clearedFields[coreuser.FieldRemark]
+	return ok
+}
+
+// ResetRemark resets all changes to the "remark" field.
+func (m *CoreUserMutation) ResetRemark() {
+	m.remark = nil
+	delete(m.clearedFields, coreuser.FieldRemark)
+}
+
+// SetUserFromRoleID sets the "user_from_role" edge to the CoreRole entity by id.
+func (m *CoreUserMutation) SetUserFromRoleID(id string) {
+	m.user_from_role = &id
+}
+
+// ClearUserFromRole clears the "user_from_role" edge to the CoreRole entity.
+func (m *CoreUserMutation) ClearUserFromRole() {
+	m.cleareduser_from_role = true
+	m.clearedFields[coreuser.FieldRoleID] = struct{}{}
+}
+
+// UserFromRoleCleared reports if the "user_from_role" edge to the CoreRole entity was cleared.
+func (m *CoreUserMutation) UserFromRoleCleared() bool {
+	return m.RoleIDCleared() || m.cleareduser_from_role
+}
+
+// UserFromRoleID returns the "user_from_role" edge ID in the mutation.
+func (m *CoreUserMutation) UserFromRoleID() (id string, exists bool) {
+	if m.user_from_role != nil {
+		return *m.user_from_role, true
+	}
+	return
+}
+
+// UserFromRoleIDs returns the "user_from_role" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserFromRoleID instead. It exists only for internal usage by the builders.
+func (m *CoreUserMutation) UserFromRoleIDs() (ids []string) {
+	if id := m.user_from_role; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUserFromRole resets all changes to the "user_from_role" edge.
+func (m *CoreUserMutation) ResetUserFromRole() {
+	m.user_from_role = nil
+	m.cleareduser_from_role = false
+}
+
 // Where appends a list predicates to the CoreUserMutation builder.
 func (m *CoreUserMutation) Where(ps ...predicate.CoreUser) {
 	m.predicates = append(m.predicates, ps...)
@@ -501,7 +3918,7 @@ func (m *CoreUserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CoreUserMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 10)
 	if m.created_at != nil {
 		fields = append(fields, coreuser.FieldCreatedAt)
 	}
@@ -522,6 +3939,15 @@ func (m *CoreUserMutation) Fields() []string {
 	}
 	if m.nickname != nil {
 		fields = append(fields, coreuser.FieldNickname)
+	}
+	if m.status != nil {
+		fields = append(fields, coreuser.FieldStatus)
+	}
+	if m.user_from_role != nil {
+		fields = append(fields, coreuser.FieldRoleID)
+	}
+	if m.remark != nil {
+		fields = append(fields, coreuser.FieldRemark)
 	}
 	return fields
 }
@@ -545,6 +3971,12 @@ func (m *CoreUserMutation) Field(name string) (ent.Value, bool) {
 		return m.Email()
 	case coreuser.FieldNickname:
 		return m.Nickname()
+	case coreuser.FieldStatus:
+		return m.Status()
+	case coreuser.FieldRoleID:
+		return m.RoleID()
+	case coreuser.FieldRemark:
+		return m.Remark()
 	}
 	return nil, false
 }
@@ -568,6 +4000,12 @@ func (m *CoreUserMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldEmail(ctx)
 	case coreuser.FieldNickname:
 		return m.OldNickname(ctx)
+	case coreuser.FieldStatus:
+		return m.OldStatus(ctx)
+	case coreuser.FieldRoleID:
+		return m.OldRoleID(ctx)
+	case coreuser.FieldRemark:
+		return m.OldRemark(ctx)
 	}
 	return nil, fmt.Errorf("unknown CoreUser field %s", name)
 }
@@ -626,6 +4064,27 @@ func (m *CoreUserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetNickname(v)
 		return nil
+	case coreuser.FieldStatus:
+		v, ok := value.(int8)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case coreuser.FieldRoleID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRoleID(v)
+		return nil
+	case coreuser.FieldRemark:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRemark(v)
+		return nil
 	}
 	return fmt.Errorf("unknown CoreUser field %s", name)
 }
@@ -633,13 +4092,21 @@ func (m *CoreUserMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *CoreUserMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addstatus != nil {
+		fields = append(fields, coreuser.FieldStatus)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *CoreUserMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case coreuser.FieldStatus:
+		return m.AddedStatus()
+	}
 	return nil, false
 }
 
@@ -648,6 +4115,13 @@ func (m *CoreUserMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *CoreUserMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case coreuser.FieldStatus:
+		v, ok := value.(int8)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStatus(v)
+		return nil
 	}
 	return fmt.Errorf("unknown CoreUser numeric field %s", name)
 }
@@ -670,6 +4144,15 @@ func (m *CoreUserMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(coreuser.FieldNickname) {
 		fields = append(fields, coreuser.FieldNickname)
+	}
+	if m.FieldCleared(coreuser.FieldStatus) {
+		fields = append(fields, coreuser.FieldStatus)
+	}
+	if m.FieldCleared(coreuser.FieldRoleID) {
+		fields = append(fields, coreuser.FieldRoleID)
+	}
+	if m.FieldCleared(coreuser.FieldRemark) {
+		fields = append(fields, coreuser.FieldRemark)
 	}
 	return fields
 }
@@ -700,6 +4183,15 @@ func (m *CoreUserMutation) ClearField(name string) error {
 	case coreuser.FieldNickname:
 		m.ClearNickname()
 		return nil
+	case coreuser.FieldStatus:
+		m.ClearStatus()
+		return nil
+	case coreuser.FieldRoleID:
+		m.ClearRoleID()
+		return nil
+	case coreuser.FieldRemark:
+		m.ClearRemark()
+		return nil
 	}
 	return fmt.Errorf("unknown CoreUser nullable field %s", name)
 }
@@ -729,25 +4221,43 @@ func (m *CoreUserMutation) ResetField(name string) error {
 	case coreuser.FieldNickname:
 		m.ResetNickname()
 		return nil
+	case coreuser.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case coreuser.FieldRoleID:
+		m.ResetRoleID()
+		return nil
+	case coreuser.FieldRemark:
+		m.ResetRemark()
+		return nil
 	}
 	return fmt.Errorf("unknown CoreUser field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *CoreUserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.user_from_role != nil {
+		edges = append(edges, coreuser.EdgeUserFromRole)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *CoreUserMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case coreuser.EdgeUserFromRole:
+		if id := m.user_from_role; id != nil {
+			return []ent.Value{*id}
+		}
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *CoreUserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
 	return edges
 }
 
@@ -759,24 +4269,41 @@ func (m *CoreUserMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *CoreUserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.cleareduser_from_role {
+		edges = append(edges, coreuser.EdgeUserFromRole)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *CoreUserMutation) EdgeCleared(name string) bool {
+	switch name {
+	case coreuser.EdgeUserFromRole:
+		return m.cleareduser_from_role
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *CoreUserMutation) ClearEdge(name string) error {
+	switch name {
+	case coreuser.EdgeUserFromRole:
+		m.ClearUserFromRole()
+		return nil
+	}
 	return fmt.Errorf("unknown CoreUser unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *CoreUserMutation) ResetEdge(name string) error {
+	switch name {
+	case coreuser.EdgeUserFromRole:
+		m.ResetUserFromRole()
+		return nil
+	}
 	return fmt.Errorf("unknown CoreUser edge %s", name)
 }
