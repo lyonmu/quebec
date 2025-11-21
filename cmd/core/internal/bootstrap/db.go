@@ -12,7 +12,6 @@ import (
 	_ "github.com/lyonmu/quebec/cmd/core/internal/ent/runtime"
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
 	"github.com/lyonmu/quebec/pkg/config"
-	"github.com/lyonmu/quebec/pkg/tools"
 )
 
 func InitMySQL(cfg config.MySQLConfig) error {
@@ -33,9 +32,6 @@ func InitMySQL(cfg config.MySQLConfig) error {
 		return openErr
 	}
 	global.EntClient = client
-
-	// 注册全局时间戳 hooks
-	tools.RegisterTimeHooks(client)
 
 	if createErr := client.Schema.Create(context.Background(), migrate.WithForeignKeys(false)); createErr != nil {
 		global.Logger.Sugar().Error("failed to create mysql schema: %v", createErr)

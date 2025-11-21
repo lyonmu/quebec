@@ -12,9 +12,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/lyonmu/quebec/cmd/core/internal/common"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coredatarelationship"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
-	"github.com/lyonmu/quebec/pkg/common"
+	"github.com/lyonmu/quebec/pkg/constant"
 )
 
 // CoreMenuCreate is the builder for creating a CoreMenu entity.
@@ -152,13 +153,13 @@ func (_c *CoreMenuCreate) SetNillableParentID(v *string) *CoreMenuCreate {
 }
 
 // SetStatus sets the "status" field.
-func (_c *CoreMenuCreate) SetStatus(v common.YesOrNo) *CoreMenuCreate {
+func (_c *CoreMenuCreate) SetStatus(v constant.YesOrNo) *CoreMenuCreate {
 	_c.mutation.SetStatus(v)
 	return _c
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (_c *CoreMenuCreate) SetNillableStatus(v *common.YesOrNo) *CoreMenuCreate {
+func (_c *CoreMenuCreate) SetNillableStatus(v *constant.YesOrNo) *CoreMenuCreate {
 	if v != nil {
 		_c.SetStatus(*v)
 	}
@@ -674,7 +675,7 @@ func (u *CoreMenuUpsert) ClearParentID() *CoreMenuUpsert {
 }
 
 // SetStatus sets the "status" field.
-func (u *CoreMenuUpsert) SetStatus(v common.YesOrNo) *CoreMenuUpsert {
+func (u *CoreMenuUpsert) SetStatus(v constant.YesOrNo) *CoreMenuUpsert {
 	u.Set(coremenu.FieldStatus, v)
 	return u
 }
@@ -686,7 +687,7 @@ func (u *CoreMenuUpsert) UpdateStatus() *CoreMenuUpsert {
 }
 
 // AddStatus adds v to the "status" field.
-func (u *CoreMenuUpsert) AddStatus(v common.YesOrNo) *CoreMenuUpsert {
+func (u *CoreMenuUpsert) AddStatus(v constant.YesOrNo) *CoreMenuUpsert {
 	u.Add(coremenu.FieldStatus, v)
 	return u
 }
@@ -960,14 +961,14 @@ func (u *CoreMenuUpsertOne) ClearParentID() *CoreMenuUpsertOne {
 }
 
 // SetStatus sets the "status" field.
-func (u *CoreMenuUpsertOne) SetStatus(v common.YesOrNo) *CoreMenuUpsertOne {
+func (u *CoreMenuUpsertOne) SetStatus(v constant.YesOrNo) *CoreMenuUpsertOne {
 	return u.Update(func(s *CoreMenuUpsert) {
 		s.SetStatus(v)
 	})
 }
 
 // AddStatus adds v to the "status" field.
-func (u *CoreMenuUpsertOne) AddStatus(v common.YesOrNo) *CoreMenuUpsertOne {
+func (u *CoreMenuUpsertOne) AddStatus(v constant.YesOrNo) *CoreMenuUpsertOne {
 	return u.Update(func(s *CoreMenuUpsert) {
 		s.AddStatus(v)
 	})
@@ -1423,14 +1424,14 @@ func (u *CoreMenuUpsertBulk) ClearParentID() *CoreMenuUpsertBulk {
 }
 
 // SetStatus sets the "status" field.
-func (u *CoreMenuUpsertBulk) SetStatus(v common.YesOrNo) *CoreMenuUpsertBulk {
+func (u *CoreMenuUpsertBulk) SetStatus(v constant.YesOrNo) *CoreMenuUpsertBulk {
 	return u.Update(func(s *CoreMenuUpsert) {
 		s.SetStatus(v)
 	})
 }
 
 // AddStatus adds v to the "status" field.
-func (u *CoreMenuUpsertBulk) AddStatus(v common.YesOrNo) *CoreMenuUpsertBulk {
+func (u *CoreMenuUpsertBulk) AddStatus(v constant.YesOrNo) *CoreMenuUpsertBulk {
 	return u.Update(func(s *CoreMenuUpsert) {
 		s.AddStatus(v)
 	})

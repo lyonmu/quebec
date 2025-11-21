@@ -11,10 +11,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/lyonmu/quebec/cmd/core/internal/common"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coredatarelationship"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/predicate"
-	"github.com/lyonmu/quebec/pkg/common"
+	"github.com/lyonmu/quebec/pkg/constant"
 )
 
 // CoreMenuUpdate is the builder for updating CoreMenu entities.
@@ -192,14 +193,14 @@ func (_u *CoreMenuUpdate) ClearParentID() *CoreMenuUpdate {
 }
 
 // SetStatus sets the "status" field.
-func (_u *CoreMenuUpdate) SetStatus(v common.YesOrNo) *CoreMenuUpdate {
+func (_u *CoreMenuUpdate) SetStatus(v constant.YesOrNo) *CoreMenuUpdate {
 	_u.mutation.ResetStatus()
 	_u.mutation.SetStatus(v)
 	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (_u *CoreMenuUpdate) SetNillableStatus(v *common.YesOrNo) *CoreMenuUpdate {
+func (_u *CoreMenuUpdate) SetNillableStatus(v *constant.YesOrNo) *CoreMenuUpdate {
 	if v != nil {
 		_u.SetStatus(*v)
 	}
@@ -207,7 +208,7 @@ func (_u *CoreMenuUpdate) SetNillableStatus(v *common.YesOrNo) *CoreMenuUpdate {
 }
 
 // AddStatus adds value to the "status" field.
-func (_u *CoreMenuUpdate) AddStatus(v common.YesOrNo) *CoreMenuUpdate {
+func (_u *CoreMenuUpdate) AddStatus(v constant.YesOrNo) *CoreMenuUpdate {
 	_u.mutation.AddStatus(v)
 	return _u
 }
@@ -785,14 +786,14 @@ func (_u *CoreMenuUpdateOne) ClearParentID() *CoreMenuUpdateOne {
 }
 
 // SetStatus sets the "status" field.
-func (_u *CoreMenuUpdateOne) SetStatus(v common.YesOrNo) *CoreMenuUpdateOne {
+func (_u *CoreMenuUpdateOne) SetStatus(v constant.YesOrNo) *CoreMenuUpdateOne {
 	_u.mutation.ResetStatus()
 	_u.mutation.SetStatus(v)
 	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (_u *CoreMenuUpdateOne) SetNillableStatus(v *common.YesOrNo) *CoreMenuUpdateOne {
+func (_u *CoreMenuUpdateOne) SetNillableStatus(v *constant.YesOrNo) *CoreMenuUpdateOne {
 	if v != nil {
 		_u.SetStatus(*v)
 	}
@@ -800,7 +801,7 @@ func (_u *CoreMenuUpdateOne) SetNillableStatus(v *common.YesOrNo) *CoreMenuUpdat
 }
 
 // AddStatus adds value to the "status" field.
-func (_u *CoreMenuUpdateOne) AddStatus(v common.YesOrNo) *CoreMenuUpdateOne {
+func (_u *CoreMenuUpdateOne) AddStatus(v constant.YesOrNo) *CoreMenuUpdateOne {
 	_u.mutation.AddStatus(v)
 	return _u
 }

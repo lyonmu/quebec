@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
+	"github.com/lyonmu/quebec/pkg/constant"
 )
 
 // 角色信息表
@@ -29,7 +30,7 @@ type CoreRole struct {
 	// 角色备注
 	Remark string `json:"remark,omitempty"`
 	// 角色状态 [1: 启用, 2: 禁用]
-	Status int8 `json:"status,omitempty"`
+	Status constant.YesOrNo `json:"status,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CoreRoleQuery when eager-loading is set.
 	Edges        CoreRoleEdges `json:"-" gorm:"-"`
@@ -132,7 +133,7 @@ func (_m *CoreRole) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
-				_m.Status = int8(value.Int64)
+				_m.Status = constant.YesOrNo(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])

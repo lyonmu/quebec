@@ -7,7 +7,7 @@ import (
 	"github.com/lyonmu/quebec/cmd/core/internal/ent"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
-	"github.com/lyonmu/quebec/pkg/common"
+	"github.com/lyonmu/quebec/pkg/constant"
 )
 
 func InitRole(client *ent.Client) error {
@@ -23,10 +23,11 @@ func InitRole(client *ent.Client) error {
 		global.Logger.Info("core_role表数据无需初始化")
 	} else {
 		roles, err := client.CoreRole.CreateBulk(
-			client.CoreRole.Create().SetID("1").SetName("system").SetRemark("系统管理员").SetStatus(int8(common.Yes)),
-			client.CoreRole.Create().SetID("2").SetName("operations").SetRemark("运营管理员").SetStatus(int8(common.Yes)),
-			client.CoreRole.Create().SetID("3").SetName("guest").SetRemark("访客").SetStatus(int8(common.Yes)),
-			client.CoreRole.Create().SetID("4").SetName("user").SetRemark("普通用户").SetStatus(int8(common.Yes)),
+			client.CoreRole.Create().
+				SetID("1").
+				SetName("system").
+				SetRemark("system").
+				SetStatus(constant.Yes),
 		).Save(ctx)
 		if err != nil {
 			return err

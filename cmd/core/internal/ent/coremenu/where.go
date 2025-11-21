@@ -7,8 +7,9 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/lyonmu/quebec/cmd/core/internal/common"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/predicate"
-	"github.com/lyonmu/quebec/pkg/common"
+	"github.com/lyonmu/quebec/pkg/constant"
 )
 
 // ID filters vertices based on their ID field.
@@ -113,7 +114,7 @@ func ParentID(v string) predicate.CoreMenu {
 }
 
 // Status applies equality check predicate on the "status" field. It's identical to StatusEQ.
-func Status(v common.YesOrNo) predicate.CoreMenu {
+func Status(v constant.YesOrNo) predicate.CoreMenu {
 	vc := int8(v)
 	return predicate.CoreMenu(sql.FieldEQ(FieldStatus, vc))
 }
@@ -673,19 +674,19 @@ func ParentIDContainsFold(v string) predicate.CoreMenu {
 }
 
 // StatusEQ applies the EQ predicate on the "status" field.
-func StatusEQ(v common.YesOrNo) predicate.CoreMenu {
+func StatusEQ(v constant.YesOrNo) predicate.CoreMenu {
 	vc := int8(v)
 	return predicate.CoreMenu(sql.FieldEQ(FieldStatus, vc))
 }
 
 // StatusNEQ applies the NEQ predicate on the "status" field.
-func StatusNEQ(v common.YesOrNo) predicate.CoreMenu {
+func StatusNEQ(v constant.YesOrNo) predicate.CoreMenu {
 	vc := int8(v)
 	return predicate.CoreMenu(sql.FieldNEQ(FieldStatus, vc))
 }
 
 // StatusIn applies the In predicate on the "status" field.
-func StatusIn(vs ...common.YesOrNo) predicate.CoreMenu {
+func StatusIn(vs ...constant.YesOrNo) predicate.CoreMenu {
 	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = int8(vs[i])
@@ -694,7 +695,7 @@ func StatusIn(vs ...common.YesOrNo) predicate.CoreMenu {
 }
 
 // StatusNotIn applies the NotIn predicate on the "status" field.
-func StatusNotIn(vs ...common.YesOrNo) predicate.CoreMenu {
+func StatusNotIn(vs ...constant.YesOrNo) predicate.CoreMenu {
 	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = int8(vs[i])
@@ -703,25 +704,25 @@ func StatusNotIn(vs ...common.YesOrNo) predicate.CoreMenu {
 }
 
 // StatusGT applies the GT predicate on the "status" field.
-func StatusGT(v common.YesOrNo) predicate.CoreMenu {
+func StatusGT(v constant.YesOrNo) predicate.CoreMenu {
 	vc := int8(v)
 	return predicate.CoreMenu(sql.FieldGT(FieldStatus, vc))
 }
 
 // StatusGTE applies the GTE predicate on the "status" field.
-func StatusGTE(v common.YesOrNo) predicate.CoreMenu {
+func StatusGTE(v constant.YesOrNo) predicate.CoreMenu {
 	vc := int8(v)
 	return predicate.CoreMenu(sql.FieldGTE(FieldStatus, vc))
 }
 
 // StatusLT applies the LT predicate on the "status" field.
-func StatusLT(v common.YesOrNo) predicate.CoreMenu {
+func StatusLT(v constant.YesOrNo) predicate.CoreMenu {
 	vc := int8(v)
 	return predicate.CoreMenu(sql.FieldLT(FieldStatus, vc))
 }
 
 // StatusLTE applies the LTE predicate on the "status" field.
-func StatusLTE(v common.YesOrNo) predicate.CoreMenu {
+func StatusLTE(v constant.YesOrNo) predicate.CoreMenu {
 	vc := int8(v)
 	return predicate.CoreMenu(sql.FieldLTE(FieldStatus, vc))
 }

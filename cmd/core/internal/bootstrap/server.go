@@ -3,13 +3,13 @@ package bootstrap
 import (
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
 	"github.com/lyonmu/quebec/cmd/core/internal/router"
-	"github.com/lyonmu/quebec/pkg/common"
+	"github.com/lyonmu/quebec/pkg/constant"
 	"github.com/lyonmu/quebec/pkg/tools"
 )
 
 func InitServer() error {
 
-	grpcServer, err := tools.NewGRPCServer(string(common.ModuleNameCore))
+	grpcServer, err := tools.NewGRPCServer(string(constant.ModuleNameCore))
 	if err != nil {
 		return err
 	}

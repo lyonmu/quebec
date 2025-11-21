@@ -9,8 +9,9 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/lyonmu/quebec/cmd/core/internal/common"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
-	"github.com/lyonmu/quebec/pkg/common"
+	"github.com/lyonmu/quebec/pkg/constant"
 )
 
 // 菜单信息表
@@ -38,7 +39,7 @@ type CoreMenu struct {
 	// 父菜单ID
 	ParentID string `json:"parent_id,omitempty"`
 	// 菜单状态 [1: 启用, 2: 禁用]
-	Status common.YesOrNo `json:"status,omitempty"`
+	Status constant.YesOrNo `json:"status,omitempty"`
 	// 菜单组件
 	Component string `json:"component,omitempty"`
 	// 菜单备注
@@ -182,7 +183,7 @@ func (_m *CoreMenu) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
-				_m.Status = common.YesOrNo(value.Int64)
+				_m.Status = constant.YesOrNo(value.Int64)
 			}
 		case coremenu.FieldComponent:
 			if value, ok := values[i].(*sql.NullString); !ok {

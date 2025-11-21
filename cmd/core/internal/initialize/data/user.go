@@ -4,16 +4,18 @@ import (
 	"context"
 	"fmt"
 
-	corecommon "github.com/lyonmu/quebec/cmd/core/internal/common"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
-	"github.com/lyonmu/quebec/pkg/common"
+	"github.com/lyonmu/quebec/pkg/constant"
 	"github.com/lyonmu/quebec/pkg/tools/encrypt"
 )
 
 func InitUser(client *ent.Client) error {
 	ctx := context.Background()
+
+	username, _ := encrypt.HashWithBcryptBytes(encrypt.HashWithSHA256Bytes([]byte("system")))
+	password, _ := encrypt.HashWithBcryptBytes(encrypt.HashWithSHA256Bytes([]byte("Quebec@123456")))
 
 	exists, err := client.CoreUser.Query().Where(coreuser.DeletedAtIsNil()).Exist(ctx)
 	if err != nil {
@@ -24,18 +26,14 @@ func InitUser(client *ent.Client) error {
 		global.Logger.Info("core_user表数据无需初始化")
 	} else {
 		users, err := client.CoreUser.CreateBulk(
-			client.CoreUser.Create().SetID("1").SetUsername(encrypt.HashWithSHA256String("system_1")).SetPassword(corecommon.DefaultPassword).SetNickname("系统管理员1").SetStatus(int8(common.Yes)).SetRemark("系统管理员1").SetRoleID("1"),
-			client.CoreUser.Create().SetID("2").SetUsername(encrypt.HashWithSHA256String("system_2")).SetPassword(corecommon.DefaultPassword).SetNickname("系统管理员2").SetStatus(int8(common.Yes)).SetRemark("系统管理员2").SetRoleID("1"),
-			client.CoreUser.Create().SetID("3").SetUsername(encrypt.HashWithSHA256String("system_3")).SetPassword(corecommon.DefaultPassword).SetNickname("系统管理员3").SetStatus(int8(common.Yes)).SetRemark("系统管理员3").SetRoleID("1"),
-			client.CoreUser.Create().SetID("4").SetUsername(encrypt.HashWithSHA256String("operations_1")).SetPassword(corecommon.DefaultPassword).SetNickname("运营管理员1").SetStatus(int8(common.Yes)).SetRemark("运营管理员1").SetRoleID("2"),
-			client.CoreUser.Create().SetID("5").SetUsername(encrypt.HashWithSHA256String("operations_2")).SetPassword(corecommon.DefaultPassword).SetNickname("运营管理员2").SetStatus(int8(common.Yes)).SetRemark("运营管理员2").SetRoleID("2"),
-			client.CoreUser.Create().SetID("6").SetUsername(encrypt.HashWithSHA256String("operations_3")).SetPassword(corecommon.DefaultPassword).SetNickname("运营管理员3").SetStatus(int8(common.Yes)).SetRemark("运营管理员3").SetRoleID("2"),
-			client.CoreUser.Create().SetID("7").SetUsername(encrypt.HashWithSHA256String("guest_1")).SetPassword(corecommon.DefaultPassword).SetNickname("访客1").SetStatus(int8(common.Yes)).SetRemark("访客1").SetRoleID("3"),
-			client.CoreUser.Create().SetID("8").SetUsername(encrypt.HashWithSHA256String("guest_2")).SetPassword(corecommon.DefaultPassword).SetNickname("访客2").SetStatus(int8(common.Yes)).SetRemark("访客2").SetRoleID("3"),
-			client.CoreUser.Create().SetID("9").SetUsername(encrypt.HashWithSHA256String("guest_3")).SetPassword(corecommon.DefaultPassword).SetNickname("访客3").SetStatus(int8(common.Yes)).SetRemark("访客3").SetRoleID("3"),
-			client.CoreUser.Create().SetID("10").SetUsername(encrypt.HashWithSHA256String("user_1")).SetPassword(corecommon.DefaultPassword).SetNickname("普通用户1").SetStatus(int8(common.Yes)).SetRemark("普通用户1").SetRoleID("4"),
-			client.CoreUser.Create().SetID("11").SetUsername(encrypt.HashWithSHA256String("user_2")).SetPassword(corecommon.DefaultPassword).SetNickname("普通用户2").SetStatus(int8(common.Yes)).SetRemark("普通用户2").SetRoleID("4"),
-			client.CoreUser.Create().SetID("12").SetUsername(encrypt.HashWithSHA256String("user_3")).SetPassword(corecommon.DefaultPassword).SetNickname("普通用户3").SetStatus(int8(common.Yes)).SetRemark("普通用户3").SetRoleID("4"),
+			client.CoreUser.Create().
+				SetID("1").
+				SetUsername(string(username)).
+				SetPassword(string(password)).
+				SetNickname("system").
+				SetStatus(constant.Yes).
+				SetRemark("system").
+				SetRoleID("1"),
 		).Save(ctx)
 		if err != nil {
 			return err

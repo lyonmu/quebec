@@ -8,7 +8,8 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/lyonmu/quebec/pkg/common"
+	"github.com/lyonmu/quebec/cmd/core/internal/common"
+	"github.com/lyonmu/quebec/pkg/constant"
 )
 
 const (
@@ -110,7 +111,7 @@ var (
 	// DefaultOrder holds the default value on creation for the "order" field.
 	DefaultOrder int8
 	// DefaultStatus holds the default value on creation for the "status" field.
-	DefaultStatus common.YesOrNo
+	DefaultStatus constant.YesOrNo
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.

@@ -7,7 +7,7 @@ import (
 	"github.com/alecthomas/kong"
 	"github.com/lyonmu/quebec/cmd/core/internal/bootstrap"
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
-	"github.com/lyonmu/quebec/pkg/common"
+	"github.com/lyonmu/quebec/pkg/constant"
 	"github.com/prometheus/common/version"
 )
 
@@ -31,8 +31,8 @@ import (
 
 func main() {
 	kong.Parse(&global.Cfg,
-		kong.Name(string(common.ModuleNameCore)),
-		kong.Description(string(common.ModuleNameCore)),
+		kong.Name(string(constant.ModuleNameCore)),
+		kong.Description(string(constant.ModuleNameCore)),
 		kong.UsageOnError(),
 		kong.HelpOptions{
 			Compact: true,
@@ -40,7 +40,7 @@ func main() {
 		},
 	)
 	if global.Cfg.Version {
-		fmt.Println(version.Print(string(common.ModuleNameCore)))
+		fmt.Println(version.Print(string(constant.ModuleNameCore)))
 		os.Exit(0)
 	}
 	bootstrap.Start()

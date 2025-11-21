@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
+	"github.com/lyonmu/quebec/pkg/constant"
 )
 
 // 用户信息表
@@ -34,7 +35,7 @@ type CoreUser struct {
 	// 昵称
 	Nickname string `json:"nickname,omitempty"`
 	// 用户状态 [1: 启用, 2: 禁用]
-	Status int8 `json:"status,omitempty"`
+	Status constant.YesOrNo `json:"status,omitempty"`
 	// 角色ID
 	RoleID string `json:"role_id,omitempty"`
 	// 用户备注
@@ -144,7 +145,7 @@ func (_m *CoreUser) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
-				_m.Status = int8(value.Int64)
+				_m.Status = constant.YesOrNo(value.Int64)
 			}
 		case coreuser.FieldRoleID:
 			if value, ok := values[i].(*sql.NullString); !ok {

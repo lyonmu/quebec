@@ -8,8 +8,9 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	corecommon "github.com/lyonmu/quebec/cmd/core/internal/common"
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
-	"github.com/lyonmu/quebec/pkg/common"
+	"github.com/lyonmu/quebec/pkg/constant"
 	"github.com/lyonmu/quebec/pkg/tools"
 )
 
@@ -21,7 +22,7 @@ type CoreDataRelationship struct {
 // Fields of the CoreDataRelationship.
 func (CoreDataRelationship) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int8("data_relationship_type").GoType(common.DataRelationshipType(1)).Optional().Comment("数据关系类型"),
+		field.Int8("data_relationship_type").GoType(corecommon.DataRelationshipType(1)).Optional().Comment("数据关系类型"),
 		field.String("menu_id").Optional().Comment("菜单ID"),
 		field.String("role_id").Optional().Comment("角色ID"),
 	}
@@ -52,7 +53,7 @@ func (CoreDataRelationship) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		schema.Comment("数据关系信息表"),
 		entsql.Annotation{
-			Table:        fmt.Sprintf("%s_core_data_relationship", common.ProjectName),
+			Table:        fmt.Sprintf("%s_core_data_relationship", constant.ProjectName),
 			Charset:      "utf8mb4",
 			Collation:    "utf8mb4_general_ci",
 			WithComments: &withCommentsEnabled,

@@ -1,7 +1,24 @@
 package common
 
 const (
-	DefaultPassword = "$2a$10$3AT93v00Zfn.PS.J46gue.X/AdHPWstT/16uDDtgTLW8g6/xE9wXi" // Quebec@123456 SHA256后再使用bcrypt加密
+	CaptchaCache = "quebec:core:captcha:cache:%s"
+)
 
-	CaptchaCache = "quebec:captcha:cache:%s"
+type MenuType int8
+
+const (
+	MenuTypeDirectory MenuType = 1
+	MenuTypeMenu      MenuType = 2
+	MenuTypeButton    MenuType = 3
+)
+
+type DataRelationshipType int8
+
+const (
+	// 角色与菜单
+	DataRelationshipTypeRoleToMenu DataRelationshipType = 1
+	// 用户与角色
+	DataRelationshipTypeUserToRole DataRelationshipType = 2
+	// 菜单与按钮
+	DataRelationshipTypeManyToMany DataRelationshipType = 3
 )

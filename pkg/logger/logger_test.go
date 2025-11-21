@@ -20,8 +20,8 @@ func TestZapLogger(t *testing.T) {
 			Path:    tempLogPath,
 			Module:  "test",
 			Level:   "debug",
-			Size:    1, // 1 MB for testing
-			Age:     1,
+			MaxSize: 1, // 1 MB for testing
+			MaxAge:  1,
 			Backups: 3,
 			Console: false,
 			Format:  "console",

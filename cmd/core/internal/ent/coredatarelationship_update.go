@@ -11,11 +11,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/lyonmu/quebec/cmd/core/internal/common"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coredatarelationship"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/predicate"
-	"github.com/lyonmu/quebec/pkg/common"
 )
 
 // CoreDataRelationshipUpdate is the builder for updating CoreDataRelationship entities.

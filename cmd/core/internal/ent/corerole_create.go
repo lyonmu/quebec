@@ -15,6 +15,7 @@ import (
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coredatarelationship"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
+	"github.com/lyonmu/quebec/pkg/constant"
 )
 
 // CoreRoleCreate is the builder for creating a CoreRole entity.
@@ -96,13 +97,13 @@ func (_c *CoreRoleCreate) SetNillableRemark(v *string) *CoreRoleCreate {
 }
 
 // SetStatus sets the "status" field.
-func (_c *CoreRoleCreate) SetStatus(v int8) *CoreRoleCreate {
+func (_c *CoreRoleCreate) SetStatus(v constant.YesOrNo) *CoreRoleCreate {
 	_c.mutation.SetStatus(v)
 	return _c
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (_c *CoreRoleCreate) SetNillableStatus(v *int8) *CoreRoleCreate {
+func (_c *CoreRoleCreate) SetNillableStatus(v *constant.YesOrNo) *CoreRoleCreate {
 	if v != nil {
 		_c.SetStatus(*v)
 	}
@@ -442,7 +443,7 @@ func (u *CoreRoleUpsert) ClearRemark() *CoreRoleUpsert {
 }
 
 // SetStatus sets the "status" field.
-func (u *CoreRoleUpsert) SetStatus(v int8) *CoreRoleUpsert {
+func (u *CoreRoleUpsert) SetStatus(v constant.YesOrNo) *CoreRoleUpsert {
 	u.Set(corerole.FieldStatus, v)
 	return u
 }
@@ -454,7 +455,7 @@ func (u *CoreRoleUpsert) UpdateStatus() *CoreRoleUpsert {
 }
 
 // AddStatus adds v to the "status" field.
-func (u *CoreRoleUpsert) AddStatus(v int8) *CoreRoleUpsert {
+func (u *CoreRoleUpsert) AddStatus(v constant.YesOrNo) *CoreRoleUpsert {
 	u.Add(corerole.FieldStatus, v)
 	return u
 }
@@ -594,14 +595,14 @@ func (u *CoreRoleUpsertOne) ClearRemark() *CoreRoleUpsertOne {
 }
 
 // SetStatus sets the "status" field.
-func (u *CoreRoleUpsertOne) SetStatus(v int8) *CoreRoleUpsertOne {
+func (u *CoreRoleUpsertOne) SetStatus(v constant.YesOrNo) *CoreRoleUpsertOne {
 	return u.Update(func(s *CoreRoleUpsert) {
 		s.SetStatus(v)
 	})
 }
 
 // AddStatus adds v to the "status" field.
-func (u *CoreRoleUpsertOne) AddStatus(v int8) *CoreRoleUpsertOne {
+func (u *CoreRoleUpsertOne) AddStatus(v constant.YesOrNo) *CoreRoleUpsertOne {
 	return u.Update(func(s *CoreRoleUpsert) {
 		s.AddStatus(v)
 	})
@@ -917,14 +918,14 @@ func (u *CoreRoleUpsertBulk) ClearRemark() *CoreRoleUpsertBulk {
 }
 
 // SetStatus sets the "status" field.
-func (u *CoreRoleUpsertBulk) SetStatus(v int8) *CoreRoleUpsertBulk {
+func (u *CoreRoleUpsertBulk) SetStatus(v constant.YesOrNo) *CoreRoleUpsertBulk {
 	return u.Update(func(s *CoreRoleUpsert) {
 		s.SetStatus(v)
 	})
 }
 
 // AddStatus adds v to the "status" field.
-func (u *CoreRoleUpsertBulk) AddStatus(v int8) *CoreRoleUpsertBulk {
+func (u *CoreRoleUpsertBulk) AddStatus(v constant.YesOrNo) *CoreRoleUpsertBulk {
 	return u.Update(func(s *CoreRoleUpsert) {
 		s.AddStatus(v)
 	})

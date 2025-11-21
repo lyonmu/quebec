@@ -9,10 +9,10 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/lyonmu/quebec/cmd/core/internal/common"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coredatarelationship"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
-	"github.com/lyonmu/quebec/pkg/common"
 )
 
 // 数据关系信息表

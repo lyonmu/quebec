@@ -23,9 +23,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/system/captcha": {
+        "/v1/system/captcha": {
             "get": {
-                "description": "获取验证码,返回包括随机数id,base64,验证码长度,是否开启验证码",
+                "description": "获取验证码,返回包括随机数id,base64,验证码长度",
                 "produces": [
                     "application/json"
                 ],

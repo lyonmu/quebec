@@ -17,8 +17,8 @@ type LogConfig struct {
 	Path    string `name:"path" env:"LOG_PATH" default:"/var/log" help:"日志文件路径" mapstructure:"path" yaml:"path" json:"path"`
 	Module  string `name:"module" env:"LOG_MODULE" default:"quebec" help:"模块名称" mapstructure:"module" yaml:"module" json:"module"`
 	Level   string `enum:"debug,info,warn,error" name:"level" env:"LOG_LEVEL" default:"info" help:"日志级别 [debug, info, warn, error]" mapstructure:"level" yaml:"level" json:"level"`
-	Size    int    `name:"size" env:"LOG_SIZE" default:"10" help:"日志文件大小[MB]" mapstructure:"size" yaml:"size" json:"size"`
-	Age     int    `name:"age" env:"LOG_AGE" default:"7" help:"日志文件保留天数[天]" mapstructure:"age" yaml:"age" json:"age"`
+	MaxSize int    `name:"max_size" env:"LOG_MAX_SIZE" default:"10" help:"日志文件大小[MB]" mapstructure:"max_size" yaml:"max_size" json:"max_size"`
+	MaxAge  int    `name:"max_age" env:"LOG_MAX_AGE" default:"7" help:"日志文件保留天数[天]" mapstructure:"max_age" yaml:"max_age" json:"max_age"`
 	Backups int    `name:"backups" env:"LOG_BACKUPS" default:"3" help:"日志文件保留数量" mapstructure:"backups" yaml:"backups" json:"backups"`
 	Console bool   `name:"console" env:"LOG_CONSOLE" default:"false" help:"是否开启控制台输出" mapstructure:"console" yaml:"console" json:"console"`
 	Format  string `enum:"console,json" name:"format" env:"LOG_FORMAT" default:"console" help:"日志输出类型" mapstructure:"format" yaml:"format" json:"format"`
@@ -97,8 +97,8 @@ func NewZapLogger(config LogConfig) *zap.Logger {
 
 	fileWriter := zapcore.AddSync(&lumberjack.Logger{
 		Filename:   logFileName,
-		MaxSize:    config.Size,
-		MaxAge:     config.Age,
+		MaxSize:    config.MaxSize,
+		MaxAge:     config.MaxAge,
 		MaxBackups: config.Backups,
 		Compress:   true,
 		LocalTime:  true,

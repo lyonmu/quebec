@@ -11,8 +11,9 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
-	"github.com/lyonmu/quebec/pkg/common"
+	"github.com/lyonmu/quebec/pkg/constant"
 	"github.com/lyonmu/quebec/pkg/tools"
+	corecommon "github.com/lyonmu/quebec/cmd/core/internal/common"
 )
 
 // CoreMenu holds the schema definition for the CoreMenu entity.
@@ -24,12 +25,12 @@ type CoreMenu struct {
 func (CoreMenu) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name").Optional().Comment("菜单名称"),
-		field.Int8("menu_type").GoType(common.MenuType(1)).Optional().Comment("菜单类型 [1: 目录, 2: 菜单, 3: 按钮]").Default(int8(common.MenuTypeDirectory)),
+		field.Int8("menu_type").GoType(corecommon.MenuType(1)).Optional().Comment("菜单类型 [1: 目录, 2: 菜单, 3: 按钮]").Default(int8(corecommon.MenuTypeDirectory)),
 		field.String("api_path").Optional().Comment("菜单API路径"),
 		field.String("api_path_method").Optional().Comment("菜单API方法"),
 		field.Int8("order").Optional().Comment("菜单排序").Default(1),
 		field.String("parent_id").Optional().Comment("父菜单ID"),
-		field.Int8("status").GoType(common.YesOrNo(1)).Optional().Comment("菜单状态 [1: 启用, 2: 禁用]").Default(int8(common.Yes)),
+		field.Int8("status").GoType(constant.YesOrNo(1)).Optional().Comment("菜单状态 [1: 启用, 2: 禁用]").Default(int8(constant.Yes)),
 		field.String("component").Optional().Comment("菜单组件"),
 		field.String("remark").SchemaType(map[string]string{dialect.MySQL: "text", dialect.SQLite: "text", dialect.Postgres: "text"}).Optional().Comment("菜单备注"),
 	}
@@ -67,7 +68,7 @@ func (CoreMenu) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		schema.Comment("菜单信息表"),
 		entsql.Annotation{
-			Table:        fmt.Sprintf("%s_core_menu", common.ProjectName),
+			Table:        fmt.Sprintf("%s_core_menu", constant.ProjectName),
 			Charset:      "utf8mb4",
 			Collation:    "utf8mb4_general_ci",
 			WithComments: &withCommentsEnabled,

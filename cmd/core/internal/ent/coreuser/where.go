@@ -8,6 +8,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/predicate"
+	"github.com/lyonmu/quebec/pkg/constant"
 )
 
 // ID filters vertices based on their ID field.
@@ -101,8 +102,9 @@ func Nickname(v string) predicate.CoreUser {
 }
 
 // Status applies equality check predicate on the "status" field. It's identical to StatusEQ.
-func Status(v int8) predicate.CoreUser {
-	return predicate.CoreUser(sql.FieldEQ(FieldStatus, v))
+func Status(v constant.YesOrNo) predicate.CoreUser {
+	vc := int8(v)
+	return predicate.CoreUser(sql.FieldEQ(FieldStatus, vc))
 }
 
 // RoleID applies equality check predicate on the "role_id" field. It's identical to RoleIDEQ.
@@ -546,43 +548,57 @@ func NicknameContainsFold(v string) predicate.CoreUser {
 }
 
 // StatusEQ applies the EQ predicate on the "status" field.
-func StatusEQ(v int8) predicate.CoreUser {
-	return predicate.CoreUser(sql.FieldEQ(FieldStatus, v))
+func StatusEQ(v constant.YesOrNo) predicate.CoreUser {
+	vc := int8(v)
+	return predicate.CoreUser(sql.FieldEQ(FieldStatus, vc))
 }
 
 // StatusNEQ applies the NEQ predicate on the "status" field.
-func StatusNEQ(v int8) predicate.CoreUser {
-	return predicate.CoreUser(sql.FieldNEQ(FieldStatus, v))
+func StatusNEQ(v constant.YesOrNo) predicate.CoreUser {
+	vc := int8(v)
+	return predicate.CoreUser(sql.FieldNEQ(FieldStatus, vc))
 }
 
 // StatusIn applies the In predicate on the "status" field.
-func StatusIn(vs ...int8) predicate.CoreUser {
-	return predicate.CoreUser(sql.FieldIn(FieldStatus, vs...))
+func StatusIn(vs ...constant.YesOrNo) predicate.CoreUser {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = int8(vs[i])
+	}
+	return predicate.CoreUser(sql.FieldIn(FieldStatus, v...))
 }
 
 // StatusNotIn applies the NotIn predicate on the "status" field.
-func StatusNotIn(vs ...int8) predicate.CoreUser {
-	return predicate.CoreUser(sql.FieldNotIn(FieldStatus, vs...))
+func StatusNotIn(vs ...constant.YesOrNo) predicate.CoreUser {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = int8(vs[i])
+	}
+	return predicate.CoreUser(sql.FieldNotIn(FieldStatus, v...))
 }
 
 // StatusGT applies the GT predicate on the "status" field.
-func StatusGT(v int8) predicate.CoreUser {
-	return predicate.CoreUser(sql.FieldGT(FieldStatus, v))
+func StatusGT(v constant.YesOrNo) predicate.CoreUser {
+	vc := int8(v)
+	return predicate.CoreUser(sql.FieldGT(FieldStatus, vc))
 }
 
 // StatusGTE applies the GTE predicate on the "status" field.
-func StatusGTE(v int8) predicate.CoreUser {
-	return predicate.CoreUser(sql.FieldGTE(FieldStatus, v))
+func StatusGTE(v constant.YesOrNo) predicate.CoreUser {
+	vc := int8(v)
+	return predicate.CoreUser(sql.FieldGTE(FieldStatus, vc))
 }
 
 // StatusLT applies the LT predicate on the "status" field.
-func StatusLT(v int8) predicate.CoreUser {
-	return predicate.CoreUser(sql.FieldLT(FieldStatus, v))
+func StatusLT(v constant.YesOrNo) predicate.CoreUser {
+	vc := int8(v)
+	return predicate.CoreUser(sql.FieldLT(FieldStatus, vc))
 }
 
 // StatusLTE applies the LTE predicate on the "status" field.
-func StatusLTE(v int8) predicate.CoreUser {
-	return predicate.CoreUser(sql.FieldLTE(FieldStatus, v))
+func StatusLTE(v constant.YesOrNo) predicate.CoreUser {
+	vc := int8(v)
+	return predicate.CoreUser(sql.FieldLTE(FieldStatus, vc))
 }
 
 // StatusIsNil applies the IsNil predicate on the "status" field.

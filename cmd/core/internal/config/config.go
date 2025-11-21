@@ -14,7 +14,6 @@ type CoreConfig struct {
 
 type Config struct {
 	Version bool               `short:"v" long:"version" help:"版本信息" default:"false" mapstructure:"version" json:"version" yaml:"version"`
-	Host    string             `long:"host" env:"HOST" help:"服务IP" default:"127.0.0.1" mapstructure:"host" json:"host" yaml:"host"`
 	Log     log.LogConfig      `embed:"" prefix:"log." mapstructure:"log" json:"log" yaml:"log"`
 	MySQL   config.MySQLConfig `embed:"" prefix:"mysql." mapstructure:"mysql" json:"mysql" yaml:"mysql"`
 	Redis   config.RedisConfig `embed:"" prefix:"redis." mapstructure:"redis" json:"redis" yaml:"redis"`

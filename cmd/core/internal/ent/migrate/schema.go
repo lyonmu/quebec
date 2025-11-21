@@ -148,7 +148,7 @@ var (
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
 		{Name: "name", Type: field.TypeString, Nullable: true, Comment: "角色名称"},
 		{Name: "remark", Type: field.TypeString, Nullable: true, Comment: "角色备注"},
-		{Name: "status", Type: field.TypeInt8, Nullable: true, Comment: "角色状态 [1: 启用, 2: 禁用]", Default: 2},
+		{Name: "status", Type: field.TypeInt8, Nullable: true, Comment: "角色状态 [1: 启用, 2: 禁用]", Default: 1},
 	}
 	// QuebecCoreRoleTable holds the schema information for the "quebec_core_role" table.
 	QuebecCoreRoleTable = &schema.Table{

@@ -11,12 +11,13 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/lyonmu/quebec/cmd/core/internal/common"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coredatarelationship"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/predicate"
-	"github.com/lyonmu/quebec/pkg/common"
+	"github.com/lyonmu/quebec/pkg/constant"
 )
 
 const (
@@ -894,8 +895,8 @@ type CoreMenuMutation struct {
 	api_path_method                  *string
 	_order                           *int8
 	add_order                        *int8
-	status                           *common.YesOrNo
-	addstatus                        *common.YesOrNo
+	status                           *constant.YesOrNo
+	addstatus                        *constant.YesOrNo
 	component                        *string
 	remark                           *string
 	clearedFields                    map[string]struct{}
@@ -1474,13 +1475,13 @@ func (m *CoreMenuMutation) ResetParentID() {
 }
 
 // SetStatus sets the "status" field.
-func (m *CoreMenuMutation) SetStatus(con common.YesOrNo) {
+func (m *CoreMenuMutation) SetStatus(con constant.YesOrNo) {
 	m.status = &con
 	m.addstatus = nil
 }
 
 // Status returns the value of the "status" field in the mutation.
-func (m *CoreMenuMutation) Status() (r common.YesOrNo, exists bool) {
+func (m *CoreMenuMutation) Status() (r constant.YesOrNo, exists bool) {
 	v := m.status
 	if v == nil {
 		return
@@ -1491,7 +1492,7 @@ func (m *CoreMenuMutation) Status() (r common.YesOrNo, exists bool) {
 // OldStatus returns the old "status" field's value of the CoreMenu entity.
 // If the CoreMenu object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CoreMenuMutation) OldStatus(ctx context.Context) (v common.YesOrNo, err error) {
+func (m *CoreMenuMutation) OldStatus(ctx context.Context) (v constant.YesOrNo, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
 	}
@@ -1506,7 +1507,7 @@ func (m *CoreMenuMutation) OldStatus(ctx context.Context) (v common.YesOrNo, err
 }
 
 // AddStatus adds con to the "status" field.
-func (m *CoreMenuMutation) AddStatus(con common.YesOrNo) {
+func (m *CoreMenuMutation) AddStatus(con constant.YesOrNo) {
 	if m.addstatus != nil {
 		*m.addstatus += con
 	} else {
@@ -1515,7 +1516,7 @@ func (m *CoreMenuMutation) AddStatus(con common.YesOrNo) {
 }
 
 // AddedStatus returns the value that was added to the "status" field in this mutation.
-func (m *CoreMenuMutation) AddedStatus() (r common.YesOrNo, exists bool) {
+func (m *CoreMenuMutation) AddedStatus() (r constant.YesOrNo, exists bool) {
 	v := m.addstatus
 	if v == nil {
 		return
@@ -1998,7 +1999,7 @@ func (m *CoreMenuMutation) SetField(name string, value ent.Value) error {
 		m.SetParentID(v)
 		return nil
 	case coremenu.FieldStatus:
-		v, ok := value.(common.YesOrNo)
+		v, ok := value.(constant.YesOrNo)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -2073,7 +2074,7 @@ func (m *CoreMenuMutation) AddField(name string, value ent.Value) error {
 		m.AddOrder(v)
 		return nil
 	case coremenu.FieldStatus:
-		v, ok := value.(common.YesOrNo)
+		v, ok := value.(constant.YesOrNo)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -2348,8 +2349,8 @@ type CoreRoleMutation struct {
 	deleted_at                       *time.Time
 	name                             *string
 	remark                           *string
-	status                           *int8
-	addstatus                        *int8
+	status                           *constant.YesOrNo
+	addstatus                        *constant.YesOrNo
 	clearedFields                    map[string]struct{}
 	role_to_user                     map[string]struct{}
 	removedrole_to_user              map[string]struct{}
@@ -2686,13 +2687,13 @@ func (m *CoreRoleMutation) ResetRemark() {
 }
 
 // SetStatus sets the "status" field.
-func (m *CoreRoleMutation) SetStatus(i int8) {
-	m.status = &i
+func (m *CoreRoleMutation) SetStatus(con constant.YesOrNo) {
+	m.status = &con
 	m.addstatus = nil
 }
 
 // Status returns the value of the "status" field in the mutation.
-func (m *CoreRoleMutation) Status() (r int8, exists bool) {
+func (m *CoreRoleMutation) Status() (r constant.YesOrNo, exists bool) {
 	v := m.status
 	if v == nil {
 		return
@@ -2703,7 +2704,7 @@ func (m *CoreRoleMutation) Status() (r int8, exists bool) {
 // OldStatus returns the old "status" field's value of the CoreRole entity.
 // If the CoreRole object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CoreRoleMutation) OldStatus(ctx context.Context) (v int8, err error) {
+func (m *CoreRoleMutation) OldStatus(ctx context.Context) (v constant.YesOrNo, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
 	}
@@ -2717,17 +2718,17 @@ func (m *CoreRoleMutation) OldStatus(ctx context.Context) (v int8, err error) {
 	return oldValue.Status, nil
 }
 
-// AddStatus adds i to the "status" field.
-func (m *CoreRoleMutation) AddStatus(i int8) {
+// AddStatus adds con to the "status" field.
+func (m *CoreRoleMutation) AddStatus(con constant.YesOrNo) {
 	if m.addstatus != nil {
-		*m.addstatus += i
+		*m.addstatus += con
 	} else {
-		m.addstatus = &i
+		m.addstatus = &con
 	}
 }
 
 // AddedStatus returns the value that was added to the "status" field in this mutation.
-func (m *CoreRoleMutation) AddedStatus() (r int8, exists bool) {
+func (m *CoreRoleMutation) AddedStatus() (r constant.YesOrNo, exists bool) {
 	v := m.addstatus
 	if v == nil {
 		return
@@ -3002,7 +3003,7 @@ func (m *CoreRoleMutation) SetField(name string, value ent.Value) error {
 		m.SetRemark(v)
 		return nil
 	case corerole.FieldStatus:
-		v, ok := value.(int8)
+		v, ok := value.(constant.YesOrNo)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -3039,7 +3040,7 @@ func (m *CoreRoleMutation) AddedField(name string) (ent.Value, bool) {
 func (m *CoreRoleMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	case corerole.FieldStatus:
-		v, ok := value.(int8)
+		v, ok := value.(constant.YesOrNo)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -3244,8 +3245,8 @@ type CoreUserMutation struct {
 	password              *string
 	email                 *string
 	nickname              *string
-	status                *int8
-	addstatus             *int8
+	status                *constant.YesOrNo
+	addstatus             *constant.YesOrNo
 	remark                *string
 	clearedFields         map[string]struct{}
 	user_from_role        *string
@@ -3677,13 +3678,13 @@ func (m *CoreUserMutation) ResetNickname() {
 }
 
 // SetStatus sets the "status" field.
-func (m *CoreUserMutation) SetStatus(i int8) {
-	m.status = &i
+func (m *CoreUserMutation) SetStatus(con constant.YesOrNo) {
+	m.status = &con
 	m.addstatus = nil
 }
 
 // Status returns the value of the "status" field in the mutation.
-func (m *CoreUserMutation) Status() (r int8, exists bool) {
+func (m *CoreUserMutation) Status() (r constant.YesOrNo, exists bool) {
 	v := m.status
 	if v == nil {
 		return
@@ -3694,7 +3695,7 @@ func (m *CoreUserMutation) Status() (r int8, exists bool) {
 // OldStatus returns the old "status" field's value of the CoreUser entity.
 // If the CoreUser object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CoreUserMutation) OldStatus(ctx context.Context) (v int8, err error) {
+func (m *CoreUserMutation) OldStatus(ctx context.Context) (v constant.YesOrNo, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
 	}
@@ -3708,17 +3709,17 @@ func (m *CoreUserMutation) OldStatus(ctx context.Context) (v int8, err error) {
 	return oldValue.Status, nil
 }
 
-// AddStatus adds i to the "status" field.
-func (m *CoreUserMutation) AddStatus(i int8) {
+// AddStatus adds con to the "status" field.
+func (m *CoreUserMutation) AddStatus(con constant.YesOrNo) {
 	if m.addstatus != nil {
-		*m.addstatus += i
+		*m.addstatus += con
 	} else {
-		m.addstatus = &i
+		m.addstatus = &con
 	}
 }
 
 // AddedStatus returns the value that was added to the "status" field in this mutation.
-func (m *CoreUserMutation) AddedStatus() (r int8, exists bool) {
+func (m *CoreUserMutation) AddedStatus() (r constant.YesOrNo, exists bool) {
 	v := m.addstatus
 	if v == nil {
 		return
@@ -4065,7 +4066,7 @@ func (m *CoreUserMutation) SetField(name string, value ent.Value) error {
 		m.SetNickname(v)
 		return nil
 	case coreuser.FieldStatus:
-		v, ok := value.(int8)
+		v, ok := value.(constant.YesOrNo)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -4116,7 +4117,7 @@ func (m *CoreUserMutation) AddedField(name string) (ent.Value, bool) {
 func (m *CoreUserMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	case coreuser.FieldStatus:
-		v, ok := value.(int8)
+		v, ok := value.(constant.YesOrNo)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

@@ -95,36 +95,6 @@ func (TimeMixin) Hooks() []ent.Hook {
 	}
 }
 
-// RegisterTimeHooks 注册全局时间戳 hooks 到 ent client
-// 这个函数应该在初始化 ent client 后调用
-// 注意：deleted_at 需要通过 Update 操作手动设置，不在此自动处理
-func RegisterTimeHooks(client interface {
-	Use(...ent.Hook)
-}) {
-	client.Use(
-		// 创建时设置 created_at 和 updated_at
-		func(next ent.Mutator) ent.Mutator {
-			return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-				if m.Op().Is(ent.OpCreate) {
-					now := time.Now()
-					_ = setTimeField(m, "created_at", now)
-					_ = setTimeField(m, "updated_at", now)
-				}
-				return next.Mutate(ctx, m)
-			})
-		},
-		// 更新时设置 updated_at
-		func(next ent.Mutator) ent.Mutator {
-			return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-				if m.Op().Is(ent.OpUpdate) || m.Op().Is(ent.OpUpdateOne) {
-					_ = setTimeField(m, "updated_at", time.Now())
-				}
-				return next.Mutate(ctx, m)
-			})
-		},
-	)
-}
-
 // setTimeField 安全地设置时间字段，如果字段不存在则忽略
 func setTimeField(m ent.Mutation, fieldName string, value time.Time) error {
 	if _, exists := m.Field(fieldName); !exists {

@@ -10,7 +10,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
-	"github.com/lyonmu/quebec/pkg/common"
+	"github.com/lyonmu/quebec/pkg/constant"
 	"github.com/lyonmu/quebec/pkg/tools"
 )
 
@@ -24,7 +24,7 @@ func (CoreRole) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name").Optional().Comment("角色名称"),
 		field.String("remark").Optional().Comment("角色备注"),
-		field.Int8("status").Optional().Comment("角色状态 [1: 启用, 2: 禁用]").Default(2),
+		field.Int8("status").Optional().GoType(constant.YesOrNo(1)).Optional().Comment("角色状态 [1: 启用, 2: 禁用]").Default(int8(constant.Yes)),
 	}
 }
 
@@ -57,7 +57,7 @@ func (CoreRole) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		schema.Comment("角色信息表"),
 		entsql.Annotation{
-			Table:        fmt.Sprintf("%s_core_role", common.ProjectName),
+			Table:        fmt.Sprintf("%s_core_role", constant.ProjectName),
 			Charset:      "utf8mb4",
 			Collation:    "utf8mb4_general_ci",
 			WithComments: &withCommentsEnabled,

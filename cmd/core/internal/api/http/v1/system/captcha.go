@@ -10,10 +10,10 @@ import (
 // Captcha
 // @Tags      系统管理
 // @Summary   获取验证码
-// @Description 获取验证码,返回包括随机数id,base64,验证码长度,是否开启验证码
+// @Description 获取验证码,返回包括随机数id,base64,验证码长度
 // @Produce      json
 // @Success   200  {object}  code.Response{code=number,data=response.CaptchaResponse,message=string}  "50000,success"
-// @Router    /system/captcha [get]
+// @Router    /v1/system/captcha [get]
 func (b *SystemV1ApiGroup) SystemCaptcha(c *gin.Context) {
 
 	id, b64s, _, err := global.CaptchaGenerator.Generate()

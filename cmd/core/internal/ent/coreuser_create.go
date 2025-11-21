@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
+	"github.com/lyonmu/quebec/pkg/constant"
 )
 
 // CoreUserCreate is the builder for creating a CoreUser entity.
@@ -123,13 +124,13 @@ func (_c *CoreUserCreate) SetNillableNickname(v *string) *CoreUserCreate {
 }
 
 // SetStatus sets the "status" field.
-func (_c *CoreUserCreate) SetStatus(v int8) *CoreUserCreate {
+func (_c *CoreUserCreate) SetStatus(v constant.YesOrNo) *CoreUserCreate {
 	_c.mutation.SetStatus(v)
 	return _c
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (_c *CoreUserCreate) SetNillableStatus(v *int8) *CoreUserCreate {
+func (_c *CoreUserCreate) SetNillableStatus(v *constant.YesOrNo) *CoreUserCreate {
 	if v != nil {
 		_c.SetStatus(*v)
 	}
@@ -519,7 +520,7 @@ func (u *CoreUserUpsert) ClearNickname() *CoreUserUpsert {
 }
 
 // SetStatus sets the "status" field.
-func (u *CoreUserUpsert) SetStatus(v int8) *CoreUserUpsert {
+func (u *CoreUserUpsert) SetStatus(v constant.YesOrNo) *CoreUserUpsert {
 	u.Set(coreuser.FieldStatus, v)
 	return u
 }
@@ -531,7 +532,7 @@ func (u *CoreUserUpsert) UpdateStatus() *CoreUserUpsert {
 }
 
 // AddStatus adds v to the "status" field.
-func (u *CoreUserUpsert) AddStatus(v int8) *CoreUserUpsert {
+func (u *CoreUserUpsert) AddStatus(v constant.YesOrNo) *CoreUserUpsert {
 	u.Add(coreuser.FieldStatus, v)
 	return u
 }
@@ -749,14 +750,14 @@ func (u *CoreUserUpsertOne) ClearNickname() *CoreUserUpsertOne {
 }
 
 // SetStatus sets the "status" field.
-func (u *CoreUserUpsertOne) SetStatus(v int8) *CoreUserUpsertOne {
+func (u *CoreUserUpsertOne) SetStatus(v constant.YesOrNo) *CoreUserUpsertOne {
 	return u.Update(func(s *CoreUserUpsert) {
 		s.SetStatus(v)
 	})
 }
 
 // AddStatus adds v to the "status" field.
-func (u *CoreUserUpsertOne) AddStatus(v int8) *CoreUserUpsertOne {
+func (u *CoreUserUpsertOne) AddStatus(v constant.YesOrNo) *CoreUserUpsertOne {
 	return u.Update(func(s *CoreUserUpsert) {
 		s.AddStatus(v)
 	})
@@ -1156,14 +1157,14 @@ func (u *CoreUserUpsertBulk) ClearNickname() *CoreUserUpsertBulk {
 }
 
 // SetStatus sets the "status" field.
-func (u *CoreUserUpsertBulk) SetStatus(v int8) *CoreUserUpsertBulk {
+func (u *CoreUserUpsertBulk) SetStatus(v constant.YesOrNo) *CoreUserUpsertBulk {
 	return u.Update(func(s *CoreUserUpsert) {
 		s.SetStatus(v)
 	})
 }
 
 // AddStatus adds v to the "status" field.
-func (u *CoreUserUpsertBulk) AddStatus(v int8) *CoreUserUpsertBulk {
+func (u *CoreUserUpsertBulk) AddStatus(v constant.YesOrNo) *CoreUserUpsertBulk {
 	return u.Update(func(s *CoreUserUpsert) {
 		s.AddStatus(v)
 	})

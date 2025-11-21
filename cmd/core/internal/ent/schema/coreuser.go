@@ -11,7 +11,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
-	"github.com/lyonmu/quebec/pkg/common"
+	"github.com/lyonmu/quebec/pkg/constant"
 	"github.com/lyonmu/quebec/pkg/tools"
 )
 
@@ -27,7 +27,7 @@ func (CoreUser) Fields() []ent.Field {
 		field.String("password").SchemaType(map[string]string{dialect.MySQL: "text", dialect.SQLite: "text", dialect.Postgres: "text"}).Optional().Comment("密码"),
 		field.String("email").Optional().Comment("邮箱"),
 		field.String("nickname").SchemaType(map[string]string{dialect.MySQL: "text", dialect.SQLite: "text", dialect.Postgres: "text"}).Optional().Comment("昵称"),
-		field.Int8("status").Optional().Comment("用户状态 [1: 启用, 2: 禁用]").Default(1),
+		field.Int8("status").Optional().GoType(constant.YesOrNo(1)).Optional().Comment("用户状态 [1: 启用, 2: 禁用]").Default(int8(constant.Yes)),
 		field.String("role_id").Optional().Comment("角色ID"),
 		field.String("remark").SchemaType(map[string]string{dialect.MySQL: "text", dialect.SQLite: "text", dialect.Postgres: "text"}).Optional().Comment("用户备注"),
 	}
@@ -63,7 +63,7 @@ func (CoreUser) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		schema.Comment("用户信息表"),
 		entsql.Annotation{
-			Table:        fmt.Sprintf("%s_core_user", common.ProjectName),
+			Table:        fmt.Sprintf("%s_core_user", constant.ProjectName),
 			Charset:      "utf8mb4",
 			Collation:    "utf8mb4_general_ci",
 			WithComments: &withCommentsEnabled,

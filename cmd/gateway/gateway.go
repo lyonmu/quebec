@@ -6,14 +6,14 @@ import (
 
 	"github.com/alecthomas/kong"
 	"github.com/lyonmu/quebec/cmd/gateway/internal/global"
-	"github.com/lyonmu/quebec/pkg/common"
+	"github.com/lyonmu/quebec/pkg/constant"
 	"github.com/prometheus/common/version"
 )
 
 func main() {
 	kong.Parse(&global.Cfg,
-		kong.Name(string(common.ModuleNameGateway)),
-		kong.Description(string(common.ModuleNameGateway)),
+		kong.Name(string(constant.ModuleNameGateway)),
+		kong.Description(string(constant.ModuleNameGateway)),
 		kong.UsageOnError(),
 		kong.HelpOptions{
 			Compact: true,
@@ -21,7 +21,7 @@ func main() {
 		},
 	)
 	if global.Cfg.Version {
-		fmt.Println(version.Print(string(common.ModuleNameGateway)))
+		fmt.Println(version.Print(string(constant.ModuleNameGateway)))
 		os.Exit(0)
 	}
 

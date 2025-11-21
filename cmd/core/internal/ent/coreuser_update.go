@@ -14,6 +14,7 @@ import (
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/predicate"
+	"github.com/lyonmu/quebec/pkg/constant"
 )
 
 // CoreUserUpdate is the builder for updating CoreUser entities.
@@ -137,14 +138,14 @@ func (_u *CoreUserUpdate) ClearNickname() *CoreUserUpdate {
 }
 
 // SetStatus sets the "status" field.
-func (_u *CoreUserUpdate) SetStatus(v int8) *CoreUserUpdate {
+func (_u *CoreUserUpdate) SetStatus(v constant.YesOrNo) *CoreUserUpdate {
 	_u.mutation.ResetStatus()
 	_u.mutation.SetStatus(v)
 	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (_u *CoreUserUpdate) SetNillableStatus(v *int8) *CoreUserUpdate {
+func (_u *CoreUserUpdate) SetNillableStatus(v *constant.YesOrNo) *CoreUserUpdate {
 	if v != nil {
 		_u.SetStatus(*v)
 	}
@@ -152,7 +153,7 @@ func (_u *CoreUserUpdate) SetNillableStatus(v *int8) *CoreUserUpdate {
 }
 
 // AddStatus adds value to the "status" field.
-func (_u *CoreUserUpdate) AddStatus(v int8) *CoreUserUpdate {
+func (_u *CoreUserUpdate) AddStatus(v constant.YesOrNo) *CoreUserUpdate {
 	_u.mutation.AddStatus(v)
 	return _u
 }
@@ -496,14 +497,14 @@ func (_u *CoreUserUpdateOne) ClearNickname() *CoreUserUpdateOne {
 }
 
 // SetStatus sets the "status" field.
-func (_u *CoreUserUpdateOne) SetStatus(v int8) *CoreUserUpdateOne {
+func (_u *CoreUserUpdateOne) SetStatus(v constant.YesOrNo) *CoreUserUpdateOne {
 	_u.mutation.ResetStatus()
 	_u.mutation.SetStatus(v)
 	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (_u *CoreUserUpdateOne) SetNillableStatus(v *int8) *CoreUserUpdateOne {
+func (_u *CoreUserUpdateOne) SetNillableStatus(v *constant.YesOrNo) *CoreUserUpdateOne {
 	if v != nil {
 		_u.SetStatus(*v)
 	}
@@ -511,7 +512,7 @@ func (_u *CoreUserUpdateOne) SetNillableStatus(v *int8) *CoreUserUpdateOne {
 }
 
 // AddStatus adds value to the "status" field.
-func (_u *CoreUserUpdateOne) AddStatus(v int8) *CoreUserUpdateOne {
+func (_u *CoreUserUpdateOne) AddStatus(v constant.YesOrNo) *CoreUserUpdateOne {
 	_u.mutation.AddStatus(v)
 	return _u
 }

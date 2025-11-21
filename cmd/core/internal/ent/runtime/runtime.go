@@ -5,12 +5,13 @@ package runtime
 import (
 	"time"
 
+	"github.com/lyonmu/quebec/cmd/core/internal/common"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coredatarelationship"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/schema"
-	"github.com/lyonmu/quebec/pkg/common"
+	"github.com/lyonmu/quebec/pkg/constant"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -74,7 +75,7 @@ func init() {
 	// coremenuDescStatus is the schema descriptor for status field.
 	coremenuDescStatus := coremenuFields[6].Descriptor()
 	// coremenu.DefaultStatus holds the default value on creation for the status field.
-	coremenu.DefaultStatus = common.YesOrNo(coremenuDescStatus.Default.(int8))
+	coremenu.DefaultStatus = constant.YesOrNo(coremenuDescStatus.Default.(int8))
 	// coremenuDescID is the schema descriptor for id field.
 	coremenuDescID := coremenuMixinFields0[0].Descriptor()
 	// coremenu.DefaultID holds the default value on creation for the id field.
@@ -104,7 +105,7 @@ func init() {
 	// coreroleDescStatus is the schema descriptor for status field.
 	coreroleDescStatus := coreroleFields[2].Descriptor()
 	// corerole.DefaultStatus holds the default value on creation for the status field.
-	corerole.DefaultStatus = coreroleDescStatus.Default.(int8)
+	corerole.DefaultStatus = constant.YesOrNo(coreroleDescStatus.Default.(int8))
 	// coreroleDescID is the schema descriptor for id field.
 	coreroleDescID := coreroleMixinFields0[0].Descriptor()
 	// corerole.DefaultID holds the default value on creation for the id field.
@@ -134,7 +135,7 @@ func init() {
 	// coreuserDescStatus is the schema descriptor for status field.
 	coreuserDescStatus := coreuserFields[4].Descriptor()
 	// coreuser.DefaultStatus holds the default value on creation for the status field.
-	coreuser.DefaultStatus = coreuserDescStatus.Default.(int8)
+	coreuser.DefaultStatus = constant.YesOrNo(coreuserDescStatus.Default.(int8))
 	// coreuserDescID is the schema descriptor for id field.
 	coreuserDescID := coreuserMixinFields0[0].Descriptor()
 	// coreuser.DefaultID holds the default value on creation for the id field.
