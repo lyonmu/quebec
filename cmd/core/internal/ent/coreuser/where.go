@@ -117,6 +117,11 @@ func Remark(v string) predicate.CoreUser {
 	return predicate.CoreUser(sql.FieldEQ(FieldRemark, v))
 }
 
+// LastPasswordChange applies equality check predicate on the "last_password_change" field. It's identical to LastPasswordChangeEQ.
+func LastPasswordChange(v int64) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldEQ(FieldLastPasswordChange, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.CoreUser {
 	return predicate.CoreUser(sql.FieldEQ(FieldCreatedAt, v))
@@ -761,6 +766,56 @@ func RemarkContainsFold(v string) predicate.CoreUser {
 	return predicate.CoreUser(sql.FieldContainsFold(FieldRemark, v))
 }
 
+// LastPasswordChangeEQ applies the EQ predicate on the "last_password_change" field.
+func LastPasswordChangeEQ(v int64) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldEQ(FieldLastPasswordChange, v))
+}
+
+// LastPasswordChangeNEQ applies the NEQ predicate on the "last_password_change" field.
+func LastPasswordChangeNEQ(v int64) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldNEQ(FieldLastPasswordChange, v))
+}
+
+// LastPasswordChangeIn applies the In predicate on the "last_password_change" field.
+func LastPasswordChangeIn(vs ...int64) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldIn(FieldLastPasswordChange, vs...))
+}
+
+// LastPasswordChangeNotIn applies the NotIn predicate on the "last_password_change" field.
+func LastPasswordChangeNotIn(vs ...int64) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldNotIn(FieldLastPasswordChange, vs...))
+}
+
+// LastPasswordChangeGT applies the GT predicate on the "last_password_change" field.
+func LastPasswordChangeGT(v int64) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldGT(FieldLastPasswordChange, v))
+}
+
+// LastPasswordChangeGTE applies the GTE predicate on the "last_password_change" field.
+func LastPasswordChangeGTE(v int64) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldGTE(FieldLastPasswordChange, v))
+}
+
+// LastPasswordChangeLT applies the LT predicate on the "last_password_change" field.
+func LastPasswordChangeLT(v int64) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldLT(FieldLastPasswordChange, v))
+}
+
+// LastPasswordChangeLTE applies the LTE predicate on the "last_password_change" field.
+func LastPasswordChangeLTE(v int64) predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldLTE(FieldLastPasswordChange, v))
+}
+
+// LastPasswordChangeIsNil applies the IsNil predicate on the "last_password_change" field.
+func LastPasswordChangeIsNil() predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldIsNull(FieldLastPasswordChange))
+}
+
+// LastPasswordChangeNotNil applies the NotNil predicate on the "last_password_change" field.
+func LastPasswordChangeNotNil() predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldNotNull(FieldLastPasswordChange))
+}
+
 // HasUserFromRole applies the HasEdge predicate on the "user_from_role" edge.
 func HasUserFromRole() predicate.CoreUser {
 	return predicate.CoreUser(func(s *sql.Selector) {
@@ -776,6 +831,29 @@ func HasUserFromRole() predicate.CoreUser {
 func HasUserFromRoleWith(preds ...predicate.CoreRole) predicate.CoreUser {
 	return predicate.CoreUser(func(s *sql.Selector) {
 		step := newUserFromRoleStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasOnLineToUser applies the HasEdge predicate on the "on_line_to_user" edge.
+func HasOnLineToUser() predicate.CoreUser {
+	return predicate.CoreUser(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, OnLineToUserTable, OnLineToUserColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasOnLineToUserWith applies the HasEdge predicate on the "on_line_to_user" edge with a given conditions (other predicates).
+func HasOnLineToUserWith(preds ...predicate.CoreOnLineUser) predicate.CoreUser {
+	return predicate.CoreUser(func(s *sql.Selector) {
+		step := newOnLineToUserStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

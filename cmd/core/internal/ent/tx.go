@@ -18,6 +18,8 @@ type Tx struct {
 	CoreDataRelationship *CoreDataRelationshipClient
 	// CoreMenu is the client for interacting with the CoreMenu builders.
 	CoreMenu *CoreMenuClient
+	// CoreOnLineUser is the client for interacting with the CoreOnLineUser builders.
+	CoreOnLineUser *CoreOnLineUserClient
 	// CoreRole is the client for interacting with the CoreRole builders.
 	CoreRole *CoreRoleClient
 	// CoreUser is the client for interacting with the CoreUser builders.
@@ -155,6 +157,7 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.CoreDataRelationship = NewCoreDataRelationshipClient(tx.config)
 	tx.CoreMenu = NewCoreMenuClient(tx.config)
+	tx.CoreOnLineUser = NewCoreOnLineUserClient(tx.config)
 	tx.CoreRole = NewCoreRoleClient(tx.config)
 	tx.CoreUser = NewCoreUserClient(tx.config)
 }

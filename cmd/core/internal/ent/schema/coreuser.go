@@ -2,6 +2,7 @@ package schema
 
 import (
 	"fmt"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -30,6 +31,7 @@ func (CoreUser) Fields() []ent.Field {
 		field.Int8("status").Optional().GoType(constant.YesOrNo(1)).Optional().Comment("用户状态 [1: 启用, 2: 禁用]").Default(int8(constant.Yes)),
 		field.String("role_id").Optional().Comment("角色ID"),
 		field.String("remark").SchemaType(map[string]string{dialect.MySQL: "text", dialect.SQLite: "text", dialect.Postgres: "text"}).Optional().Comment("用户备注"),
+		field.Int64("last_password_change").Optional().Comment("最后密码修改时间戳").DefaultFunc(func() int64 { return time.Now().Unix() }),
 	}
 }
 
@@ -37,13 +39,16 @@ func (CoreUser) Fields() []ent.Field {
 // 用户与角色多对一关系
 func (CoreUser) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user_from_role", CoreRole.Type).Ref("role_to_user").Field("role_id").Unique(),
+		edge.From("user_from_role", CoreRole.Type).Ref("role_to_user").Field("role_id").Unique().Comment("用户所属角色"),
+		edge.To("on_line_to_user", CoreOnLineUser.Type).Comment("用户在线信息"),
 	}
 }
 
 func (CoreUser) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		tools.NewIDMixin(global.Id),
+		tools.NewIDMixin(func() string {
+			return fmt.Sprintf("%d", global.Id.GenID())
+		}),
 		tools.TimeMixin{},
 	}
 }
@@ -55,6 +60,7 @@ func (CoreUser) Indexes() []ent.Index {
 		index.Fields("email"),
 		index.Fields("status"),
 		index.Fields("role_id"),
+		index.Fields("last_password_change"),
 	}
 }
 

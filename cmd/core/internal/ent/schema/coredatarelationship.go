@@ -38,7 +38,9 @@ func (CoreDataRelationship) Edges() []ent.Edge {
 
 func (CoreDataRelationship) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		tools.NewIDMixin(global.Id),
+		tools.NewIDMixin(func() string {
+			return fmt.Sprintf("%d", global.Id.GenID())
+		}),
 		tools.TimeMixin{},
 	}
 }

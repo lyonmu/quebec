@@ -13,7 +13,7 @@ import (
 type Captcha struct {
 	Length int `name:"length" env:"CAPTCHA_LENGTH" default:"4" help:"验证码长度" mapstructure:"length" yaml:"length" json:"length"`
 	Width  int `name:"width" env:"CAPTCHA_WIDTH" default:"240" help:"验证码宽度" mapstructure:"width" yaml:"width" json:"width"`
-	Height int `name:"height" env:"CAPTCHA_HEIGHT" default:"80" help:"证码高度" mapstructure:"height" yaml:"height" json:"height"`
+	Height int `name:"height" env:"CAPTCHA_HEIGHT" default:"80" help:"验证码高度" mapstructure:"height" yaml:"height" json:"height"`
 	Cache  int `name:"cache" env:"CAPTCHA_CACHE" default:"300" help:"验证码缓存时间" mapstructure:"cache" yaml:"cache" json:"cache"`
 }
 

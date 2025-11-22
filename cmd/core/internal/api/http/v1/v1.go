@@ -1,6 +1,7 @@
 package v1
 
-type V1ApiGroup struct {
-}
+import "github.com/lyonmu/quebec/cmd/core/internal/api/http/v1/system"
 
-var V1Group = new(V1ApiGroup)
+type V1ApiGroup struct {
+	system.SystemV1ApiGroup
+}

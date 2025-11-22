@@ -140,6 +140,80 @@ var (
 			},
 		},
 	}
+	// QuebecCoreOnLineUserColumns holds the columns for the "quebec_core_on_line_user" table.
+	QuebecCoreOnLineUserColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 64, Comment: "主键ID"},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "access_ip", Type: field.TypeString, Nullable: true, Comment: "访问IP"},
+		{Name: "last_operation_time", Type: field.TypeInt64, Nullable: true, Comment: "最后操作时间"},
+		{Name: "operation_type", Type: field.TypeInt, Nullable: true, Comment: "操作类型 [1: 登陆]"},
+		{Name: "os", Type: field.TypeString, Nullable: true, Comment: "操作系统"},
+		{Name: "platform", Type: field.TypeString, Nullable: true, Comment: "操作平台"},
+		{Name: "browser_name", Type: field.TypeString, Nullable: true, Comment: "浏览器名称"},
+		{Name: "browser_version", Type: field.TypeString, Nullable: true, Comment: "浏览器版本"},
+		{Name: "browser_engine_name", Type: field.TypeString, Nullable: true, Comment: "浏览器引擎名称"},
+		{Name: "browser_engine_version", Type: field.TypeString, Nullable: true, Comment: "浏览器引擎版本"},
+		{Name: "user_id", Type: field.TypeString, Nullable: true, Size: 64, Comment: "用户ID"},
+	}
+	// QuebecCoreOnLineUserTable holds the schema information for the "quebec_core_on_line_user" table.
+	QuebecCoreOnLineUserTable = &schema.Table{
+		Name:       "quebec_core_on_line_user",
+		Comment:    "在线用户信息表",
+		Columns:    QuebecCoreOnLineUserColumns,
+		PrimaryKey: []*schema.Column{QuebecCoreOnLineUserColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "quebec_core_on_line_user_quebec_core_user_on_line_to_user",
+				Columns:    []*schema.Column{QuebecCoreOnLineUserColumns[13]},
+				RefColumns: []*schema.Column{QuebecCoreUserColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "coreonlineuser_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreOnLineUserColumns[1]},
+			},
+			{
+				Name:    "coreonlineuser_updated_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreOnLineUserColumns[2]},
+			},
+			{
+				Name:    "coreonlineuser_deleted_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreOnLineUserColumns[3]},
+			},
+			{
+				Name:    "coreonlineuser_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreOnLineUserColumns[0]},
+			},
+			{
+				Name:    "coreonlineuser_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreOnLineUserColumns[13]},
+			},
+			{
+				Name:    "coreonlineuser_access_ip",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreOnLineUserColumns[4]},
+			},
+			{
+				Name:    "coreonlineuser_last_operation_time",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreOnLineUserColumns[5]},
+			},
+			{
+				Name:    "coreonlineuser_operation_type",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreOnLineUserColumns[6]},
+			},
+		},
+	}
 	// QuebecCoreRoleColumns holds the columns for the "quebec_core_role" table.
 	QuebecCoreRoleColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 64, Comment: "主键ID"},
@@ -201,6 +275,7 @@ var (
 		{Name: "nickname", Type: field.TypeString, Nullable: true, Comment: "昵称", SchemaType: map[string]string{"mysql": "text", "postgres": "text", "sqlite3": "text"}},
 		{Name: "status", Type: field.TypeInt8, Nullable: true, Comment: "用户状态 [1: 启用, 2: 禁用]", Default: 1},
 		{Name: "remark", Type: field.TypeString, Nullable: true, Comment: "用户备注", SchemaType: map[string]string{"mysql": "text", "postgres": "text", "sqlite3": "text"}},
+		{Name: "last_password_change", Type: field.TypeInt64, Nullable: true, Comment: "最后密码修改时间戳"},
 		{Name: "role_id", Type: field.TypeString, Nullable: true, Size: 64, Comment: "角色ID"},
 	}
 	// QuebecCoreUserTable holds the schema information for the "quebec_core_user" table.
@@ -212,7 +287,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "quebec_core_user_quebec_core_role_role_to_user",
-				Columns:    []*schema.Column{QuebecCoreUserColumns[10]},
+				Columns:    []*schema.Column{QuebecCoreUserColumns[11]},
 				RefColumns: []*schema.Column{QuebecCoreRoleColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -256,6 +331,11 @@ var (
 			{
 				Name:    "coreuser_role_id",
 				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUserColumns[11]},
+			},
+			{
+				Name:    "coreuser_last_password_change",
+				Unique:  false,
 				Columns: []*schema.Column{QuebecCoreUserColumns[10]},
 			},
 		},
@@ -264,6 +344,7 @@ var (
 	Tables = []*schema.Table{
 		QuebecCoreDataRelationshipTable,
 		QuebecCoreMenuTable,
+		QuebecCoreOnLineUserTable,
 		QuebecCoreRoleTable,
 		QuebecCoreUserTable,
 	}
@@ -280,6 +361,12 @@ func init() {
 	QuebecCoreMenuTable.ForeignKeys[0].RefTable = QuebecCoreMenuTable
 	QuebecCoreMenuTable.Annotation = &entsql.Annotation{
 		Table:     "quebec_core_menu",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_general_ci",
+	}
+	QuebecCoreOnLineUserTable.ForeignKeys[0].RefTable = QuebecCoreUserTable
+	QuebecCoreOnLineUserTable.Annotation = &entsql.Annotation{
+		Table:     "quebec_core_on_line_user",
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_general_ci",
 	}

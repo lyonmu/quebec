@@ -11,10 +11,9 @@ import (
 	"github.com/lyonmu/quebec/pkg/tools/encrypt"
 )
 
-func InitUser(client *ent.Client) error {
+func InitUser(client *ent.Client, role_id string) error {
 	ctx := context.Background()
 
-	username, _ := encrypt.HashWithBcryptBytes(encrypt.HashWithSHA256Bytes([]byte("system")))
 	password, _ := encrypt.HashWithBcryptBytes(encrypt.HashWithSHA256Bytes([]byte("Quebec@123456")))
 
 	exists, err := client.CoreUser.Query().Where(coreuser.DeletedAtIsNil()).Exist(ctx)
@@ -27,13 +26,13 @@ func InitUser(client *ent.Client) error {
 	} else {
 		users, err := client.CoreUser.CreateBulk(
 			client.CoreUser.Create().
-				SetID("1").
-				SetUsername(string(username)).
+				SetID(fmt.Sprintf("%d", global.Id.GenID())).
+				SetUsername(encrypt.HashWithSHA256String("system")).
 				SetPassword(string(password)).
 				SetNickname("system").
 				SetStatus(constant.Yes).
 				SetRemark("system").
-				SetRoleID("1"),
+				SetRoleID(role_id),
 		).Save(ctx)
 		if err != nil {
 			return err

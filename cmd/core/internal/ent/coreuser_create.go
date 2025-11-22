@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreonlineuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/pkg/constant"
@@ -165,6 +166,20 @@ func (_c *CoreUserCreate) SetNillableRemark(v *string) *CoreUserCreate {
 	return _c
 }
 
+// SetLastPasswordChange sets the "last_password_change" field.
+func (_c *CoreUserCreate) SetLastPasswordChange(v int64) *CoreUserCreate {
+	_c.mutation.SetLastPasswordChange(v)
+	return _c
+}
+
+// SetNillableLastPasswordChange sets the "last_password_change" field if the given value is not nil.
+func (_c *CoreUserCreate) SetNillableLastPasswordChange(v *int64) *CoreUserCreate {
+	if v != nil {
+		_c.SetLastPasswordChange(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *CoreUserCreate) SetID(v string) *CoreUserCreate {
 	_c.mutation.SetID(v)
@@ -196,6 +211,21 @@ func (_c *CoreUserCreate) SetNillableUserFromRoleID(id *string) *CoreUserCreate 
 // SetUserFromRole sets the "user_from_role" edge to the CoreRole entity.
 func (_c *CoreUserCreate) SetUserFromRole(v *CoreRole) *CoreUserCreate {
 	return _c.SetUserFromRoleID(v.ID)
+}
+
+// AddOnLineToUserIDs adds the "on_line_to_user" edge to the CoreOnLineUser entity by IDs.
+func (_c *CoreUserCreate) AddOnLineToUserIDs(ids ...string) *CoreUserCreate {
+	_c.mutation.AddOnLineToUserIDs(ids...)
+	return _c
+}
+
+// AddOnLineToUser adds the "on_line_to_user" edges to the CoreOnLineUser entity.
+func (_c *CoreUserCreate) AddOnLineToUser(v ...*CoreOnLineUser) *CoreUserCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddOnLineToUserIDs(ids...)
 }
 
 // Mutation returns the CoreUserMutation object of the builder.
@@ -252,6 +282,13 @@ func (_c *CoreUserCreate) defaults() error {
 	if _, ok := _c.mutation.Status(); !ok {
 		v := coreuser.DefaultStatus
 		_c.mutation.SetStatus(v)
+	}
+	if _, ok := _c.mutation.LastPasswordChange(); !ok {
+		if coreuser.DefaultLastPasswordChange == nil {
+			return fmt.Errorf("ent: uninitialized coreuser.DefaultLastPasswordChange (forgotten import ent/runtime?)")
+		}
+		v := coreuser.DefaultLastPasswordChange()
+		_c.mutation.SetLastPasswordChange(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		if coreuser.DefaultID == nil {
@@ -348,6 +385,10 @@ func (_c *CoreUserCreate) createSpec() (*CoreUser, *sqlgraph.CreateSpec) {
 		_spec.SetField(coreuser.FieldRemark, field.TypeString, value)
 		_node.Remark = value
 	}
+	if value, ok := _c.mutation.LastPasswordChange(); ok {
+		_spec.SetField(coreuser.FieldLastPasswordChange, field.TypeInt64, value)
+		_node.LastPasswordChange = value
+	}
 	if nodes := _c.mutation.UserFromRoleIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -363,6 +404,22 @@ func (_c *CoreUserCreate) createSpec() (*CoreUser, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.RoleID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.OnLineToUserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   coreuser.OnLineToUserTable,
+			Columns: []string{coreuser.OnLineToUserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(coreonlineuser.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -576,6 +633,30 @@ func (u *CoreUserUpsert) UpdateRemark() *CoreUserUpsert {
 // ClearRemark clears the value of the "remark" field.
 func (u *CoreUserUpsert) ClearRemark() *CoreUserUpsert {
 	u.SetNull(coreuser.FieldRemark)
+	return u
+}
+
+// SetLastPasswordChange sets the "last_password_change" field.
+func (u *CoreUserUpsert) SetLastPasswordChange(v int64) *CoreUserUpsert {
+	u.Set(coreuser.FieldLastPasswordChange, v)
+	return u
+}
+
+// UpdateLastPasswordChange sets the "last_password_change" field to the value that was provided on create.
+func (u *CoreUserUpsert) UpdateLastPasswordChange() *CoreUserUpsert {
+	u.SetExcluded(coreuser.FieldLastPasswordChange)
+	return u
+}
+
+// AddLastPasswordChange adds v to the "last_password_change" field.
+func (u *CoreUserUpsert) AddLastPasswordChange(v int64) *CoreUserUpsert {
+	u.Add(coreuser.FieldLastPasswordChange, v)
+	return u
+}
+
+// ClearLastPasswordChange clears the value of the "last_password_change" field.
+func (u *CoreUserUpsert) ClearLastPasswordChange() *CoreUserUpsert {
+	u.SetNull(coreuser.FieldLastPasswordChange)
 	return u
 }
 
@@ -816,6 +897,34 @@ func (u *CoreUserUpsertOne) UpdateRemark() *CoreUserUpsertOne {
 func (u *CoreUserUpsertOne) ClearRemark() *CoreUserUpsertOne {
 	return u.Update(func(s *CoreUserUpsert) {
 		s.ClearRemark()
+	})
+}
+
+// SetLastPasswordChange sets the "last_password_change" field.
+func (u *CoreUserUpsertOne) SetLastPasswordChange(v int64) *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.SetLastPasswordChange(v)
+	})
+}
+
+// AddLastPasswordChange adds v to the "last_password_change" field.
+func (u *CoreUserUpsertOne) AddLastPasswordChange(v int64) *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.AddLastPasswordChange(v)
+	})
+}
+
+// UpdateLastPasswordChange sets the "last_password_change" field to the value that was provided on create.
+func (u *CoreUserUpsertOne) UpdateLastPasswordChange() *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.UpdateLastPasswordChange()
+	})
+}
+
+// ClearLastPasswordChange clears the value of the "last_password_change" field.
+func (u *CoreUserUpsertOne) ClearLastPasswordChange() *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.ClearLastPasswordChange()
 	})
 }
 
@@ -1223,6 +1332,34 @@ func (u *CoreUserUpsertBulk) UpdateRemark() *CoreUserUpsertBulk {
 func (u *CoreUserUpsertBulk) ClearRemark() *CoreUserUpsertBulk {
 	return u.Update(func(s *CoreUserUpsert) {
 		s.ClearRemark()
+	})
+}
+
+// SetLastPasswordChange sets the "last_password_change" field.
+func (u *CoreUserUpsertBulk) SetLastPasswordChange(v int64) *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.SetLastPasswordChange(v)
+	})
+}
+
+// AddLastPasswordChange adds v to the "last_password_change" field.
+func (u *CoreUserUpsertBulk) AddLastPasswordChange(v int64) *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.AddLastPasswordChange(v)
+	})
+}
+
+// UpdateLastPasswordChange sets the "last_password_change" field to the value that was provided on create.
+func (u *CoreUserUpsertBulk) UpdateLastPasswordChange() *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.UpdateLastPasswordChange()
+	})
+}
+
+// ClearLastPasswordChange clears the value of the "last_password_change" field.
+func (u *CoreUserUpsertBulk) ClearLastPasswordChange() *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.ClearLastPasswordChange()
 	})
 }
 

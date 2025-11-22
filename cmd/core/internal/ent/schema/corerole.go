@@ -39,7 +39,9 @@ func (CoreRole) Edges() []ent.Edge {
 
 func (CoreRole) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		tools.NewIDMixin(global.Id),
+		tools.NewIDMixin(func() string {
+			return fmt.Sprintf("%d", global.Id.GenID())
+		}),
 		tools.TimeMixin{},
 	}
 }

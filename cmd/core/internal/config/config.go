@@ -10,6 +10,7 @@ type CoreConfig struct {
 	Node    int     `name:"node" env:"NODE" default:"1" help:"节点编号" mapstructure:"node" yaml:"node" json:"node"`
 	Prefix  string  `name:"prefix" env:"PREFIX" default:"/core/api" help:"路由前缀" mapstructure:"prefix" yaml:"prefix" json:"prefix"`
 	Captcha Captcha `embed:"" prefix:"captcha." mapstructure:"captcha" json:"captcha" yaml:"captcha"`
+	Jwt     Jwt     `embed:"" prefix:"jwt." mapstructure:"jwt" json:"jwt" yaml:"jwt"`
 }
 
 type Config struct {

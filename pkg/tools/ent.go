@@ -2,7 +2,6 @@ package tools
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
@@ -15,24 +14,24 @@ import (
 // IDMixin 提供字符串类型的 id 字段
 type IDMixin struct {
 	mixin.Schema
-	IDGenerator IDGenerator
+	defaultFunc func() string
 }
 
 // NewIDMixin 创建 IDMixin 实例
-func NewIDMixin(generator IDGenerator) *IDMixin {
-	return &IDMixin{IDGenerator: generator}
+func NewIDMixin(defaultFunc func() string) *IDMixin {
+	return &IDMixin{defaultFunc: defaultFunc}
 }
 
 // Fields 返回 id 字段
 func (i *IDMixin) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("id").MaxLen(64).Unique().Comment("主键ID").DefaultFunc(func() string {
-			if i.IDGenerator == nil {
-				// 如果 IDGenerator 未设置，返回空字符串，由调用方处理
-				return ""
-			}
-			return fmt.Sprintf("%d", i.IDGenerator.GenID())
-		}),
+		field.String("id").
+			MaxLen(64).
+			Unique().
+			Comment("主键ID").
+			DefaultFunc(i.defaultFunc).
+			NotEmpty().
+			Immutable(),
 	}
 }
 

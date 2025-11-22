@@ -40,6 +40,8 @@ type CoreUser struct {
 	RoleID string `json:"role_id,omitempty"`
 	// 用户备注
 	Remark string `json:"remark,omitempty"`
+	// 最后密码修改时间戳
+	LastPasswordChange int64 `json:"last_password_change,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CoreUserQuery when eager-loading is set.
 	Edges        CoreUserEdges `json:"-" gorm:"-"`
@@ -48,11 +50,13 @@ type CoreUser struct {
 
 // CoreUserEdges holds the relations/edges for other nodes in the graph.
 type CoreUserEdges struct {
-	// UserFromRole holds the value of the user_from_role edge.
+	// 用户所属角色
 	UserFromRole *CoreRole `json:"user_from_role,omitempty"`
+	// 用户在线信息
+	OnLineToUser []*CoreOnLineUser `json:"on_line_to_user,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // UserFromRoleOrErr returns the UserFromRole value or an error if the edge
@@ -66,12 +70,21 @@ func (e CoreUserEdges) UserFromRoleOrErr() (*CoreRole, error) {
 	return nil, &NotLoadedError{edge: "user_from_role"}
 }
 
+// OnLineToUserOrErr returns the OnLineToUser value or an error if the edge
+// was not loaded in eager-loading.
+func (e CoreUserEdges) OnLineToUserOrErr() ([]*CoreOnLineUser, error) {
+	if e.loadedTypes[1] {
+		return e.OnLineToUser, nil
+	}
+	return nil, &NotLoadedError{edge: "on_line_to_user"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*CoreUser) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case coreuser.FieldStatus:
+		case coreuser.FieldStatus, coreuser.FieldLastPasswordChange:
 			values[i] = new(sql.NullInt64)
 		case coreuser.FieldID, coreuser.FieldUsername, coreuser.FieldPassword, coreuser.FieldEmail, coreuser.FieldNickname, coreuser.FieldRoleID, coreuser.FieldRemark:
 			values[i] = new(sql.NullString)
@@ -159,6 +172,12 @@ func (_m *CoreUser) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Remark = value.String
 			}
+		case coreuser.FieldLastPasswordChange:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field last_password_change", values[i])
+			} else if value.Valid {
+				_m.LastPasswordChange = value.Int64
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -175,6 +194,11 @@ func (_m *CoreUser) Value(name string) (ent.Value, error) {
 // QueryUserFromRole queries the "user_from_role" edge of the CoreUser entity.
 func (_m *CoreUser) QueryUserFromRole() *CoreRoleQuery {
 	return NewCoreUserClient(_m.config).QueryUserFromRole(_m)
+}
+
+// QueryOnLineToUser queries the "on_line_to_user" edge of the CoreUser entity.
+func (_m *CoreUser) QueryOnLineToUser() *CoreOnLineUserQuery {
+	return NewCoreUserClient(_m.config).QueryOnLineToUser(_m)
 }
 
 // Update returns a builder for updating this CoreUser.
@@ -231,6 +255,9 @@ func (_m *CoreUser) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("remark=")
 	builder.WriteString(_m.Remark)
+	builder.WriteString(", ")
+	builder.WriteString("last_password_change=")
+	builder.WriteString(fmt.Sprintf("%v", _m.LastPasswordChange))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -36,8 +36,12 @@ const (
 	FieldRoleID = "role_id"
 	// FieldRemark holds the string denoting the remark field in the database.
 	FieldRemark = "remark"
+	// FieldLastPasswordChange holds the string denoting the last_password_change field in the database.
+	FieldLastPasswordChange = "last_password_change"
 	// EdgeUserFromRole holds the string denoting the user_from_role edge name in mutations.
 	EdgeUserFromRole = "user_from_role"
+	// EdgeOnLineToUser holds the string denoting the on_line_to_user edge name in mutations.
+	EdgeOnLineToUser = "on_line_to_user"
 	// Table holds the table name of the coreuser in the database.
 	Table = "quebec_core_user"
 	// UserFromRoleTable is the table that holds the user_from_role relation/edge.
@@ -47,6 +51,13 @@ const (
 	UserFromRoleInverseTable = "quebec_core_role"
 	// UserFromRoleColumn is the table column denoting the user_from_role relation/edge.
 	UserFromRoleColumn = "role_id"
+	// OnLineToUserTable is the table that holds the on_line_to_user relation/edge.
+	OnLineToUserTable = "quebec_core_on_line_user"
+	// OnLineToUserInverseTable is the table name for the CoreOnLineUser entity.
+	// It exists in this package in order to avoid circular dependency with the "coreonlineuser" package.
+	OnLineToUserInverseTable = "quebec_core_on_line_user"
+	// OnLineToUserColumn is the table column denoting the on_line_to_user relation/edge.
+	OnLineToUserColumn = "user_id"
 )
 
 // Columns holds all SQL columns for coreuser fields.
@@ -62,6 +73,7 @@ var Columns = []string{
 	FieldStatus,
 	FieldRoleID,
 	FieldRemark,
+	FieldLastPasswordChange,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -89,6 +101,8 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// DefaultStatus holds the default value on creation for the "status" field.
 	DefaultStatus constant.YesOrNo
+	// DefaultLastPasswordChange holds the default value on creation for the "last_password_change" field.
+	DefaultLastPasswordChange func() int64
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -153,10 +167,29 @@ func ByRemark(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRemark, opts...).ToFunc()
 }
 
+// ByLastPasswordChange orders the results by the last_password_change field.
+func ByLastPasswordChange(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastPasswordChange, opts...).ToFunc()
+}
+
 // ByUserFromRoleField orders the results by user_from_role field.
 func ByUserFromRoleField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newUserFromRoleStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByOnLineToUserCount orders the results by on_line_to_user count.
+func ByOnLineToUserCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newOnLineToUserStep(), opts...)
+	}
+}
+
+// ByOnLineToUser orders the results by on_line_to_user terms.
+func ByOnLineToUser(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newOnLineToUserStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newUserFromRoleStep() *sqlgraph.Step {
@@ -164,5 +197,12 @@ func newUserFromRoleStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UserFromRoleInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, UserFromRoleTable, UserFromRoleColumn),
+	)
+}
+func newOnLineToUserStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(OnLineToUserInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, OnLineToUserTable, OnLineToUserColumn),
 	)
 }

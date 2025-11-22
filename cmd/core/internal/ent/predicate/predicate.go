@@ -12,6 +12,9 @@ type CoreDataRelationship func(*sql.Selector)
 // CoreMenu is the predicate function for coremenu builders.
 type CoreMenu func(*sql.Selector)
 
+// CoreOnLineUser is the predicate function for coreonlineuser builders.
+type CoreOnLineUser func(*sql.Selector)
+
 // CoreRole is the predicate function for corerole builders.
 type CoreRole func(*sql.Selector)
 

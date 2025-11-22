@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coredatarelationship"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreonlineuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 )
@@ -78,6 +79,7 @@ func checkColumn(t, c string) error {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			coredatarelationship.Table: coredatarelationship.ValidColumn,
 			coremenu.Table:             coremenu.ValidColumn,
+			coreonlineuser.Table:       coreonlineuser.ValidColumn,
 			corerole.Table:             corerole.ValidColumn,
 			coreuser.Table:             coreuser.ValidColumn,
 		})

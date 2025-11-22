@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreonlineuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/predicate"
@@ -204,6 +205,33 @@ func (_u *CoreUserUpdate) ClearRemark() *CoreUserUpdate {
 	return _u
 }
 
+// SetLastPasswordChange sets the "last_password_change" field.
+func (_u *CoreUserUpdate) SetLastPasswordChange(v int64) *CoreUserUpdate {
+	_u.mutation.ResetLastPasswordChange()
+	_u.mutation.SetLastPasswordChange(v)
+	return _u
+}
+
+// SetNillableLastPasswordChange sets the "last_password_change" field if the given value is not nil.
+func (_u *CoreUserUpdate) SetNillableLastPasswordChange(v *int64) *CoreUserUpdate {
+	if v != nil {
+		_u.SetLastPasswordChange(*v)
+	}
+	return _u
+}
+
+// AddLastPasswordChange adds value to the "last_password_change" field.
+func (_u *CoreUserUpdate) AddLastPasswordChange(v int64) *CoreUserUpdate {
+	_u.mutation.AddLastPasswordChange(v)
+	return _u
+}
+
+// ClearLastPasswordChange clears the value of the "last_password_change" field.
+func (_u *CoreUserUpdate) ClearLastPasswordChange() *CoreUserUpdate {
+	_u.mutation.ClearLastPasswordChange()
+	return _u
+}
+
 // SetUserFromRoleID sets the "user_from_role" edge to the CoreRole entity by ID.
 func (_u *CoreUserUpdate) SetUserFromRoleID(id string) *CoreUserUpdate {
 	_u.mutation.SetUserFromRoleID(id)
@@ -223,6 +251,21 @@ func (_u *CoreUserUpdate) SetUserFromRole(v *CoreRole) *CoreUserUpdate {
 	return _u.SetUserFromRoleID(v.ID)
 }
 
+// AddOnLineToUserIDs adds the "on_line_to_user" edge to the CoreOnLineUser entity by IDs.
+func (_u *CoreUserUpdate) AddOnLineToUserIDs(ids ...string) *CoreUserUpdate {
+	_u.mutation.AddOnLineToUserIDs(ids...)
+	return _u
+}
+
+// AddOnLineToUser adds the "on_line_to_user" edges to the CoreOnLineUser entity.
+func (_u *CoreUserUpdate) AddOnLineToUser(v ...*CoreOnLineUser) *CoreUserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddOnLineToUserIDs(ids...)
+}
+
 // Mutation returns the CoreUserMutation object of the builder.
 func (_u *CoreUserUpdate) Mutation() *CoreUserMutation {
 	return _u.mutation
@@ -232,6 +275,27 @@ func (_u *CoreUserUpdate) Mutation() *CoreUserMutation {
 func (_u *CoreUserUpdate) ClearUserFromRole() *CoreUserUpdate {
 	_u.mutation.ClearUserFromRole()
 	return _u
+}
+
+// ClearOnLineToUser clears all "on_line_to_user" edges to the CoreOnLineUser entity.
+func (_u *CoreUserUpdate) ClearOnLineToUser() *CoreUserUpdate {
+	_u.mutation.ClearOnLineToUser()
+	return _u
+}
+
+// RemoveOnLineToUserIDs removes the "on_line_to_user" edge to CoreOnLineUser entities by IDs.
+func (_u *CoreUserUpdate) RemoveOnLineToUserIDs(ids ...string) *CoreUserUpdate {
+	_u.mutation.RemoveOnLineToUserIDs(ids...)
+	return _u
+}
+
+// RemoveOnLineToUser removes "on_line_to_user" edges to CoreOnLineUser entities.
+func (_u *CoreUserUpdate) RemoveOnLineToUser(v ...*CoreOnLineUser) *CoreUserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveOnLineToUserIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -339,6 +403,15 @@ func (_u *CoreUserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.RemarkCleared() {
 		_spec.ClearField(coreuser.FieldRemark, field.TypeString)
 	}
+	if value, ok := _u.mutation.LastPasswordChange(); ok {
+		_spec.SetField(coreuser.FieldLastPasswordChange, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedLastPasswordChange(); ok {
+		_spec.AddField(coreuser.FieldLastPasswordChange, field.TypeInt64, value)
+	}
+	if _u.mutation.LastPasswordChangeCleared() {
+		_spec.ClearField(coreuser.FieldLastPasswordChange, field.TypeInt64)
+	}
 	if _u.mutation.UserFromRoleCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -361,6 +434,51 @@ func (_u *CoreUserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(corerole.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.OnLineToUserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   coreuser.OnLineToUserTable,
+			Columns: []string{coreuser.OnLineToUserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(coreonlineuser.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedOnLineToUserIDs(); len(nodes) > 0 && !_u.mutation.OnLineToUserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   coreuser.OnLineToUserTable,
+			Columns: []string{coreuser.OnLineToUserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(coreonlineuser.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.OnLineToUserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   coreuser.OnLineToUserTable,
+			Columns: []string{coreuser.OnLineToUserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(coreonlineuser.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -563,6 +681,33 @@ func (_u *CoreUserUpdateOne) ClearRemark() *CoreUserUpdateOne {
 	return _u
 }
 
+// SetLastPasswordChange sets the "last_password_change" field.
+func (_u *CoreUserUpdateOne) SetLastPasswordChange(v int64) *CoreUserUpdateOne {
+	_u.mutation.ResetLastPasswordChange()
+	_u.mutation.SetLastPasswordChange(v)
+	return _u
+}
+
+// SetNillableLastPasswordChange sets the "last_password_change" field if the given value is not nil.
+func (_u *CoreUserUpdateOne) SetNillableLastPasswordChange(v *int64) *CoreUserUpdateOne {
+	if v != nil {
+		_u.SetLastPasswordChange(*v)
+	}
+	return _u
+}
+
+// AddLastPasswordChange adds value to the "last_password_change" field.
+func (_u *CoreUserUpdateOne) AddLastPasswordChange(v int64) *CoreUserUpdateOne {
+	_u.mutation.AddLastPasswordChange(v)
+	return _u
+}
+
+// ClearLastPasswordChange clears the value of the "last_password_change" field.
+func (_u *CoreUserUpdateOne) ClearLastPasswordChange() *CoreUserUpdateOne {
+	_u.mutation.ClearLastPasswordChange()
+	return _u
+}
+
 // SetUserFromRoleID sets the "user_from_role" edge to the CoreRole entity by ID.
 func (_u *CoreUserUpdateOne) SetUserFromRoleID(id string) *CoreUserUpdateOne {
 	_u.mutation.SetUserFromRoleID(id)
@@ -582,6 +727,21 @@ func (_u *CoreUserUpdateOne) SetUserFromRole(v *CoreRole) *CoreUserUpdateOne {
 	return _u.SetUserFromRoleID(v.ID)
 }
 
+// AddOnLineToUserIDs adds the "on_line_to_user" edge to the CoreOnLineUser entity by IDs.
+func (_u *CoreUserUpdateOne) AddOnLineToUserIDs(ids ...string) *CoreUserUpdateOne {
+	_u.mutation.AddOnLineToUserIDs(ids...)
+	return _u
+}
+
+// AddOnLineToUser adds the "on_line_to_user" edges to the CoreOnLineUser entity.
+func (_u *CoreUserUpdateOne) AddOnLineToUser(v ...*CoreOnLineUser) *CoreUserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddOnLineToUserIDs(ids...)
+}
+
 // Mutation returns the CoreUserMutation object of the builder.
 func (_u *CoreUserUpdateOne) Mutation() *CoreUserMutation {
 	return _u.mutation
@@ -591,6 +751,27 @@ func (_u *CoreUserUpdateOne) Mutation() *CoreUserMutation {
 func (_u *CoreUserUpdateOne) ClearUserFromRole() *CoreUserUpdateOne {
 	_u.mutation.ClearUserFromRole()
 	return _u
+}
+
+// ClearOnLineToUser clears all "on_line_to_user" edges to the CoreOnLineUser entity.
+func (_u *CoreUserUpdateOne) ClearOnLineToUser() *CoreUserUpdateOne {
+	_u.mutation.ClearOnLineToUser()
+	return _u
+}
+
+// RemoveOnLineToUserIDs removes the "on_line_to_user" edge to CoreOnLineUser entities by IDs.
+func (_u *CoreUserUpdateOne) RemoveOnLineToUserIDs(ids ...string) *CoreUserUpdateOne {
+	_u.mutation.RemoveOnLineToUserIDs(ids...)
+	return _u
+}
+
+// RemoveOnLineToUser removes "on_line_to_user" edges to CoreOnLineUser entities.
+func (_u *CoreUserUpdateOne) RemoveOnLineToUser(v ...*CoreOnLineUser) *CoreUserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveOnLineToUserIDs(ids...)
 }
 
 // Where appends a list predicates to the CoreUserUpdate builder.
@@ -728,6 +909,15 @@ func (_u *CoreUserUpdateOne) sqlSave(ctx context.Context) (_node *CoreUser, err 
 	if _u.mutation.RemarkCleared() {
 		_spec.ClearField(coreuser.FieldRemark, field.TypeString)
 	}
+	if value, ok := _u.mutation.LastPasswordChange(); ok {
+		_spec.SetField(coreuser.FieldLastPasswordChange, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedLastPasswordChange(); ok {
+		_spec.AddField(coreuser.FieldLastPasswordChange, field.TypeInt64, value)
+	}
+	if _u.mutation.LastPasswordChangeCleared() {
+		_spec.ClearField(coreuser.FieldLastPasswordChange, field.TypeInt64)
+	}
 	if _u.mutation.UserFromRoleCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -750,6 +940,51 @@ func (_u *CoreUserUpdateOne) sqlSave(ctx context.Context) (_node *CoreUser, err 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(corerole.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.OnLineToUserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   coreuser.OnLineToUserTable,
+			Columns: []string{coreuser.OnLineToUserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(coreonlineuser.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedOnLineToUserIDs(); len(nodes) > 0 && !_u.mutation.OnLineToUserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   coreuser.OnLineToUserTable,
+			Columns: []string{coreuser.OnLineToUserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(coreonlineuser.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.OnLineToUserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   coreuser.OnLineToUserTable,
+			Columns: []string{coreuser.OnLineToUserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(coreonlineuser.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

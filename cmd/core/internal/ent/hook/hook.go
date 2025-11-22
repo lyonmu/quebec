@@ -33,6 +33,18 @@ func (f CoreMenuFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CoreMenuMutation", m)
 }
 
+// The CoreOnLineUserFunc type is an adapter to allow the use of ordinary
+// function as CoreOnLineUser mutator.
+type CoreOnLineUserFunc func(context.Context, *ent.CoreOnLineUserMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CoreOnLineUserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CoreOnLineUserMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CoreOnLineUserMutation", m)
+}
+
 // The CoreRoleFunc type is an adapter to allow the use of ordinary
 // function as CoreRole mutator.
 type CoreRoleFunc func(context.Context, *ent.CoreRoleMutation) (ent.Value, error)

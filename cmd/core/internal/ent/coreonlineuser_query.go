@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -13,60 +12,58 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreonlineuser"
-	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/predicate"
 )
 
-// CoreUserQuery is the builder for querying CoreUser entities.
-type CoreUserQuery struct {
+// CoreOnLineUserQuery is the builder for querying CoreOnLineUser entities.
+type CoreOnLineUserQuery struct {
 	config
-	ctx              *QueryContext
-	order            []coreuser.OrderOption
-	inters           []Interceptor
-	predicates       []predicate.CoreUser
-	withUserFromRole *CoreRoleQuery
-	withOnLineToUser *CoreOnLineUserQuery
-	modifiers        []func(*sql.Selector)
+	ctx                *QueryContext
+	order              []coreonlineuser.OrderOption
+	inters             []Interceptor
+	predicates         []predicate.CoreOnLineUser
+	withOnLineFromUser *CoreUserQuery
+	modifiers          []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the CoreUserQuery builder.
-func (_q *CoreUserQuery) Where(ps ...predicate.CoreUser) *CoreUserQuery {
+// Where adds a new predicate for the CoreOnLineUserQuery builder.
+func (_q *CoreOnLineUserQuery) Where(ps ...predicate.CoreOnLineUser) *CoreOnLineUserQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *CoreUserQuery) Limit(limit int) *CoreUserQuery {
+func (_q *CoreOnLineUserQuery) Limit(limit int) *CoreOnLineUserQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *CoreUserQuery) Offset(offset int) *CoreUserQuery {
+func (_q *CoreOnLineUserQuery) Offset(offset int) *CoreOnLineUserQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *CoreUserQuery) Unique(unique bool) *CoreUserQuery {
+func (_q *CoreOnLineUserQuery) Unique(unique bool) *CoreOnLineUserQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *CoreUserQuery) Order(o ...coreuser.OrderOption) *CoreUserQuery {
+func (_q *CoreOnLineUserQuery) Order(o ...coreonlineuser.OrderOption) *CoreOnLineUserQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
-// QueryUserFromRole chains the current query on the "user_from_role" edge.
-func (_q *CoreUserQuery) QueryUserFromRole() *CoreRoleQuery {
-	query := (&CoreRoleClient{config: _q.config}).Query()
+// QueryOnLineFromUser chains the current query on the "on_line_from_user" edge.
+func (_q *CoreOnLineUserQuery) QueryOnLineFromUser() *CoreUserQuery {
+	query := (&CoreUserClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -76,9 +73,9 @@ func (_q *CoreUserQuery) QueryUserFromRole() *CoreRoleQuery {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(coreuser.Table, coreuser.FieldID, selector),
-			sqlgraph.To(corerole.Table, corerole.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, coreuser.UserFromRoleTable, coreuser.UserFromRoleColumn),
+			sqlgraph.From(coreonlineuser.Table, coreonlineuser.FieldID, selector),
+			sqlgraph.To(coreuser.Table, coreuser.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, coreonlineuser.OnLineFromUserTable, coreonlineuser.OnLineFromUserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -86,43 +83,21 @@ func (_q *CoreUserQuery) QueryUserFromRole() *CoreRoleQuery {
 	return query
 }
 
-// QueryOnLineToUser chains the current query on the "on_line_to_user" edge.
-func (_q *CoreUserQuery) QueryOnLineToUser() *CoreOnLineUserQuery {
-	query := (&CoreOnLineUserClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(coreuser.Table, coreuser.FieldID, selector),
-			sqlgraph.To(coreonlineuser.Table, coreonlineuser.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, coreuser.OnLineToUserTable, coreuser.OnLineToUserColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// First returns the first CoreUser entity from the query.
-// Returns a *NotFoundError when no CoreUser was found.
-func (_q *CoreUserQuery) First(ctx context.Context) (*CoreUser, error) {
+// First returns the first CoreOnLineUser entity from the query.
+// Returns a *NotFoundError when no CoreOnLineUser was found.
+func (_q *CoreOnLineUserQuery) First(ctx context.Context) (*CoreOnLineUser, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{coreuser.Label}
+		return nil, &NotFoundError{coreonlineuser.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *CoreUserQuery) FirstX(ctx context.Context) *CoreUser {
+func (_q *CoreOnLineUserQuery) FirstX(ctx context.Context) *CoreOnLineUser {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -130,22 +105,22 @@ func (_q *CoreUserQuery) FirstX(ctx context.Context) *CoreUser {
 	return node
 }
 
-// FirstID returns the first CoreUser ID from the query.
-// Returns a *NotFoundError when no CoreUser ID was found.
-func (_q *CoreUserQuery) FirstID(ctx context.Context) (id string, err error) {
+// FirstID returns the first CoreOnLineUser ID from the query.
+// Returns a *NotFoundError when no CoreOnLineUser ID was found.
+func (_q *CoreOnLineUserQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{coreuser.Label}
+		err = &NotFoundError{coreonlineuser.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *CoreUserQuery) FirstIDX(ctx context.Context) string {
+func (_q *CoreOnLineUserQuery) FirstIDX(ctx context.Context) string {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -153,10 +128,10 @@ func (_q *CoreUserQuery) FirstIDX(ctx context.Context) string {
 	return id
 }
 
-// Only returns a single CoreUser entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one CoreUser entity is found.
-// Returns a *NotFoundError when no CoreUser entities are found.
-func (_q *CoreUserQuery) Only(ctx context.Context) (*CoreUser, error) {
+// Only returns a single CoreOnLineUser entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one CoreOnLineUser entity is found.
+// Returns a *NotFoundError when no CoreOnLineUser entities are found.
+func (_q *CoreOnLineUserQuery) Only(ctx context.Context) (*CoreOnLineUser, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -165,14 +140,14 @@ func (_q *CoreUserQuery) Only(ctx context.Context) (*CoreUser, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{coreuser.Label}
+		return nil, &NotFoundError{coreonlineuser.Label}
 	default:
-		return nil, &NotSingularError{coreuser.Label}
+		return nil, &NotSingularError{coreonlineuser.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *CoreUserQuery) OnlyX(ctx context.Context) *CoreUser {
+func (_q *CoreOnLineUserQuery) OnlyX(ctx context.Context) *CoreOnLineUser {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -180,10 +155,10 @@ func (_q *CoreUserQuery) OnlyX(ctx context.Context) *CoreUser {
 	return node
 }
 
-// OnlyID is like Only, but returns the only CoreUser ID in the query.
-// Returns a *NotSingularError when more than one CoreUser ID is found.
+// OnlyID is like Only, but returns the only CoreOnLineUser ID in the query.
+// Returns a *NotSingularError when more than one CoreOnLineUser ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *CoreUserQuery) OnlyID(ctx context.Context) (id string, err error) {
+func (_q *CoreOnLineUserQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
@@ -192,15 +167,15 @@ func (_q *CoreUserQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{coreuser.Label}
+		err = &NotFoundError{coreonlineuser.Label}
 	default:
-		err = &NotSingularError{coreuser.Label}
+		err = &NotSingularError{coreonlineuser.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *CoreUserQuery) OnlyIDX(ctx context.Context) string {
+func (_q *CoreOnLineUserQuery) OnlyIDX(ctx context.Context) string {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -208,18 +183,18 @@ func (_q *CoreUserQuery) OnlyIDX(ctx context.Context) string {
 	return id
 }
 
-// All executes the query and returns a list of CoreUsers.
-func (_q *CoreUserQuery) All(ctx context.Context) ([]*CoreUser, error) {
+// All executes the query and returns a list of CoreOnLineUsers.
+func (_q *CoreOnLineUserQuery) All(ctx context.Context) ([]*CoreOnLineUser, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*CoreUser, *CoreUserQuery]()
-	return withInterceptors[[]*CoreUser](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*CoreOnLineUser, *CoreOnLineUserQuery]()
+	return withInterceptors[[]*CoreOnLineUser](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *CoreUserQuery) AllX(ctx context.Context) []*CoreUser {
+func (_q *CoreOnLineUserQuery) AllX(ctx context.Context) []*CoreOnLineUser {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -227,20 +202,20 @@ func (_q *CoreUserQuery) AllX(ctx context.Context) []*CoreUser {
 	return nodes
 }
 
-// IDs executes the query and returns a list of CoreUser IDs.
-func (_q *CoreUserQuery) IDs(ctx context.Context) (ids []string, err error) {
+// IDs executes the query and returns a list of CoreOnLineUser IDs.
+func (_q *CoreOnLineUserQuery) IDs(ctx context.Context) (ids []string, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(coreuser.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(coreonlineuser.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *CoreUserQuery) IDsX(ctx context.Context) []string {
+func (_q *CoreOnLineUserQuery) IDsX(ctx context.Context) []string {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -249,16 +224,16 @@ func (_q *CoreUserQuery) IDsX(ctx context.Context) []string {
 }
 
 // Count returns the count of the given query.
-func (_q *CoreUserQuery) Count(ctx context.Context) (int, error) {
+func (_q *CoreOnLineUserQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*CoreUserQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*CoreOnLineUserQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *CoreUserQuery) CountX(ctx context.Context) int {
+func (_q *CoreOnLineUserQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -267,7 +242,7 @@ func (_q *CoreUserQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *CoreUserQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *CoreOnLineUserQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -280,7 +255,7 @@ func (_q *CoreUserQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *CoreUserQuery) ExistX(ctx context.Context) bool {
+func (_q *CoreOnLineUserQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -288,20 +263,19 @@ func (_q *CoreUserQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the CoreUserQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the CoreOnLineUserQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *CoreUserQuery) Clone() *CoreUserQuery {
+func (_q *CoreOnLineUserQuery) Clone() *CoreOnLineUserQuery {
 	if _q == nil {
 		return nil
 	}
-	return &CoreUserQuery{
-		config:           _q.config,
-		ctx:              _q.ctx.Clone(),
-		order:            append([]coreuser.OrderOption{}, _q.order...),
-		inters:           append([]Interceptor{}, _q.inters...),
-		predicates:       append([]predicate.CoreUser{}, _q.predicates...),
-		withUserFromRole: _q.withUserFromRole.Clone(),
-		withOnLineToUser: _q.withOnLineToUser.Clone(),
+	return &CoreOnLineUserQuery{
+		config:             _q.config,
+		ctx:                _q.ctx.Clone(),
+		order:              append([]coreonlineuser.OrderOption{}, _q.order...),
+		inters:             append([]Interceptor{}, _q.inters...),
+		predicates:         append([]predicate.CoreOnLineUser{}, _q.predicates...),
+		withOnLineFromUser: _q.withOnLineFromUser.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -309,25 +283,14 @@ func (_q *CoreUserQuery) Clone() *CoreUserQuery {
 	}
 }
 
-// WithUserFromRole tells the query-builder to eager-load the nodes that are connected to
-// the "user_from_role" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *CoreUserQuery) WithUserFromRole(opts ...func(*CoreRoleQuery)) *CoreUserQuery {
-	query := (&CoreRoleClient{config: _q.config}).Query()
+// WithOnLineFromUser tells the query-builder to eager-load the nodes that are connected to
+// the "on_line_from_user" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *CoreOnLineUserQuery) WithOnLineFromUser(opts ...func(*CoreUserQuery)) *CoreOnLineUserQuery {
+	query := (&CoreUserClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withUserFromRole = query
-	return _q
-}
-
-// WithOnLineToUser tells the query-builder to eager-load the nodes that are connected to
-// the "on_line_to_user" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *CoreUserQuery) WithOnLineToUser(opts ...func(*CoreOnLineUserQuery)) *CoreUserQuery {
-	query := (&CoreOnLineUserClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withOnLineToUser = query
+	_q.withOnLineFromUser = query
 	return _q
 }
 
@@ -341,15 +304,15 @@ func (_q *CoreUserQuery) WithOnLineToUser(opts ...func(*CoreOnLineUserQuery)) *C
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.CoreUser.Query().
-//		GroupBy(coreuser.FieldCreatedAt).
+//	client.CoreOnLineUser.Query().
+//		GroupBy(coreonlineuser.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (_q *CoreUserQuery) GroupBy(field string, fields ...string) *CoreUserGroupBy {
+func (_q *CoreOnLineUserQuery) GroupBy(field string, fields ...string) *CoreOnLineUserGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &CoreUserGroupBy{build: _q}
+	grbuild := &CoreOnLineUserGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = coreuser.Label
+	grbuild.label = coreonlineuser.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -363,23 +326,23 @@ func (_q *CoreUserQuery) GroupBy(field string, fields ...string) *CoreUserGroupB
 //		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
-//	client.CoreUser.Query().
-//		Select(coreuser.FieldCreatedAt).
+//	client.CoreOnLineUser.Query().
+//		Select(coreonlineuser.FieldCreatedAt).
 //		Scan(ctx, &v)
-func (_q *CoreUserQuery) Select(fields ...string) *CoreUserSelect {
+func (_q *CoreOnLineUserQuery) Select(fields ...string) *CoreOnLineUserSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &CoreUserSelect{CoreUserQuery: _q}
-	sbuild.label = coreuser.Label
+	sbuild := &CoreOnLineUserSelect{CoreOnLineUserQuery: _q}
+	sbuild.label = coreonlineuser.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a CoreUserSelect configured with the given aggregations.
-func (_q *CoreUserQuery) Aggregate(fns ...AggregateFunc) *CoreUserSelect {
+// Aggregate returns a CoreOnLineUserSelect configured with the given aggregations.
+func (_q *CoreOnLineUserQuery) Aggregate(fns ...AggregateFunc) *CoreOnLineUserSelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *CoreUserQuery) prepareQuery(ctx context.Context) error {
+func (_q *CoreOnLineUserQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
@@ -391,7 +354,7 @@ func (_q *CoreUserQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !coreuser.ValidColumn(f) {
+		if !coreonlineuser.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
@@ -405,20 +368,19 @@ func (_q *CoreUserQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *CoreUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CoreUser, error) {
+func (_q *CoreOnLineUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CoreOnLineUser, error) {
 	var (
-		nodes       = []*CoreUser{}
+		nodes       = []*CoreOnLineUser{}
 		_spec       = _q.querySpec()
-		loadedTypes = [2]bool{
-			_q.withUserFromRole != nil,
-			_q.withOnLineToUser != nil,
+		loadedTypes = [1]bool{
+			_q.withOnLineFromUser != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*CoreUser).scanValues(nil, columns)
+		return (*CoreOnLineUser).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &CoreUser{config: _q.config}
+		node := &CoreOnLineUser{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -435,27 +397,20 @@ func (_q *CoreUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Cor
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withUserFromRole; query != nil {
-		if err := _q.loadUserFromRole(ctx, query, nodes, nil,
-			func(n *CoreUser, e *CoreRole) { n.Edges.UserFromRole = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := _q.withOnLineToUser; query != nil {
-		if err := _q.loadOnLineToUser(ctx, query, nodes,
-			func(n *CoreUser) { n.Edges.OnLineToUser = []*CoreOnLineUser{} },
-			func(n *CoreUser, e *CoreOnLineUser) { n.Edges.OnLineToUser = append(n.Edges.OnLineToUser, e) }); err != nil {
+	if query := _q.withOnLineFromUser; query != nil {
+		if err := _q.loadOnLineFromUser(ctx, query, nodes, nil,
+			func(n *CoreOnLineUser, e *CoreUser) { n.Edges.OnLineFromUser = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (_q *CoreUserQuery) loadUserFromRole(ctx context.Context, query *CoreRoleQuery, nodes []*CoreUser, init func(*CoreUser), assign func(*CoreUser, *CoreRole)) error {
+func (_q *CoreOnLineUserQuery) loadOnLineFromUser(ctx context.Context, query *CoreUserQuery, nodes []*CoreOnLineUser, init func(*CoreOnLineUser), assign func(*CoreOnLineUser, *CoreUser)) error {
 	ids := make([]string, 0, len(nodes))
-	nodeids := make(map[string][]*CoreUser)
+	nodeids := make(map[string][]*CoreOnLineUser)
 	for i := range nodes {
-		fk := nodes[i].RoleID
+		fk := nodes[i].UserID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -464,7 +419,7 @@ func (_q *CoreUserQuery) loadUserFromRole(ctx context.Context, query *CoreRoleQu
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(corerole.IDIn(ids...))
+	query.Where(coreuser.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -472,7 +427,7 @@ func (_q *CoreUserQuery) loadUserFromRole(ctx context.Context, query *CoreRoleQu
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "role_id" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -480,38 +435,8 @@ func (_q *CoreUserQuery) loadUserFromRole(ctx context.Context, query *CoreRoleQu
 	}
 	return nil
 }
-func (_q *CoreUserQuery) loadOnLineToUser(ctx context.Context, query *CoreOnLineUserQuery, nodes []*CoreUser, init func(*CoreUser), assign func(*CoreUser, *CoreOnLineUser)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[string]*CoreUser)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(coreonlineuser.FieldUserID)
-	}
-	query.Where(predicate.CoreOnLineUser(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(coreuser.OnLineToUserColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.UserID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
 
-func (_q *CoreUserQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *CoreOnLineUserQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
@@ -523,8 +448,8 @@ func (_q *CoreUserQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *CoreUserQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(coreuser.Table, coreuser.Columns, sqlgraph.NewFieldSpec(coreuser.FieldID, field.TypeString))
+func (_q *CoreOnLineUserQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(coreonlineuser.Table, coreonlineuser.Columns, sqlgraph.NewFieldSpec(coreonlineuser.FieldID, field.TypeString))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -533,14 +458,14 @@ func (_q *CoreUserQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, coreuser.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, coreonlineuser.FieldID)
 		for i := range fields {
-			if fields[i] != coreuser.FieldID {
+			if fields[i] != coreonlineuser.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
-		if _q.withUserFromRole != nil {
-			_spec.Node.AddColumnOnce(coreuser.FieldRoleID)
+		if _q.withOnLineFromUser != nil {
+			_spec.Node.AddColumnOnce(coreonlineuser.FieldUserID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {
@@ -566,12 +491,12 @@ func (_q *CoreUserQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *CoreUserQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *CoreOnLineUserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(coreuser.Table)
+	t1 := builder.Table(coreonlineuser.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = coreuser.Columns
+		columns = coreonlineuser.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -602,33 +527,33 @@ func (_q *CoreUserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 }
 
 // Modify adds a query modifier for attaching custom logic to queries.
-func (_q *CoreUserQuery) Modify(modifiers ...func(s *sql.Selector)) *CoreUserSelect {
+func (_q *CoreOnLineUserQuery) Modify(modifiers ...func(s *sql.Selector)) *CoreOnLineUserSelect {
 	_q.modifiers = append(_q.modifiers, modifiers...)
 	return _q.Select()
 }
 
-// CoreUserGroupBy is the group-by builder for CoreUser entities.
-type CoreUserGroupBy struct {
+// CoreOnLineUserGroupBy is the group-by builder for CoreOnLineUser entities.
+type CoreOnLineUserGroupBy struct {
 	selector
-	build *CoreUserQuery
+	build *CoreOnLineUserQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *CoreUserGroupBy) Aggregate(fns ...AggregateFunc) *CoreUserGroupBy {
+func (_g *CoreOnLineUserGroupBy) Aggregate(fns ...AggregateFunc) *CoreOnLineUserGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *CoreUserGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *CoreOnLineUserGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*CoreUserQuery, *CoreUserGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*CoreOnLineUserQuery, *CoreOnLineUserGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *CoreUserGroupBy) sqlScan(ctx context.Context, root *CoreUserQuery, v any) error {
+func (_g *CoreOnLineUserGroupBy) sqlScan(ctx context.Context, root *CoreOnLineUserQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -655,28 +580,28 @@ func (_g *CoreUserGroupBy) sqlScan(ctx context.Context, root *CoreUserQuery, v a
 	return sql.ScanSlice(rows, v)
 }
 
-// CoreUserSelect is the builder for selecting fields of CoreUser entities.
-type CoreUserSelect struct {
-	*CoreUserQuery
+// CoreOnLineUserSelect is the builder for selecting fields of CoreOnLineUser entities.
+type CoreOnLineUserSelect struct {
+	*CoreOnLineUserQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *CoreUserSelect) Aggregate(fns ...AggregateFunc) *CoreUserSelect {
+func (_s *CoreOnLineUserSelect) Aggregate(fns ...AggregateFunc) *CoreOnLineUserSelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *CoreUserSelect) Scan(ctx context.Context, v any) error {
+func (_s *CoreOnLineUserSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*CoreUserQuery, *CoreUserSelect](ctx, _s.CoreUserQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*CoreOnLineUserQuery, *CoreOnLineUserSelect](ctx, _s.CoreOnLineUserQuery, _s, _s.inters, v)
 }
 
-func (_s *CoreUserSelect) sqlScan(ctx context.Context, root *CoreUserQuery, v any) error {
+func (_s *CoreOnLineUserSelect) sqlScan(ctx context.Context, root *CoreOnLineUserQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {
@@ -698,7 +623,7 @@ func (_s *CoreUserSelect) sqlScan(ctx context.Context, root *CoreUserQuery, v an
 }
 
 // Modify adds a query modifier for attaching custom logic to queries.
-func (_s *CoreUserSelect) Modify(modifiers ...func(s *sql.Selector)) *CoreUserSelect {
+func (_s *CoreOnLineUserSelect) Modify(modifiers ...func(s *sql.Selector)) *CoreOnLineUserSelect {
 	_s.modifiers = append(_s.modifiers, modifiers...)
 	return _s
 }

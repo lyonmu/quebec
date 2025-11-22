@@ -2,6 +2,7 @@ package common
 
 const (
 	CaptchaCache = "quebec:core:captcha:cache:%s"
+	TokenCache   = "quebec:core:token:cache:%s"
 )
 
 type MenuType int8
@@ -21,4 +22,10 @@ const (
 	DataRelationshipTypeUserToRole DataRelationshipType = 2
 	// 菜单与按钮
 	DataRelationshipTypeManyToMany DataRelationshipType = 3
+)
+
+type OperationType int
+
+const (
+	OperationLogin OperationType = 1
 )

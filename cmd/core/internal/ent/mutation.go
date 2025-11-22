@@ -14,6 +14,7 @@ import (
 	"github.com/lyonmu/quebec/cmd/core/internal/common"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coredatarelationship"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreonlineuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/predicate"
@@ -31,6 +32,7 @@ const (
 	// Node types.
 	TypeCoreDataRelationship = "CoreDataRelationship"
 	TypeCoreMenu             = "CoreMenu"
+	TypeCoreOnLineUser       = "CoreOnLineUser"
 	TypeCoreRole             = "CoreRole"
 	TypeCoreUser             = "CoreUser"
 )
@@ -2338,6 +2340,1336 @@ func (m *CoreMenuMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown CoreMenu edge %s", name)
 }
 
+// CoreOnLineUserMutation represents an operation that mutates the CoreOnLineUser nodes in the graph.
+type CoreOnLineUserMutation struct {
+	config
+	op                       Op
+	typ                      string
+	id                       *string
+	created_at               *time.Time
+	updated_at               *time.Time
+	deleted_at               *time.Time
+	access_ip                *string
+	last_operation_time      *int64
+	addlast_operation_time   *int64
+	operation_type           *common.OperationType
+	addoperation_type        *common.OperationType
+	os                       *string
+	platform                 *string
+	browser_name             *string
+	browser_version          *string
+	browser_engine_name      *string
+	browser_engine_version   *string
+	clearedFields            map[string]struct{}
+	on_line_from_user        *string
+	clearedon_line_from_user bool
+	done                     bool
+	oldValue                 func(context.Context) (*CoreOnLineUser, error)
+	predicates               []predicate.CoreOnLineUser
+}
+
+var _ ent.Mutation = (*CoreOnLineUserMutation)(nil)
+
+// coreonlineuserOption allows management of the mutation configuration using functional options.
+type coreonlineuserOption func(*CoreOnLineUserMutation)
+
+// newCoreOnLineUserMutation creates new mutation for the CoreOnLineUser entity.
+func newCoreOnLineUserMutation(c config, op Op, opts ...coreonlineuserOption) *CoreOnLineUserMutation {
+	m := &CoreOnLineUserMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCoreOnLineUser,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCoreOnLineUserID sets the ID field of the mutation.
+func withCoreOnLineUserID(id string) coreonlineuserOption {
+	return func(m *CoreOnLineUserMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CoreOnLineUser
+		)
+		m.oldValue = func(ctx context.Context) (*CoreOnLineUser, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CoreOnLineUser.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCoreOnLineUser sets the old CoreOnLineUser of the mutation.
+func withCoreOnLineUser(node *CoreOnLineUser) coreonlineuserOption {
+	return func(m *CoreOnLineUserMutation) {
+		m.oldValue = func(context.Context) (*CoreOnLineUser, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CoreOnLineUserMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CoreOnLineUserMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of CoreOnLineUser entities.
+func (m *CoreOnLineUserMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CoreOnLineUserMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CoreOnLineUserMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CoreOnLineUser.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *CoreOnLineUserMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *CoreOnLineUserMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the CoreOnLineUser entity.
+// If the CoreOnLineUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreOnLineUserMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *CoreOnLineUserMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *CoreOnLineUserMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *CoreOnLineUserMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the CoreOnLineUser entity.
+// If the CoreOnLineUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreOnLineUserMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *CoreOnLineUserMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *CoreOnLineUserMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *CoreOnLineUserMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the CoreOnLineUser entity.
+// If the CoreOnLineUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreOnLineUserMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *CoreOnLineUserMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[coreonlineuser.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *CoreOnLineUserMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[coreonlineuser.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *CoreOnLineUserMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, coreonlineuser.FieldDeletedAt)
+}
+
+// SetUserID sets the "user_id" field.
+func (m *CoreOnLineUserMutation) SetUserID(s string) {
+	m.on_line_from_user = &s
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *CoreOnLineUserMutation) UserID() (r string, exists bool) {
+	v := m.on_line_from_user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the CoreOnLineUser entity.
+// If the CoreOnLineUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreOnLineUserMutation) OldUserID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ClearUserID clears the value of the "user_id" field.
+func (m *CoreOnLineUserMutation) ClearUserID() {
+	m.on_line_from_user = nil
+	m.clearedFields[coreonlineuser.FieldUserID] = struct{}{}
+}
+
+// UserIDCleared returns if the "user_id" field was cleared in this mutation.
+func (m *CoreOnLineUserMutation) UserIDCleared() bool {
+	_, ok := m.clearedFields[coreonlineuser.FieldUserID]
+	return ok
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *CoreOnLineUserMutation) ResetUserID() {
+	m.on_line_from_user = nil
+	delete(m.clearedFields, coreonlineuser.FieldUserID)
+}
+
+// SetAccessIP sets the "access_ip" field.
+func (m *CoreOnLineUserMutation) SetAccessIP(s string) {
+	m.access_ip = &s
+}
+
+// AccessIP returns the value of the "access_ip" field in the mutation.
+func (m *CoreOnLineUserMutation) AccessIP() (r string, exists bool) {
+	v := m.access_ip
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccessIP returns the old "access_ip" field's value of the CoreOnLineUser entity.
+// If the CoreOnLineUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreOnLineUserMutation) OldAccessIP(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccessIP is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccessIP requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccessIP: %w", err)
+	}
+	return oldValue.AccessIP, nil
+}
+
+// ClearAccessIP clears the value of the "access_ip" field.
+func (m *CoreOnLineUserMutation) ClearAccessIP() {
+	m.access_ip = nil
+	m.clearedFields[coreonlineuser.FieldAccessIP] = struct{}{}
+}
+
+// AccessIPCleared returns if the "access_ip" field was cleared in this mutation.
+func (m *CoreOnLineUserMutation) AccessIPCleared() bool {
+	_, ok := m.clearedFields[coreonlineuser.FieldAccessIP]
+	return ok
+}
+
+// ResetAccessIP resets all changes to the "access_ip" field.
+func (m *CoreOnLineUserMutation) ResetAccessIP() {
+	m.access_ip = nil
+	delete(m.clearedFields, coreonlineuser.FieldAccessIP)
+}
+
+// SetLastOperationTime sets the "last_operation_time" field.
+func (m *CoreOnLineUserMutation) SetLastOperationTime(i int64) {
+	m.last_operation_time = &i
+	m.addlast_operation_time = nil
+}
+
+// LastOperationTime returns the value of the "last_operation_time" field in the mutation.
+func (m *CoreOnLineUserMutation) LastOperationTime() (r int64, exists bool) {
+	v := m.last_operation_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastOperationTime returns the old "last_operation_time" field's value of the CoreOnLineUser entity.
+// If the CoreOnLineUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreOnLineUserMutation) OldLastOperationTime(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastOperationTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastOperationTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastOperationTime: %w", err)
+	}
+	return oldValue.LastOperationTime, nil
+}
+
+// AddLastOperationTime adds i to the "last_operation_time" field.
+func (m *CoreOnLineUserMutation) AddLastOperationTime(i int64) {
+	if m.addlast_operation_time != nil {
+		*m.addlast_operation_time += i
+	} else {
+		m.addlast_operation_time = &i
+	}
+}
+
+// AddedLastOperationTime returns the value that was added to the "last_operation_time" field in this mutation.
+func (m *CoreOnLineUserMutation) AddedLastOperationTime() (r int64, exists bool) {
+	v := m.addlast_operation_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearLastOperationTime clears the value of the "last_operation_time" field.
+func (m *CoreOnLineUserMutation) ClearLastOperationTime() {
+	m.last_operation_time = nil
+	m.addlast_operation_time = nil
+	m.clearedFields[coreonlineuser.FieldLastOperationTime] = struct{}{}
+}
+
+// LastOperationTimeCleared returns if the "last_operation_time" field was cleared in this mutation.
+func (m *CoreOnLineUserMutation) LastOperationTimeCleared() bool {
+	_, ok := m.clearedFields[coreonlineuser.FieldLastOperationTime]
+	return ok
+}
+
+// ResetLastOperationTime resets all changes to the "last_operation_time" field.
+func (m *CoreOnLineUserMutation) ResetLastOperationTime() {
+	m.last_operation_time = nil
+	m.addlast_operation_time = nil
+	delete(m.clearedFields, coreonlineuser.FieldLastOperationTime)
+}
+
+// SetOperationType sets the "operation_type" field.
+func (m *CoreOnLineUserMutation) SetOperationType(ct common.OperationType) {
+	m.operation_type = &ct
+	m.addoperation_type = nil
+}
+
+// OperationType returns the value of the "operation_type" field in the mutation.
+func (m *CoreOnLineUserMutation) OperationType() (r common.OperationType, exists bool) {
+	v := m.operation_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOperationType returns the old "operation_type" field's value of the CoreOnLineUser entity.
+// If the CoreOnLineUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreOnLineUserMutation) OldOperationType(ctx context.Context) (v common.OperationType, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOperationType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOperationType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOperationType: %w", err)
+	}
+	return oldValue.OperationType, nil
+}
+
+// AddOperationType adds ct to the "operation_type" field.
+func (m *CoreOnLineUserMutation) AddOperationType(ct common.OperationType) {
+	if m.addoperation_type != nil {
+		*m.addoperation_type += ct
+	} else {
+		m.addoperation_type = &ct
+	}
+}
+
+// AddedOperationType returns the value that was added to the "operation_type" field in this mutation.
+func (m *CoreOnLineUserMutation) AddedOperationType() (r common.OperationType, exists bool) {
+	v := m.addoperation_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearOperationType clears the value of the "operation_type" field.
+func (m *CoreOnLineUserMutation) ClearOperationType() {
+	m.operation_type = nil
+	m.addoperation_type = nil
+	m.clearedFields[coreonlineuser.FieldOperationType] = struct{}{}
+}
+
+// OperationTypeCleared returns if the "operation_type" field was cleared in this mutation.
+func (m *CoreOnLineUserMutation) OperationTypeCleared() bool {
+	_, ok := m.clearedFields[coreonlineuser.FieldOperationType]
+	return ok
+}
+
+// ResetOperationType resets all changes to the "operation_type" field.
+func (m *CoreOnLineUserMutation) ResetOperationType() {
+	m.operation_type = nil
+	m.addoperation_type = nil
+	delete(m.clearedFields, coreonlineuser.FieldOperationType)
+}
+
+// SetOs sets the "os" field.
+func (m *CoreOnLineUserMutation) SetOs(s string) {
+	m.os = &s
+}
+
+// Os returns the value of the "os" field in the mutation.
+func (m *CoreOnLineUserMutation) Os() (r string, exists bool) {
+	v := m.os
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOs returns the old "os" field's value of the CoreOnLineUser entity.
+// If the CoreOnLineUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreOnLineUserMutation) OldOs(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOs is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOs requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOs: %w", err)
+	}
+	return oldValue.Os, nil
+}
+
+// ClearOs clears the value of the "os" field.
+func (m *CoreOnLineUserMutation) ClearOs() {
+	m.os = nil
+	m.clearedFields[coreonlineuser.FieldOs] = struct{}{}
+}
+
+// OsCleared returns if the "os" field was cleared in this mutation.
+func (m *CoreOnLineUserMutation) OsCleared() bool {
+	_, ok := m.clearedFields[coreonlineuser.FieldOs]
+	return ok
+}
+
+// ResetOs resets all changes to the "os" field.
+func (m *CoreOnLineUserMutation) ResetOs() {
+	m.os = nil
+	delete(m.clearedFields, coreonlineuser.FieldOs)
+}
+
+// SetPlatform sets the "platform" field.
+func (m *CoreOnLineUserMutation) SetPlatform(s string) {
+	m.platform = &s
+}
+
+// Platform returns the value of the "platform" field in the mutation.
+func (m *CoreOnLineUserMutation) Platform() (r string, exists bool) {
+	v := m.platform
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPlatform returns the old "platform" field's value of the CoreOnLineUser entity.
+// If the CoreOnLineUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreOnLineUserMutation) OldPlatform(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPlatform is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPlatform requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPlatform: %w", err)
+	}
+	return oldValue.Platform, nil
+}
+
+// ClearPlatform clears the value of the "platform" field.
+func (m *CoreOnLineUserMutation) ClearPlatform() {
+	m.platform = nil
+	m.clearedFields[coreonlineuser.FieldPlatform] = struct{}{}
+}
+
+// PlatformCleared returns if the "platform" field was cleared in this mutation.
+func (m *CoreOnLineUserMutation) PlatformCleared() bool {
+	_, ok := m.clearedFields[coreonlineuser.FieldPlatform]
+	return ok
+}
+
+// ResetPlatform resets all changes to the "platform" field.
+func (m *CoreOnLineUserMutation) ResetPlatform() {
+	m.platform = nil
+	delete(m.clearedFields, coreonlineuser.FieldPlatform)
+}
+
+// SetBrowserName sets the "browser_name" field.
+func (m *CoreOnLineUserMutation) SetBrowserName(s string) {
+	m.browser_name = &s
+}
+
+// BrowserName returns the value of the "browser_name" field in the mutation.
+func (m *CoreOnLineUserMutation) BrowserName() (r string, exists bool) {
+	v := m.browser_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBrowserName returns the old "browser_name" field's value of the CoreOnLineUser entity.
+// If the CoreOnLineUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreOnLineUserMutation) OldBrowserName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBrowserName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBrowserName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBrowserName: %w", err)
+	}
+	return oldValue.BrowserName, nil
+}
+
+// ClearBrowserName clears the value of the "browser_name" field.
+func (m *CoreOnLineUserMutation) ClearBrowserName() {
+	m.browser_name = nil
+	m.clearedFields[coreonlineuser.FieldBrowserName] = struct{}{}
+}
+
+// BrowserNameCleared returns if the "browser_name" field was cleared in this mutation.
+func (m *CoreOnLineUserMutation) BrowserNameCleared() bool {
+	_, ok := m.clearedFields[coreonlineuser.FieldBrowserName]
+	return ok
+}
+
+// ResetBrowserName resets all changes to the "browser_name" field.
+func (m *CoreOnLineUserMutation) ResetBrowserName() {
+	m.browser_name = nil
+	delete(m.clearedFields, coreonlineuser.FieldBrowserName)
+}
+
+// SetBrowserVersion sets the "browser_version" field.
+func (m *CoreOnLineUserMutation) SetBrowserVersion(s string) {
+	m.browser_version = &s
+}
+
+// BrowserVersion returns the value of the "browser_version" field in the mutation.
+func (m *CoreOnLineUserMutation) BrowserVersion() (r string, exists bool) {
+	v := m.browser_version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBrowserVersion returns the old "browser_version" field's value of the CoreOnLineUser entity.
+// If the CoreOnLineUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreOnLineUserMutation) OldBrowserVersion(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBrowserVersion is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBrowserVersion requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBrowserVersion: %w", err)
+	}
+	return oldValue.BrowserVersion, nil
+}
+
+// ClearBrowserVersion clears the value of the "browser_version" field.
+func (m *CoreOnLineUserMutation) ClearBrowserVersion() {
+	m.browser_version = nil
+	m.clearedFields[coreonlineuser.FieldBrowserVersion] = struct{}{}
+}
+
+// BrowserVersionCleared returns if the "browser_version" field was cleared in this mutation.
+func (m *CoreOnLineUserMutation) BrowserVersionCleared() bool {
+	_, ok := m.clearedFields[coreonlineuser.FieldBrowserVersion]
+	return ok
+}
+
+// ResetBrowserVersion resets all changes to the "browser_version" field.
+func (m *CoreOnLineUserMutation) ResetBrowserVersion() {
+	m.browser_version = nil
+	delete(m.clearedFields, coreonlineuser.FieldBrowserVersion)
+}
+
+// SetBrowserEngineName sets the "browser_engine_name" field.
+func (m *CoreOnLineUserMutation) SetBrowserEngineName(s string) {
+	m.browser_engine_name = &s
+}
+
+// BrowserEngineName returns the value of the "browser_engine_name" field in the mutation.
+func (m *CoreOnLineUserMutation) BrowserEngineName() (r string, exists bool) {
+	v := m.browser_engine_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBrowserEngineName returns the old "browser_engine_name" field's value of the CoreOnLineUser entity.
+// If the CoreOnLineUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreOnLineUserMutation) OldBrowserEngineName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBrowserEngineName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBrowserEngineName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBrowserEngineName: %w", err)
+	}
+	return oldValue.BrowserEngineName, nil
+}
+
+// ClearBrowserEngineName clears the value of the "browser_engine_name" field.
+func (m *CoreOnLineUserMutation) ClearBrowserEngineName() {
+	m.browser_engine_name = nil
+	m.clearedFields[coreonlineuser.FieldBrowserEngineName] = struct{}{}
+}
+
+// BrowserEngineNameCleared returns if the "browser_engine_name" field was cleared in this mutation.
+func (m *CoreOnLineUserMutation) BrowserEngineNameCleared() bool {
+	_, ok := m.clearedFields[coreonlineuser.FieldBrowserEngineName]
+	return ok
+}
+
+// ResetBrowserEngineName resets all changes to the "browser_engine_name" field.
+func (m *CoreOnLineUserMutation) ResetBrowserEngineName() {
+	m.browser_engine_name = nil
+	delete(m.clearedFields, coreonlineuser.FieldBrowserEngineName)
+}
+
+// SetBrowserEngineVersion sets the "browser_engine_version" field.
+func (m *CoreOnLineUserMutation) SetBrowserEngineVersion(s string) {
+	m.browser_engine_version = &s
+}
+
+// BrowserEngineVersion returns the value of the "browser_engine_version" field in the mutation.
+func (m *CoreOnLineUserMutation) BrowserEngineVersion() (r string, exists bool) {
+	v := m.browser_engine_version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBrowserEngineVersion returns the old "browser_engine_version" field's value of the CoreOnLineUser entity.
+// If the CoreOnLineUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreOnLineUserMutation) OldBrowserEngineVersion(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBrowserEngineVersion is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBrowserEngineVersion requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBrowserEngineVersion: %w", err)
+	}
+	return oldValue.BrowserEngineVersion, nil
+}
+
+// ClearBrowserEngineVersion clears the value of the "browser_engine_version" field.
+func (m *CoreOnLineUserMutation) ClearBrowserEngineVersion() {
+	m.browser_engine_version = nil
+	m.clearedFields[coreonlineuser.FieldBrowserEngineVersion] = struct{}{}
+}
+
+// BrowserEngineVersionCleared returns if the "browser_engine_version" field was cleared in this mutation.
+func (m *CoreOnLineUserMutation) BrowserEngineVersionCleared() bool {
+	_, ok := m.clearedFields[coreonlineuser.FieldBrowserEngineVersion]
+	return ok
+}
+
+// ResetBrowserEngineVersion resets all changes to the "browser_engine_version" field.
+func (m *CoreOnLineUserMutation) ResetBrowserEngineVersion() {
+	m.browser_engine_version = nil
+	delete(m.clearedFields, coreonlineuser.FieldBrowserEngineVersion)
+}
+
+// SetOnLineFromUserID sets the "on_line_from_user" edge to the CoreUser entity by id.
+func (m *CoreOnLineUserMutation) SetOnLineFromUserID(id string) {
+	m.on_line_from_user = &id
+}
+
+// ClearOnLineFromUser clears the "on_line_from_user" edge to the CoreUser entity.
+func (m *CoreOnLineUserMutation) ClearOnLineFromUser() {
+	m.clearedon_line_from_user = true
+	m.clearedFields[coreonlineuser.FieldUserID] = struct{}{}
+}
+
+// OnLineFromUserCleared reports if the "on_line_from_user" edge to the CoreUser entity was cleared.
+func (m *CoreOnLineUserMutation) OnLineFromUserCleared() bool {
+	return m.UserIDCleared() || m.clearedon_line_from_user
+}
+
+// OnLineFromUserID returns the "on_line_from_user" edge ID in the mutation.
+func (m *CoreOnLineUserMutation) OnLineFromUserID() (id string, exists bool) {
+	if m.on_line_from_user != nil {
+		return *m.on_line_from_user, true
+	}
+	return
+}
+
+// OnLineFromUserIDs returns the "on_line_from_user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// OnLineFromUserID instead. It exists only for internal usage by the builders.
+func (m *CoreOnLineUserMutation) OnLineFromUserIDs() (ids []string) {
+	if id := m.on_line_from_user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetOnLineFromUser resets all changes to the "on_line_from_user" edge.
+func (m *CoreOnLineUserMutation) ResetOnLineFromUser() {
+	m.on_line_from_user = nil
+	m.clearedon_line_from_user = false
+}
+
+// Where appends a list predicates to the CoreOnLineUserMutation builder.
+func (m *CoreOnLineUserMutation) Where(ps ...predicate.CoreOnLineUser) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CoreOnLineUserMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CoreOnLineUserMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CoreOnLineUser, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CoreOnLineUserMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CoreOnLineUserMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CoreOnLineUser).
+func (m *CoreOnLineUserMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CoreOnLineUserMutation) Fields() []string {
+	fields := make([]string, 0, 13)
+	if m.created_at != nil {
+		fields = append(fields, coreonlineuser.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, coreonlineuser.FieldUpdatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, coreonlineuser.FieldDeletedAt)
+	}
+	if m.on_line_from_user != nil {
+		fields = append(fields, coreonlineuser.FieldUserID)
+	}
+	if m.access_ip != nil {
+		fields = append(fields, coreonlineuser.FieldAccessIP)
+	}
+	if m.last_operation_time != nil {
+		fields = append(fields, coreonlineuser.FieldLastOperationTime)
+	}
+	if m.operation_type != nil {
+		fields = append(fields, coreonlineuser.FieldOperationType)
+	}
+	if m.os != nil {
+		fields = append(fields, coreonlineuser.FieldOs)
+	}
+	if m.platform != nil {
+		fields = append(fields, coreonlineuser.FieldPlatform)
+	}
+	if m.browser_name != nil {
+		fields = append(fields, coreonlineuser.FieldBrowserName)
+	}
+	if m.browser_version != nil {
+		fields = append(fields, coreonlineuser.FieldBrowserVersion)
+	}
+	if m.browser_engine_name != nil {
+		fields = append(fields, coreonlineuser.FieldBrowserEngineName)
+	}
+	if m.browser_engine_version != nil {
+		fields = append(fields, coreonlineuser.FieldBrowserEngineVersion)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CoreOnLineUserMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case coreonlineuser.FieldCreatedAt:
+		return m.CreatedAt()
+	case coreonlineuser.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case coreonlineuser.FieldDeletedAt:
+		return m.DeletedAt()
+	case coreonlineuser.FieldUserID:
+		return m.UserID()
+	case coreonlineuser.FieldAccessIP:
+		return m.AccessIP()
+	case coreonlineuser.FieldLastOperationTime:
+		return m.LastOperationTime()
+	case coreonlineuser.FieldOperationType:
+		return m.OperationType()
+	case coreonlineuser.FieldOs:
+		return m.Os()
+	case coreonlineuser.FieldPlatform:
+		return m.Platform()
+	case coreonlineuser.FieldBrowserName:
+		return m.BrowserName()
+	case coreonlineuser.FieldBrowserVersion:
+		return m.BrowserVersion()
+	case coreonlineuser.FieldBrowserEngineName:
+		return m.BrowserEngineName()
+	case coreonlineuser.FieldBrowserEngineVersion:
+		return m.BrowserEngineVersion()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CoreOnLineUserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case coreonlineuser.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case coreonlineuser.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case coreonlineuser.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
+	case coreonlineuser.FieldUserID:
+		return m.OldUserID(ctx)
+	case coreonlineuser.FieldAccessIP:
+		return m.OldAccessIP(ctx)
+	case coreonlineuser.FieldLastOperationTime:
+		return m.OldLastOperationTime(ctx)
+	case coreonlineuser.FieldOperationType:
+		return m.OldOperationType(ctx)
+	case coreonlineuser.FieldOs:
+		return m.OldOs(ctx)
+	case coreonlineuser.FieldPlatform:
+		return m.OldPlatform(ctx)
+	case coreonlineuser.FieldBrowserName:
+		return m.OldBrowserName(ctx)
+	case coreonlineuser.FieldBrowserVersion:
+		return m.OldBrowserVersion(ctx)
+	case coreonlineuser.FieldBrowserEngineName:
+		return m.OldBrowserEngineName(ctx)
+	case coreonlineuser.FieldBrowserEngineVersion:
+		return m.OldBrowserEngineVersion(ctx)
+	}
+	return nil, fmt.Errorf("unknown CoreOnLineUser field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoreOnLineUserMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case coreonlineuser.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case coreonlineuser.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case coreonlineuser.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
+	case coreonlineuser.FieldUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case coreonlineuser.FieldAccessIP:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccessIP(v)
+		return nil
+	case coreonlineuser.FieldLastOperationTime:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastOperationTime(v)
+		return nil
+	case coreonlineuser.FieldOperationType:
+		v, ok := value.(common.OperationType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOperationType(v)
+		return nil
+	case coreonlineuser.FieldOs:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOs(v)
+		return nil
+	case coreonlineuser.FieldPlatform:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPlatform(v)
+		return nil
+	case coreonlineuser.FieldBrowserName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBrowserName(v)
+		return nil
+	case coreonlineuser.FieldBrowserVersion:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBrowserVersion(v)
+		return nil
+	case coreonlineuser.FieldBrowserEngineName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBrowserEngineName(v)
+		return nil
+	case coreonlineuser.FieldBrowserEngineVersion:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBrowserEngineVersion(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CoreOnLineUser field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CoreOnLineUserMutation) AddedFields() []string {
+	var fields []string
+	if m.addlast_operation_time != nil {
+		fields = append(fields, coreonlineuser.FieldLastOperationTime)
+	}
+	if m.addoperation_type != nil {
+		fields = append(fields, coreonlineuser.FieldOperationType)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CoreOnLineUserMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case coreonlineuser.FieldLastOperationTime:
+		return m.AddedLastOperationTime()
+	case coreonlineuser.FieldOperationType:
+		return m.AddedOperationType()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoreOnLineUserMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case coreonlineuser.FieldLastOperationTime:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLastOperationTime(v)
+		return nil
+	case coreonlineuser.FieldOperationType:
+		v, ok := value.(common.OperationType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOperationType(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CoreOnLineUser numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CoreOnLineUserMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(coreonlineuser.FieldDeletedAt) {
+		fields = append(fields, coreonlineuser.FieldDeletedAt)
+	}
+	if m.FieldCleared(coreonlineuser.FieldUserID) {
+		fields = append(fields, coreonlineuser.FieldUserID)
+	}
+	if m.FieldCleared(coreonlineuser.FieldAccessIP) {
+		fields = append(fields, coreonlineuser.FieldAccessIP)
+	}
+	if m.FieldCleared(coreonlineuser.FieldLastOperationTime) {
+		fields = append(fields, coreonlineuser.FieldLastOperationTime)
+	}
+	if m.FieldCleared(coreonlineuser.FieldOperationType) {
+		fields = append(fields, coreonlineuser.FieldOperationType)
+	}
+	if m.FieldCleared(coreonlineuser.FieldOs) {
+		fields = append(fields, coreonlineuser.FieldOs)
+	}
+	if m.FieldCleared(coreonlineuser.FieldPlatform) {
+		fields = append(fields, coreonlineuser.FieldPlatform)
+	}
+	if m.FieldCleared(coreonlineuser.FieldBrowserName) {
+		fields = append(fields, coreonlineuser.FieldBrowserName)
+	}
+	if m.FieldCleared(coreonlineuser.FieldBrowserVersion) {
+		fields = append(fields, coreonlineuser.FieldBrowserVersion)
+	}
+	if m.FieldCleared(coreonlineuser.FieldBrowserEngineName) {
+		fields = append(fields, coreonlineuser.FieldBrowserEngineName)
+	}
+	if m.FieldCleared(coreonlineuser.FieldBrowserEngineVersion) {
+		fields = append(fields, coreonlineuser.FieldBrowserEngineVersion)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CoreOnLineUserMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CoreOnLineUserMutation) ClearField(name string) error {
+	switch name {
+	case coreonlineuser.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	case coreonlineuser.FieldUserID:
+		m.ClearUserID()
+		return nil
+	case coreonlineuser.FieldAccessIP:
+		m.ClearAccessIP()
+		return nil
+	case coreonlineuser.FieldLastOperationTime:
+		m.ClearLastOperationTime()
+		return nil
+	case coreonlineuser.FieldOperationType:
+		m.ClearOperationType()
+		return nil
+	case coreonlineuser.FieldOs:
+		m.ClearOs()
+		return nil
+	case coreonlineuser.FieldPlatform:
+		m.ClearPlatform()
+		return nil
+	case coreonlineuser.FieldBrowserName:
+		m.ClearBrowserName()
+		return nil
+	case coreonlineuser.FieldBrowserVersion:
+		m.ClearBrowserVersion()
+		return nil
+	case coreonlineuser.FieldBrowserEngineName:
+		m.ClearBrowserEngineName()
+		return nil
+	case coreonlineuser.FieldBrowserEngineVersion:
+		m.ClearBrowserEngineVersion()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreOnLineUser nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CoreOnLineUserMutation) ResetField(name string) error {
+	switch name {
+	case coreonlineuser.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case coreonlineuser.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case coreonlineuser.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
+	case coreonlineuser.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case coreonlineuser.FieldAccessIP:
+		m.ResetAccessIP()
+		return nil
+	case coreonlineuser.FieldLastOperationTime:
+		m.ResetLastOperationTime()
+		return nil
+	case coreonlineuser.FieldOperationType:
+		m.ResetOperationType()
+		return nil
+	case coreonlineuser.FieldOs:
+		m.ResetOs()
+		return nil
+	case coreonlineuser.FieldPlatform:
+		m.ResetPlatform()
+		return nil
+	case coreonlineuser.FieldBrowserName:
+		m.ResetBrowserName()
+		return nil
+	case coreonlineuser.FieldBrowserVersion:
+		m.ResetBrowserVersion()
+		return nil
+	case coreonlineuser.FieldBrowserEngineName:
+		m.ResetBrowserEngineName()
+		return nil
+	case coreonlineuser.FieldBrowserEngineVersion:
+		m.ResetBrowserEngineVersion()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreOnLineUser field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CoreOnLineUserMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.on_line_from_user != nil {
+		edges = append(edges, coreonlineuser.EdgeOnLineFromUser)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CoreOnLineUserMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case coreonlineuser.EdgeOnLineFromUser:
+		if id := m.on_line_from_user; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CoreOnLineUserMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CoreOnLineUserMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CoreOnLineUserMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedon_line_from_user {
+		edges = append(edges, coreonlineuser.EdgeOnLineFromUser)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CoreOnLineUserMutation) EdgeCleared(name string) bool {
+	switch name {
+	case coreonlineuser.EdgeOnLineFromUser:
+		return m.clearedon_line_from_user
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CoreOnLineUserMutation) ClearEdge(name string) error {
+	switch name {
+	case coreonlineuser.EdgeOnLineFromUser:
+		m.ClearOnLineFromUser()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreOnLineUser unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CoreOnLineUserMutation) ResetEdge(name string) error {
+	switch name {
+	case coreonlineuser.EdgeOnLineFromUser:
+		m.ResetOnLineFromUser()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreOnLineUser edge %s", name)
+}
+
 // CoreRoleMutation represents an operation that mutates the CoreRole nodes in the graph.
 type CoreRoleMutation struct {
 	config
@@ -3235,25 +4567,30 @@ func (m *CoreRoleMutation) ResetEdge(name string) error {
 // CoreUserMutation represents an operation that mutates the CoreUser nodes in the graph.
 type CoreUserMutation struct {
 	config
-	op                    Op
-	typ                   string
-	id                    *string
-	created_at            *time.Time
-	updated_at            *time.Time
-	deleted_at            *time.Time
-	username              *string
-	password              *string
-	email                 *string
-	nickname              *string
-	status                *constant.YesOrNo
-	addstatus             *constant.YesOrNo
-	remark                *string
-	clearedFields         map[string]struct{}
-	user_from_role        *string
-	cleareduser_from_role bool
-	done                  bool
-	oldValue              func(context.Context) (*CoreUser, error)
-	predicates            []predicate.CoreUser
+	op                      Op
+	typ                     string
+	id                      *string
+	created_at              *time.Time
+	updated_at              *time.Time
+	deleted_at              *time.Time
+	username                *string
+	password                *string
+	email                   *string
+	nickname                *string
+	status                  *constant.YesOrNo
+	addstatus               *constant.YesOrNo
+	remark                  *string
+	last_password_change    *int64
+	addlast_password_change *int64
+	clearedFields           map[string]struct{}
+	user_from_role          *string
+	cleareduser_from_role   bool
+	on_line_to_user         map[string]struct{}
+	removedon_line_to_user  map[string]struct{}
+	clearedon_line_to_user  bool
+	done                    bool
+	oldValue                func(context.Context) (*CoreUser, error)
+	predicates              []predicate.CoreUser
 }
 
 var _ ent.Mutation = (*CoreUserMutation)(nil)
@@ -3845,6 +5182,76 @@ func (m *CoreUserMutation) ResetRemark() {
 	delete(m.clearedFields, coreuser.FieldRemark)
 }
 
+// SetLastPasswordChange sets the "last_password_change" field.
+func (m *CoreUserMutation) SetLastPasswordChange(i int64) {
+	m.last_password_change = &i
+	m.addlast_password_change = nil
+}
+
+// LastPasswordChange returns the value of the "last_password_change" field in the mutation.
+func (m *CoreUserMutation) LastPasswordChange() (r int64, exists bool) {
+	v := m.last_password_change
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastPasswordChange returns the old "last_password_change" field's value of the CoreUser entity.
+// If the CoreUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUserMutation) OldLastPasswordChange(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastPasswordChange is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastPasswordChange requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastPasswordChange: %w", err)
+	}
+	return oldValue.LastPasswordChange, nil
+}
+
+// AddLastPasswordChange adds i to the "last_password_change" field.
+func (m *CoreUserMutation) AddLastPasswordChange(i int64) {
+	if m.addlast_password_change != nil {
+		*m.addlast_password_change += i
+	} else {
+		m.addlast_password_change = &i
+	}
+}
+
+// AddedLastPasswordChange returns the value that was added to the "last_password_change" field in this mutation.
+func (m *CoreUserMutation) AddedLastPasswordChange() (r int64, exists bool) {
+	v := m.addlast_password_change
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearLastPasswordChange clears the value of the "last_password_change" field.
+func (m *CoreUserMutation) ClearLastPasswordChange() {
+	m.last_password_change = nil
+	m.addlast_password_change = nil
+	m.clearedFields[coreuser.FieldLastPasswordChange] = struct{}{}
+}
+
+// LastPasswordChangeCleared returns if the "last_password_change" field was cleared in this mutation.
+func (m *CoreUserMutation) LastPasswordChangeCleared() bool {
+	_, ok := m.clearedFields[coreuser.FieldLastPasswordChange]
+	return ok
+}
+
+// ResetLastPasswordChange resets all changes to the "last_password_change" field.
+func (m *CoreUserMutation) ResetLastPasswordChange() {
+	m.last_password_change = nil
+	m.addlast_password_change = nil
+	delete(m.clearedFields, coreuser.FieldLastPasswordChange)
+}
+
 // SetUserFromRoleID sets the "user_from_role" edge to the CoreRole entity by id.
 func (m *CoreUserMutation) SetUserFromRoleID(id string) {
 	m.user_from_role = &id
@@ -3885,6 +5292,60 @@ func (m *CoreUserMutation) ResetUserFromRole() {
 	m.cleareduser_from_role = false
 }
 
+// AddOnLineToUserIDs adds the "on_line_to_user" edge to the CoreOnLineUser entity by ids.
+func (m *CoreUserMutation) AddOnLineToUserIDs(ids ...string) {
+	if m.on_line_to_user == nil {
+		m.on_line_to_user = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.on_line_to_user[ids[i]] = struct{}{}
+	}
+}
+
+// ClearOnLineToUser clears the "on_line_to_user" edge to the CoreOnLineUser entity.
+func (m *CoreUserMutation) ClearOnLineToUser() {
+	m.clearedon_line_to_user = true
+}
+
+// OnLineToUserCleared reports if the "on_line_to_user" edge to the CoreOnLineUser entity was cleared.
+func (m *CoreUserMutation) OnLineToUserCleared() bool {
+	return m.clearedon_line_to_user
+}
+
+// RemoveOnLineToUserIDs removes the "on_line_to_user" edge to the CoreOnLineUser entity by IDs.
+func (m *CoreUserMutation) RemoveOnLineToUserIDs(ids ...string) {
+	if m.removedon_line_to_user == nil {
+		m.removedon_line_to_user = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.on_line_to_user, ids[i])
+		m.removedon_line_to_user[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedOnLineToUser returns the removed IDs of the "on_line_to_user" edge to the CoreOnLineUser entity.
+func (m *CoreUserMutation) RemovedOnLineToUserIDs() (ids []string) {
+	for id := range m.removedon_line_to_user {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// OnLineToUserIDs returns the "on_line_to_user" edge IDs in the mutation.
+func (m *CoreUserMutation) OnLineToUserIDs() (ids []string) {
+	for id := range m.on_line_to_user {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetOnLineToUser resets all changes to the "on_line_to_user" edge.
+func (m *CoreUserMutation) ResetOnLineToUser() {
+	m.on_line_to_user = nil
+	m.clearedon_line_to_user = false
+	m.removedon_line_to_user = nil
+}
+
 // Where appends a list predicates to the CoreUserMutation builder.
 func (m *CoreUserMutation) Where(ps ...predicate.CoreUser) {
 	m.predicates = append(m.predicates, ps...)
@@ -3919,7 +5380,7 @@ func (m *CoreUserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CoreUserMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.created_at != nil {
 		fields = append(fields, coreuser.FieldCreatedAt)
 	}
@@ -3950,6 +5411,9 @@ func (m *CoreUserMutation) Fields() []string {
 	if m.remark != nil {
 		fields = append(fields, coreuser.FieldRemark)
 	}
+	if m.last_password_change != nil {
+		fields = append(fields, coreuser.FieldLastPasswordChange)
+	}
 	return fields
 }
 
@@ -3978,6 +5442,8 @@ func (m *CoreUserMutation) Field(name string) (ent.Value, bool) {
 		return m.RoleID()
 	case coreuser.FieldRemark:
 		return m.Remark()
+	case coreuser.FieldLastPasswordChange:
+		return m.LastPasswordChange()
 	}
 	return nil, false
 }
@@ -4007,6 +5473,8 @@ func (m *CoreUserMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldRoleID(ctx)
 	case coreuser.FieldRemark:
 		return m.OldRemark(ctx)
+	case coreuser.FieldLastPasswordChange:
+		return m.OldLastPasswordChange(ctx)
 	}
 	return nil, fmt.Errorf("unknown CoreUser field %s", name)
 }
@@ -4086,6 +5554,13 @@ func (m *CoreUserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetRemark(v)
 		return nil
+	case coreuser.FieldLastPasswordChange:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastPasswordChange(v)
+		return nil
 	}
 	return fmt.Errorf("unknown CoreUser field %s", name)
 }
@@ -4097,6 +5572,9 @@ func (m *CoreUserMutation) AddedFields() []string {
 	if m.addstatus != nil {
 		fields = append(fields, coreuser.FieldStatus)
 	}
+	if m.addlast_password_change != nil {
+		fields = append(fields, coreuser.FieldLastPasswordChange)
+	}
 	return fields
 }
 
@@ -4107,6 +5585,8 @@ func (m *CoreUserMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case coreuser.FieldStatus:
 		return m.AddedStatus()
+	case coreuser.FieldLastPasswordChange:
+		return m.AddedLastPasswordChange()
 	}
 	return nil, false
 }
@@ -4122,6 +5602,13 @@ func (m *CoreUserMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddStatus(v)
+		return nil
+	case coreuser.FieldLastPasswordChange:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLastPasswordChange(v)
 		return nil
 	}
 	return fmt.Errorf("unknown CoreUser numeric field %s", name)
@@ -4154,6 +5641,9 @@ func (m *CoreUserMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(coreuser.FieldRemark) {
 		fields = append(fields, coreuser.FieldRemark)
+	}
+	if m.FieldCleared(coreuser.FieldLastPasswordChange) {
+		fields = append(fields, coreuser.FieldLastPasswordChange)
 	}
 	return fields
 }
@@ -4193,6 +5683,9 @@ func (m *CoreUserMutation) ClearField(name string) error {
 	case coreuser.FieldRemark:
 		m.ClearRemark()
 		return nil
+	case coreuser.FieldLastPasswordChange:
+		m.ClearLastPasswordChange()
+		return nil
 	}
 	return fmt.Errorf("unknown CoreUser nullable field %s", name)
 }
@@ -4231,15 +5724,21 @@ func (m *CoreUserMutation) ResetField(name string) error {
 	case coreuser.FieldRemark:
 		m.ResetRemark()
 		return nil
+	case coreuser.FieldLastPasswordChange:
+		m.ResetLastPasswordChange()
+		return nil
 	}
 	return fmt.Errorf("unknown CoreUser field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *CoreUserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.user_from_role != nil {
 		edges = append(edges, coreuser.EdgeUserFromRole)
+	}
+	if m.on_line_to_user != nil {
+		edges = append(edges, coreuser.EdgeOnLineToUser)
 	}
 	return edges
 }
@@ -4252,27 +5751,47 @@ func (m *CoreUserMutation) AddedIDs(name string) []ent.Value {
 		if id := m.user_from_role; id != nil {
 			return []ent.Value{*id}
 		}
+	case coreuser.EdgeOnLineToUser:
+		ids := make([]ent.Value, 0, len(m.on_line_to_user))
+		for id := range m.on_line_to_user {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *CoreUserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
+	if m.removedon_line_to_user != nil {
+		edges = append(edges, coreuser.EdgeOnLineToUser)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *CoreUserMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case coreuser.EdgeOnLineToUser:
+		ids := make([]ent.Value, 0, len(m.removedon_line_to_user))
+		for id := range m.removedon_line_to_user {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *CoreUserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.cleareduser_from_role {
 		edges = append(edges, coreuser.EdgeUserFromRole)
+	}
+	if m.clearedon_line_to_user {
+		edges = append(edges, coreuser.EdgeOnLineToUser)
 	}
 	return edges
 }
@@ -4283,6 +5802,8 @@ func (m *CoreUserMutation) EdgeCleared(name string) bool {
 	switch name {
 	case coreuser.EdgeUserFromRole:
 		return m.cleareduser_from_role
+	case coreuser.EdgeOnLineToUser:
+		return m.clearedon_line_to_user
 	}
 	return false
 }
@@ -4304,6 +5825,9 @@ func (m *CoreUserMutation) ResetEdge(name string) error {
 	switch name {
 	case coreuser.EdgeUserFromRole:
 		m.ResetUserFromRole()
+		return nil
+	case coreuser.EdgeOnLineToUser:
+		m.ResetOnLineToUser()
 		return nil
 	}
 	return fmt.Errorf("unknown CoreUser edge %s", name)

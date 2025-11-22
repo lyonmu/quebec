@@ -10,10 +10,10 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	corecommon "github.com/lyonmu/quebec/cmd/core/internal/common"
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
 	"github.com/lyonmu/quebec/pkg/constant"
 	"github.com/lyonmu/quebec/pkg/tools"
-	corecommon "github.com/lyonmu/quebec/cmd/core/internal/common"
 )
 
 // CoreMenu holds the schema definition for the CoreMenu entity.
@@ -47,7 +47,9 @@ func (CoreMenu) Edges() []ent.Edge {
 
 func (CoreMenu) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		tools.NewIDMixin(global.Id),
+		tools.NewIDMixin(func() string {
+			return fmt.Sprintf("%d", global.Id.GenID())
+		}),
 		tools.TimeMixin{},
 	}
 }

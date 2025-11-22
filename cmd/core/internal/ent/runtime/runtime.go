@@ -8,6 +8,7 @@ import (
 	"github.com/lyonmu/quebec/cmd/core/internal/common"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coredatarelationship"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreonlineuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/schema"
@@ -43,7 +44,21 @@ func init() {
 	// coredatarelationship.DefaultID holds the default value on creation for the id field.
 	coredatarelationship.DefaultID = coredatarelationshipDescID.Default.(func() string)
 	// coredatarelationship.IDValidator is a validator for the "id" field. It is called by the builders before save.
-	coredatarelationship.IDValidator = coredatarelationshipDescID.Validators[0].(func(string) error)
+	coredatarelationship.IDValidator = func() func(string) error {
+		validators := coredatarelationshipDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	coremenuMixin := schema.CoreMenu{}.Mixin()
 	coremenuMixinHooks1 := coremenuMixin[1].Hooks()
 	coremenu.Hooks[0] = coremenuMixinHooks1[0]
@@ -81,7 +96,65 @@ func init() {
 	// coremenu.DefaultID holds the default value on creation for the id field.
 	coremenu.DefaultID = coremenuDescID.Default.(func() string)
 	// coremenu.IDValidator is a validator for the "id" field. It is called by the builders before save.
-	coremenu.IDValidator = coremenuDescID.Validators[0].(func(string) error)
+	coremenu.IDValidator = func() func(string) error {
+		validators := coremenuDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	coreonlineuserMixin := schema.CoreOnLineUser{}.Mixin()
+	coreonlineuserMixinHooks1 := coreonlineuserMixin[1].Hooks()
+	coreonlineuser.Hooks[0] = coreonlineuserMixinHooks1[0]
+	coreonlineuser.Hooks[1] = coreonlineuserMixinHooks1[1]
+	coreonlineuserMixinFields0 := coreonlineuserMixin[0].Fields()
+	_ = coreonlineuserMixinFields0
+	coreonlineuserMixinFields1 := coreonlineuserMixin[1].Fields()
+	_ = coreonlineuserMixinFields1
+	coreonlineuserFields := schema.CoreOnLineUser{}.Fields()
+	_ = coreonlineuserFields
+	// coreonlineuserDescCreatedAt is the schema descriptor for created_at field.
+	coreonlineuserDescCreatedAt := coreonlineuserMixinFields1[0].Descriptor()
+	// coreonlineuser.DefaultCreatedAt holds the default value on creation for the created_at field.
+	coreonlineuser.DefaultCreatedAt = coreonlineuserDescCreatedAt.Default.(func() time.Time)
+	// coreonlineuserDescUpdatedAt is the schema descriptor for updated_at field.
+	coreonlineuserDescUpdatedAt := coreonlineuserMixinFields1[1].Descriptor()
+	// coreonlineuser.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	coreonlineuser.DefaultUpdatedAt = coreonlineuserDescUpdatedAt.Default.(func() time.Time)
+	// coreonlineuser.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	coreonlineuser.UpdateDefaultUpdatedAt = coreonlineuserDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// coreonlineuserDescLastOperationTime is the schema descriptor for last_operation_time field.
+	coreonlineuserDescLastOperationTime := coreonlineuserFields[2].Descriptor()
+	// coreonlineuser.DefaultLastOperationTime holds the default value on creation for the last_operation_time field.
+	coreonlineuser.DefaultLastOperationTime = coreonlineuserDescLastOperationTime.Default.(func() int64)
+	// coreonlineuserDescID is the schema descriptor for id field.
+	coreonlineuserDescID := coreonlineuserMixinFields0[0].Descriptor()
+	// coreonlineuser.DefaultID holds the default value on creation for the id field.
+	coreonlineuser.DefaultID = coreonlineuserDescID.Default.(func() string)
+	// coreonlineuser.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	coreonlineuser.IDValidator = func() func(string) error {
+		validators := coreonlineuserDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	coreroleMixin := schema.CoreRole{}.Mixin()
 	coreroleMixinHooks1 := coreroleMixin[1].Hooks()
 	corerole.Hooks[0] = coreroleMixinHooks1[0]
@@ -111,7 +184,21 @@ func init() {
 	// corerole.DefaultID holds the default value on creation for the id field.
 	corerole.DefaultID = coreroleDescID.Default.(func() string)
 	// corerole.IDValidator is a validator for the "id" field. It is called by the builders before save.
-	corerole.IDValidator = coreroleDescID.Validators[0].(func(string) error)
+	corerole.IDValidator = func() func(string) error {
+		validators := coreroleDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	coreuserMixin := schema.CoreUser{}.Mixin()
 	coreuserMixinHooks1 := coreuserMixin[1].Hooks()
 	coreuser.Hooks[0] = coreuserMixinHooks1[0]
@@ -136,12 +223,30 @@ func init() {
 	coreuserDescStatus := coreuserFields[4].Descriptor()
 	// coreuser.DefaultStatus holds the default value on creation for the status field.
 	coreuser.DefaultStatus = constant.YesOrNo(coreuserDescStatus.Default.(int8))
+	// coreuserDescLastPasswordChange is the schema descriptor for last_password_change field.
+	coreuserDescLastPasswordChange := coreuserFields[7].Descriptor()
+	// coreuser.DefaultLastPasswordChange holds the default value on creation for the last_password_change field.
+	coreuser.DefaultLastPasswordChange = coreuserDescLastPasswordChange.Default.(func() int64)
 	// coreuserDescID is the schema descriptor for id field.
 	coreuserDescID := coreuserMixinFields0[0].Descriptor()
 	// coreuser.DefaultID holds the default value on creation for the id field.
 	coreuser.DefaultID = coreuserDescID.Default.(func() string)
 	// coreuser.IDValidator is a validator for the "id" field. It is called by the builders before save.
-	coreuser.IDValidator = coreuserDescID.Validators[0].(func(string) error)
+	coreuser.IDValidator = func() func(string) error {
+		validators := coreuserDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 }
 
 const (

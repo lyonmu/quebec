@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coredatarelationship"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreonlineuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 
@@ -32,6 +33,8 @@ type Client struct {
 	CoreDataRelationship *CoreDataRelationshipClient
 	// CoreMenu is the client for interacting with the CoreMenu builders.
 	CoreMenu *CoreMenuClient
+	// CoreOnLineUser is the client for interacting with the CoreOnLineUser builders.
+	CoreOnLineUser *CoreOnLineUserClient
 	// CoreRole is the client for interacting with the CoreRole builders.
 	CoreRole *CoreRoleClient
 	// CoreUser is the client for interacting with the CoreUser builders.
@@ -49,6 +52,7 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.CoreDataRelationship = NewCoreDataRelationshipClient(c.config)
 	c.CoreMenu = NewCoreMenuClient(c.config)
+	c.CoreOnLineUser = NewCoreOnLineUserClient(c.config)
 	c.CoreRole = NewCoreRoleClient(c.config)
 	c.CoreUser = NewCoreUserClient(c.config)
 }
@@ -145,6 +149,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:               cfg,
 		CoreDataRelationship: NewCoreDataRelationshipClient(cfg),
 		CoreMenu:             NewCoreMenuClient(cfg),
+		CoreOnLineUser:       NewCoreOnLineUserClient(cfg),
 		CoreRole:             NewCoreRoleClient(cfg),
 		CoreUser:             NewCoreUserClient(cfg),
 	}, nil
@@ -168,6 +173,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:               cfg,
 		CoreDataRelationship: NewCoreDataRelationshipClient(cfg),
 		CoreMenu:             NewCoreMenuClient(cfg),
+		CoreOnLineUser:       NewCoreOnLineUserClient(cfg),
 		CoreRole:             NewCoreRoleClient(cfg),
 		CoreUser:             NewCoreUserClient(cfg),
 	}, nil
@@ -200,6 +206,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	c.CoreDataRelationship.Use(hooks...)
 	c.CoreMenu.Use(hooks...)
+	c.CoreOnLineUser.Use(hooks...)
 	c.CoreRole.Use(hooks...)
 	c.CoreUser.Use(hooks...)
 }
@@ -209,6 +216,7 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.CoreDataRelationship.Intercept(interceptors...)
 	c.CoreMenu.Intercept(interceptors...)
+	c.CoreOnLineUser.Intercept(interceptors...)
 	c.CoreRole.Intercept(interceptors...)
 	c.CoreUser.Intercept(interceptors...)
 }
@@ -220,6 +228,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.CoreDataRelationship.mutate(ctx, m)
 	case *CoreMenuMutation:
 		return c.CoreMenu.mutate(ctx, m)
+	case *CoreOnLineUserMutation:
+		return c.CoreOnLineUser.mutate(ctx, m)
 	case *CoreRoleMutation:
 		return c.CoreRole.mutate(ctx, m)
 	case *CoreUserMutation:
@@ -577,6 +587,156 @@ func (c *CoreMenuClient) mutate(ctx context.Context, m *CoreMenuMutation) (Value
 	}
 }
 
+// CoreOnLineUserClient is a client for the CoreOnLineUser schema.
+type CoreOnLineUserClient struct {
+	config
+}
+
+// NewCoreOnLineUserClient returns a client for the CoreOnLineUser from the given config.
+func NewCoreOnLineUserClient(c config) *CoreOnLineUserClient {
+	return &CoreOnLineUserClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `coreonlineuser.Hooks(f(g(h())))`.
+func (c *CoreOnLineUserClient) Use(hooks ...Hook) {
+	c.hooks.CoreOnLineUser = append(c.hooks.CoreOnLineUser, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `coreonlineuser.Intercept(f(g(h())))`.
+func (c *CoreOnLineUserClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CoreOnLineUser = append(c.inters.CoreOnLineUser, interceptors...)
+}
+
+// Create returns a builder for creating a CoreOnLineUser entity.
+func (c *CoreOnLineUserClient) Create() *CoreOnLineUserCreate {
+	mutation := newCoreOnLineUserMutation(c.config, OpCreate)
+	return &CoreOnLineUserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CoreOnLineUser entities.
+func (c *CoreOnLineUserClient) CreateBulk(builders ...*CoreOnLineUserCreate) *CoreOnLineUserCreateBulk {
+	return &CoreOnLineUserCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CoreOnLineUserClient) MapCreateBulk(slice any, setFunc func(*CoreOnLineUserCreate, int)) *CoreOnLineUserCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CoreOnLineUserCreateBulk{err: fmt.Errorf("calling to CoreOnLineUserClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CoreOnLineUserCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CoreOnLineUserCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CoreOnLineUser.
+func (c *CoreOnLineUserClient) Update() *CoreOnLineUserUpdate {
+	mutation := newCoreOnLineUserMutation(c.config, OpUpdate)
+	return &CoreOnLineUserUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CoreOnLineUserClient) UpdateOne(_m *CoreOnLineUser) *CoreOnLineUserUpdateOne {
+	mutation := newCoreOnLineUserMutation(c.config, OpUpdateOne, withCoreOnLineUser(_m))
+	return &CoreOnLineUserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CoreOnLineUserClient) UpdateOneID(id string) *CoreOnLineUserUpdateOne {
+	mutation := newCoreOnLineUserMutation(c.config, OpUpdateOne, withCoreOnLineUserID(id))
+	return &CoreOnLineUserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CoreOnLineUser.
+func (c *CoreOnLineUserClient) Delete() *CoreOnLineUserDelete {
+	mutation := newCoreOnLineUserMutation(c.config, OpDelete)
+	return &CoreOnLineUserDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CoreOnLineUserClient) DeleteOne(_m *CoreOnLineUser) *CoreOnLineUserDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CoreOnLineUserClient) DeleteOneID(id string) *CoreOnLineUserDeleteOne {
+	builder := c.Delete().Where(coreonlineuser.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CoreOnLineUserDeleteOne{builder}
+}
+
+// Query returns a query builder for CoreOnLineUser.
+func (c *CoreOnLineUserClient) Query() *CoreOnLineUserQuery {
+	return &CoreOnLineUserQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCoreOnLineUser},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CoreOnLineUser entity by its id.
+func (c *CoreOnLineUserClient) Get(ctx context.Context, id string) (*CoreOnLineUser, error) {
+	return c.Query().Where(coreonlineuser.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CoreOnLineUserClient) GetX(ctx context.Context, id string) *CoreOnLineUser {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryOnLineFromUser queries the on_line_from_user edge of a CoreOnLineUser.
+func (c *CoreOnLineUserClient) QueryOnLineFromUser(_m *CoreOnLineUser) *CoreUserQuery {
+	query := (&CoreUserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(coreonlineuser.Table, coreonlineuser.FieldID, id),
+			sqlgraph.To(coreuser.Table, coreuser.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, coreonlineuser.OnLineFromUserTable, coreonlineuser.OnLineFromUserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CoreOnLineUserClient) Hooks() []Hook {
+	hooks := c.hooks.CoreOnLineUser
+	return append(hooks[:len(hooks):len(hooks)], coreonlineuser.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *CoreOnLineUserClient) Interceptors() []Interceptor {
+	return c.inters.CoreOnLineUser
+}
+
+func (c *CoreOnLineUserClient) mutate(ctx context.Context, m *CoreOnLineUserMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CoreOnLineUserCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CoreOnLineUserUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CoreOnLineUserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CoreOnLineUserDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CoreOnLineUser mutation op: %q", m.Op())
+	}
+}
+
 // CoreRoleClient is a client for the CoreRole schema.
 type CoreRoleClient struct {
 	config
@@ -867,6 +1027,22 @@ func (c *CoreUserClient) QueryUserFromRole(_m *CoreUser) *CoreRoleQuery {
 	return query
 }
 
+// QueryOnLineToUser queries the on_line_to_user edge of a CoreUser.
+func (c *CoreUserClient) QueryOnLineToUser(_m *CoreUser) *CoreOnLineUserQuery {
+	query := (&CoreOnLineUserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(coreuser.Table, coreuser.FieldID, id),
+			sqlgraph.To(coreonlineuser.Table, coreonlineuser.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, coreuser.OnLineToUserTable, coreuser.OnLineToUserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *CoreUserClient) Hooks() []Hook {
 	hooks := c.hooks.CoreUser
@@ -896,10 +1072,11 @@ func (c *CoreUserClient) mutate(ctx context.Context, m *CoreUserMutation) (Value
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		CoreDataRelationship, CoreMenu, CoreRole, CoreUser []ent.Hook
+		CoreDataRelationship, CoreMenu, CoreOnLineUser, CoreRole, CoreUser []ent.Hook
 	}
 	inters struct {
-		CoreDataRelationship, CoreMenu, CoreRole, CoreUser []ent.Interceptor
+		CoreDataRelationship, CoreMenu, CoreOnLineUser, CoreRole,
+		CoreUser []ent.Interceptor
 	}
 )
 
