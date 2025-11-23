@@ -16,12 +16,12 @@ func InitRole(client *ent.Client) ([]*ent.CoreRole, error) {
 
 	exists, err := client.CoreRole.Query().Where(corerole.DeletedAtIsNil()).Exist(ctx)
 	if err != nil {
-		global.Logger.Error("core_role表数据初始化失败")
+		global.Logger.Sugar().Error("core_role表数据初始化失败")
 		return nil, err
 	}
 
 	if exists {
-		global.Logger.Info("core_role表数据无需初始化")
+		global.Logger.Sugar().Info("core_role表数据无需初始化")
 	} else {
 		roles, err := client.CoreRole.CreateBulk(
 			client.CoreRole.Create().
@@ -37,7 +37,7 @@ func InitRole(client *ent.Client) ([]*ent.CoreRole, error) {
 			return nil, fmt.Errorf("roles is nil")
 		}
 		resp = roles
-		global.Logger.Info("core_role表数据初始化成功")
+		global.Logger.Sugar().Info("core_role表数据初始化成功")
 	}
 
 	return resp, nil

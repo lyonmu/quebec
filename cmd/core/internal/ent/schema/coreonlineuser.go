@@ -24,7 +24,7 @@ type CoreOnLineUser struct {
 // Fields of the CoreOnLineUser.
 func (CoreOnLineUser) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("user_id").Unique().Optional().Comment("用户ID").Unique(),
+		field.String("user_id").Unique().Optional().Comment("用户ID"),
 		field.String("access_ip").Optional().Comment("访问IP"),
 		field.Int64("last_operation_time").Optional().Comment("最后操作时间").DefaultFunc(func() int64 { return time.Now().Unix() }),
 		field.Int("operation_type").Optional().GoType(common.OperationType(1)).Optional().Comment("操作类型 [1: 登陆]"),

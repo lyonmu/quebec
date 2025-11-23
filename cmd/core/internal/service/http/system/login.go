@@ -7,6 +7,7 @@ import (
 	"github.com/lyonmu/quebec/cmd/core/internal/common"
 	"github.com/lyonmu/quebec/cmd/core/internal/dto/request"
 	"github.com/lyonmu/quebec/cmd/core/internal/dto/response"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreonlineuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
 	"github.com/lyonmu/quebec/pkg/code"
@@ -57,22 +58,46 @@ func (s *SystemSvc) Login(req *request.SystemLoginRequest, ua *useragent.UserAge
 	browserName, browserVersion := ua.Browser()
 	browserEngineName, browserEngineVersion := ua.Engine()
 
-	// TODO 如果已经存在在线用户记录,则更新记录,否则创建记录
-	_, oerr := global.EntClient.CoreOnLineUser.Create().
-		SetUserID(u.ID).
-		SetAccessIP(access_ip).
-		SetLastOperationTime(time.Now().Unix()).
-		SetOperationType(common.OperationLogin).
-		SetOs(ua.OS()).
-		SetPlatform(ua.Platform()).
-		SetBrowserName(browserName).
-		SetBrowserVersion(browserVersion).
-		SetBrowserEngineName(browserEngineName).
-		SetBrowserEngineVersion(browserEngineVersion).
-		Save(ctx)
-	if oerr != nil {
-		global.Logger.Sugar().Errorf("用户 %s 登录记录在线用户失败: %v", req.Username, oerr)
+	exists, err := global.EntClient.CoreOnLineUser.Query().Where(coreonlineuser.UserIDEQ(u.ID), coreonlineuser.DeletedAtIsNil()).Exist(ctx)
+	if err != nil {
+		global.Logger.Sugar().Errorf("用户 %s 登录查询在线用户失败: %v", req.Username, err)
 		return nil, &code.Failed
+	}
+
+	if exists {
+		_, uerr := global.EntClient.CoreOnLineUser.Update().
+			Where(coreonlineuser.UserIDEQ(u.ID), coreonlineuser.DeletedAtIsNil()).
+			SetAccessIP(access_ip).
+			SetLastOperationTime(time.Now().Unix()).
+			SetOperationType(common.OperationLogin).
+			SetOs(ua.OS()).
+			SetPlatform(ua.Platform()).
+			SetBrowserName(browserName).
+			SetBrowserVersion(browserVersion).
+			SetBrowserEngineName(browserEngineName).
+			SetBrowserEngineVersion(browserEngineVersion).
+			Save(ctx)
+		if uerr != nil {
+			global.Logger.Sugar().Errorf("用户 %s 登录更新在线用户失败: %v", req.Username, uerr)
+			return nil, &code.Failed
+		}
+	} else {
+		_, oerr := global.EntClient.CoreOnLineUser.Create().
+			SetUserID(u.ID).
+			SetAccessIP(access_ip).
+			SetLastOperationTime(time.Now().Unix()).
+			SetOperationType(common.OperationLogin).
+			SetOs(ua.OS()).
+			SetPlatform(ua.Platform()).
+			SetBrowserName(browserName).
+			SetBrowserVersion(browserVersion).
+			SetBrowserEngineName(browserEngineName).
+			SetBrowserEngineVersion(browserEngineVersion).
+			Save(ctx)
+		if oerr != nil {
+			global.Logger.Sugar().Errorf("用户 %s 登录记录在线用户失败: %v", req.Username, oerr)
+			return nil, &code.Failed
+		}
 	}
 
 	global.Logger.Sugar().Infof("用户 %s 登录成功", u.Username)

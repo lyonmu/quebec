@@ -18,11 +18,11 @@ func InitUser(client *ent.Client, role_id string) error {
 
 	exists, err := client.CoreUser.Query().Where(coreuser.DeletedAtIsNil()).Exist(ctx)
 	if err != nil {
-		global.Logger.Error("core_user表数据初始化失败")
+		global.Logger.Sugar().Error("core_user表数据初始化失败")
 		return err
 	}
 	if exists {
-		global.Logger.Info("core_user表数据无需初始化")
+		global.Logger.Sugar().Info("core_user表数据无需初始化")
 	} else {
 		users, err := client.CoreUser.CreateBulk(
 			client.CoreUser.Create().
@@ -40,7 +40,7 @@ func InitUser(client *ent.Client, role_id string) error {
 		if users == nil {
 			return fmt.Errorf("core_user表数据初始化失败")
 		}
-		global.Logger.Info("core_user表数据初始化成功")
+		global.Logger.Sugar().Info("core_user表数据初始化成功")
 	}
 	return nil
 }
