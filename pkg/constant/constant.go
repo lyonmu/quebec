@@ -15,4 +15,6 @@ const (
 	No  YesOrNo = 2
 )
 
-
+const (
+	ApiTokenName = "x-quebec-token"
+)

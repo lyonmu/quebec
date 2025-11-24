@@ -88,6 +88,17 @@ func TestIsExpired(t *testing.T) {
 	log.Printf("is expired: %v", expired)
 }
 
+func TestJwtToolParseToken(t *testing.T) {
+	testJwt := JwtTool{}
+	ss := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNzM4MTk3NTI4IiwibGFzdF9wYXNzd29yZF9jaGFuZ2UiOjE3NjM5NDY2MzAsImlzcyI6InF1ZWJlYyIsImV4cCI6MTc2NDAzNzI1OCwibmJmIjoxNzYzOTUwODU4LCJpYXQiOjE3NjM5NTA4NTgsImp0aSI6IjAxOWFiM2FhLTEwMTAtNzcxNC04NGJlLWE1MTg2ODE0ODRhMiJ9._dRKDFrUblWQK1xQotdddnVDWxhV_j21CkMyTEZsmQU"
+	claims, err := testJwt.ParseToken(ss, "quebec")
+	if err != nil {
+		log.Printf("parse token error: %v", err)
+	} else {
+		log.Printf("info is : %+v", claims)
+	}
+}
+
 func TestStoreToken(t *testing.T) {
 	testJwt := JwtTool{}
 	rc := config.RedisConfig{

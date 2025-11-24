@@ -13,14 +13,12 @@ import (
 )
 
 type JwtClaims struct {
-	Id                 string `json:"id"`
+	UserId             string `json:"user_id"`
 	LastPasswordChange int64  `json:"last_password_change"`
 	jwt.RegisteredClaims
 }
 
 type JwtTool struct{}
-
-
 
 func (JwtTool) GenerateToken(id, sign string, lastPasswordChange, cache int64) (string, error) {
 

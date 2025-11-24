@@ -44,7 +44,7 @@ func (s *SystemSvc) Login(req *request.SystemLoginRequest, ua *useragent.UserAge
 		return nil, &code.UserPasswordError
 	}
 
-	token, terr := global.JwtToolEntity.GenerateToken(u.ID, u.Username, u.LastPasswordChange, global.Cfg.Core.Jwt.Cache)
+	token, terr := global.JwtToolEntity.GenerateToken(u.ID, global.Cfg.Core.Jwt.Sign, u.LastPasswordChange, global.Cfg.Core.Jwt.Cache)
 	if terr != nil {
 		global.Logger.Sugar().Errorf("用户 %s 登录生成token失败: %v", req.Username, terr)
 		return nil, &code.Failed
@@ -102,8 +102,31 @@ func (s *SystemSvc) Login(req *request.SystemLoginRequest, ua *useragent.UserAge
 
 	global.Logger.Sugar().Infof("用户 %s 登录成功", u.Username)
 
-	resp.Username = u.Username
+	resp.Username = u.Nickname
 	resp.Token = token
 
 	return &resp, nil
+}
+
+func (s *SystemSvc) Logout(token string, ctx context.Context) error {
+
+	claims, perr := global.JwtToolEntity.ParseToken(token, global.Cfg.Core.Jwt.Sign)
+	if perr != nil {
+		global.Logger.Sugar().Errorf("用户登出解析token失败: %v", perr)
+		return &code.Failed
+	}
+	if perr := global.JwtToolEntity.DeleteToken(claims.UserId, global.RedisCli); perr != nil {
+		global.Logger.Sugar().Errorf("用户登出删除token失败: %v", perr)
+		return &code.Failed
+	}
+
+	_, uerr := global.EntClient.CoreOnLineUser.Update().
+		Where(coreonlineuser.UserIDEQ(claims.UserId), coreonlineuser.DeletedAtIsNil()).
+		SetDeletedAt(time.Now()).
+		Save(ctx)
+	if uerr != nil {
+		global.Logger.Sugar().Errorf("用户登出更新在线用户失败: %v", uerr)
+		return &code.Failed
+	}
+	return nil
 }

@@ -24,3 +24,15 @@ func (r Response) Success(data any, c *gin.Context) {
 func (r Response) Failed(c *gin.Context) {
 	c.JSON(http.StatusOK, r)
 }
+
+func (r Response) Unauthorized(c *gin.Context) {
+	c.JSON(http.StatusUnauthorized, r)
+}
+
+func (r Response) Forbidden(c *gin.Context) {
+	c.JSON(http.StatusForbidden, r)
+}
+
+func (r Response) NotFound(c *gin.Context) {
+	c.JSON(http.StatusNotFound, r)
+}
