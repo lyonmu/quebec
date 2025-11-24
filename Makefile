@@ -25,9 +25,21 @@ endif
 build-gateway:
 	CGO_ENABLED=0 go mod download && go build ${FLAGS} -o bin/gateway cmd/gateway/gateway.go
 
+.PHONY: build-ui
+build-ui:
+	cd web && bun install && bun run build
+
+.PHONY: build-ui-dev
+build-ui-dev:
+	cd web && bun install && bun run dev
+
 .PHONY: build-core
 build-core:
+	make build-ui
 	CGO_ENABLED=0 go mod download && go build ${FLAGS} -o bin/core cmd/core/core.go
+
+.PHONY: build-all
+build-all: build-gateway build-core 
 
 .PHONY: clean
 clean:

@@ -37,7 +37,8 @@ export default defineConfig(({ mode }) => {
         }
       },
       build: {
-        outDir: "dist",
+        outDir: path.resolve(__dirname, '../cmd/core/internal/web/dist'),
+        emptyOutDir: true,
       }
     };
 });

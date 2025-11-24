@@ -6,6 +6,7 @@ import (
 	_ "github.com/lyonmu/quebec/cmd/core/internal/docs"
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
 	v1Route "github.com/lyonmu/quebec/cmd/core/internal/router/v1"
+	"github.com/lyonmu/quebec/cmd/core/internal/web"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -28,6 +29,10 @@ func InitRouter(e *gin.Engine) {
 
 	// Init system router
 	v1route.InitSystemRouter(routerGroup, v1api)
+
+	if err := web.Register(e, "/"); err != nil {
+		global.Logger.Sugar().Warnf("register embedded web failed: %v", err)
+	}
 
 	global.Logger.Sugar().Info("router register success")
 

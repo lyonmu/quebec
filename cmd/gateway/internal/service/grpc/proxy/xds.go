@@ -102,8 +102,7 @@ func (s *SvcInfo) MakeRoute() *route.Route {
 				ClusterSpecifier: &route.RouteAction_Cluster{
 					Cluster: s.Name,
 				},
-				// 去除 global.Cfg.RouterPrefix，保留 s.Prefix 和后续路径
-				PrefixRewrite: fmt.Sprintf("%s", s.Prefix),
+				PrefixRewrite: s.Prefix,
 			},
 		},
 	}
@@ -176,14 +175,14 @@ func MakeListener(routeCfg *route.RouteConfiguration) *listener.Listener {
 	httpFilters := []*hcm.HttpFilter{}
 
 	// 如果启用认证，先添加 ext_authz 过滤器
-	// if global.Cfg.AuthConfig.Enabled {
-	// 	httpFilters = append(httpFilters, &hcm.HttpFilter{
-	// 		Name: "envoy.filters.http.ext_authz",
-	// 		ConfigType: &hcm.HttpFilter_TypedConfig{
-	// 			TypedConfig: createExtAuthzGrpcConfig(),
-	// 		},
-	// 	})
-	// }
+	if global.Cfg.Gateway.EnableAuth {
+		httpFilters = append(httpFilters, &hcm.HttpFilter{
+			Name: "envoy.filters.http.ext_authz",
+			ConfigType: &hcm.HttpFilter_TypedConfig{
+				TypedConfig: createExtAuthzGrpcConfig(),
+			},
+		})
+	}
 
 	// router 过滤器必须是最后一个
 	httpFilters = append(httpFilters, &hcm.HttpFilter{
