@@ -82,8 +82,6 @@
    在 `web` 目录下创建 `.env.local` 文件，添加以下配置（AI 功能为可选）：
 
    ```env
-   # Gemini API 密钥（用于 AI 功能，可选）
-   GEMINI_API_KEY=your_api_key_here
 
    # API 基础 URL（可选，默认为 /core/api）
    VITE_API_BASE_URL=/core/api
