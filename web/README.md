@@ -1,5 +1,5 @@
 <div align="center">
-  <img width="120" height="120" alt="Quebec Logo" src="/public/quebec.png" />
+  <img width="120" height="120" alt="Quebec Logo" src="./public/quebec.png" />
   <h1>Quebec</h1>
   <p><strong>高性能网关控制平面仪表板</strong></p>
 </div>
