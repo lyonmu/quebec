@@ -10,6 +10,12 @@ definitions:
         example: success
         type: string
     type: object
+  common.OperationType:
+    enum:
+    - 1
+    type: integer
+    x-enum-varnames:
+    - OperationLogin
   request.SystemLoginRequest:
     properties:
       captcha:
@@ -45,13 +51,84 @@ definitions:
         example: base64
         type: string
     type: object
+  response.Options:
+    properties:
+      children:
+        description: 子级选项
+        items:
+          $ref: '#/definitions/response.Options'
+        type: array
+      label:
+        description: 名称
+        type: string
+      value:
+        description: 值
+        type: string
+    type: object
   response.SystemInfoResponse:
     properties:
+      role_name:
+        description: 角色名称
+        type: string
       token:
         description: token
         type: string
       username:
         description: 用户名
+        type: string
+    type: object
+  response.SystemOnlineUserListResp:
+    properties:
+      items:
+        description: 在线用户列表
+        items:
+          $ref: '#/definitions/response.SystemOnlineUserResp'
+        type: array
+      page:
+        description: 页码
+        type: integer
+      page_size:
+        description: 每页条数
+        type: integer
+      total:
+        description: 总条数
+        type: integer
+    type: object
+  response.SystemOnlineUserResp:
+    properties:
+      access_ip:
+        description: 访问IP
+        type: string
+      browser_engine_name:
+        description: 浏览器引擎名称
+        type: string
+      browser_engine_version:
+        description: 浏览器引擎版本
+        type: string
+      browser_name:
+        description: 浏览器名称
+        type: string
+      browser_version:
+        description: 浏览器版本
+        type: string
+      id:
+        description: ID
+        type: string
+      last_operation_time:
+        description: 最后操作时间
+        type: integer
+      nickname:
+        description: 用户昵称
+        type: string
+      operation_type:
+        allOf:
+        - $ref: '#/definitions/common.OperationType'
+        description: 操作类型
+      os:
+        description: 操作系统
+        type: string
+      platform:
+        description: 操作平台
         type: string
     type: object
 host: http://localhost:59024
@@ -136,6 +213,110 @@ paths:
                   type: string
               type: object
       summary: 退出登陆
+      tags:
+      - 系统管理
+  /v1/system/onlineuser/clearance/{id}:
+    delete:
+      description: 清除在线用户
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 50000,success
+          schema:
+            allOf:
+            - $ref: '#/definitions/code.Response'
+            - properties:
+                code:
+                  type: number
+                message:
+                  type: string
+              type: object
+      summary: 清除在线用户
+      tags:
+      - 系统管理
+  /v1/system/onlineuser/label:
+    get:
+      description: 获取在线用户标签
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 50000,success
+          schema:
+            allOf:
+            - $ref: '#/definitions/code.Response'
+            - properties:
+                code:
+                  type: number
+                data:
+                  items:
+                    $ref: '#/definitions/response.Options'
+                  type: array
+                message:
+                  type: string
+              type: object
+      summary: 在线用户标签
+      tags:
+      - 系统管理
+  /v1/system/onlineuser/list:
+    get:
+      description: 获取在线用户列表
+      parameters:
+      - description: 访问IP
+        in: query
+        name: access_ip
+        type: string
+      - description: 结束时间
+        in: query
+        name: end_time
+        type: integer
+      - default: 1
+        description: 页码
+        in: query
+        minimum: 1
+        name: page
+        required: true
+        type: integer
+      - default: 10
+        description: 每页条数
+        in: query
+        maximum: 100
+        minimum: 10
+        name: page_size
+        required: true
+        type: integer
+      - description: 开始时间
+        in: query
+        name: start_time
+        type: integer
+      - description: 用户ID
+        in: query
+        name: user_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 50000,success
+          schema:
+            allOf:
+            - $ref: '#/definitions/code.Response'
+            - properties:
+                code:
+                  type: number
+                data:
+                  $ref: '#/definitions/response.SystemOnlineUserListResp'
+                message:
+                  type: string
+              type: object
+      summary: 在线用户列表
       tags:
       - 系统管理
 schemes:

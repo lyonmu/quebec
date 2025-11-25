@@ -1,7 +1,7 @@
-import { ApiResponse, CaptchaData, LoginRequest, LoginResponse } from '../types';
-import { httpClient } from './http';
+import { ApiResponse, CaptchaData, LoginRequest, LoginResponse } from '../../types';
+import { httpClient } from '../base/http';
 
-export const authService = {
+export const loginService = {
   /**
    * Fetch captcha image and ID
    * @returns Captcha data including id, base64 image, and length

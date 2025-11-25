@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Search, Plus, Filter, ArrowRight, Lock, Globe, FileJson, Database, Activity } from 'lucide-react';
-import { mockRoutes } from '../../services/mockData';
+import { mockRoutes } from '../../services/base/mockData';
 import { Protocol } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
 

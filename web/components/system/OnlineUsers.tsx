@@ -1,101 +1,102 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { Search, Monitor, Smartphone, Globe } from 'lucide-react';
-
-interface OnlineUser {
-  id: string;
-  username: string;
-  ip: string;
-  lastOperationTime: string;
-  operationType: string;
-  os: string;
-  platform: string;
-  browserName: string;
-  browserVersion: string;
-  engineName: string;
-  engineVersion: string;
-}
+import { Search, Monitor, Smartphone, Trash2, RefreshCw } from 'lucide-react';
+import { onlineuserService } from '../../services/system/onlineuserService';
+import { OnlineUser, OnlineUserLabel } from '../../types';
+import DateTimePicker from '../common/DateTimePicker';
+import { OPERATION_TYPE_MAP, DEFAULT_OPERATION_TYPE } from '../../services/base/translations';
 
 const OnlineUsers: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [users, setUsers] = useState<OnlineUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [ipSearch, setIpSearch] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [labels, setLabels] = useState<OnlineUserLabel[]>([]);
 
-  // Mock data generation
-  useEffect(() => {
-    // Simulate API call
-    const timer = setTimeout(() => {
-      const mockUsers: OnlineUser[] = [
-        {
-          id: '1',
-          username: 'admin',
-          ip: '192.168.1.100',
-          lastOperationTime: '2023-11-24 13:30:45',
-          operationType: 'QUERY',
-          os: 'Windows 10',
-          platform: 'Desktop',
-          browserName: 'Chrome',
-          browserVersion: '119.0.0.0',
-          engineName: 'Blink',
-          engineVersion: '119.0.0.0'
-        },
-        {
-          id: '2',
-          username: 'editor',
-          ip: '192.168.1.105',
-          lastOperationTime: '2023-11-24 13:28:12',
-          operationType: 'UPDATE',
-          os: 'macOS 14.1',
-          platform: 'Desktop',
-          browserName: 'Safari',
-          browserVersion: '17.1',
-          engineName: 'WebKit',
-          engineVersion: '605.1.15'
-        },
-        {
-          id: '3',
-          username: 'viewer',
-          ip: '10.0.0.55',
-          lastOperationTime: '2023-11-24 13:15:30',
-          operationType: 'LOGIN',
-          os: 'iOS 17.1',
-          platform: 'Mobile',
-          browserName: 'Mobile Safari',
-          browserVersion: '17.1',
-          engineName: 'WebKit',
-          engineVersion: '605.1.15'
-        },
-        {
-          id: '4',
-          username: 'test_user',
-          ip: '172.16.0.20',
-          lastOperationTime: '2023-11-24 13:05:10',
-          operationType: 'QUERY',
-          os: 'Linux x86_64',
-          platform: 'Desktop',
-          browserName: 'Firefox',
-          browserVersion: '120.0',
-          engineName: 'Gecko',
-          engineVersion: '120.0'
-        }
-      ];
-      setUsers(mockUsers);
+  const fetchUsers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await onlineuserService.fetchOnlineUsers({
+        page,
+        page_size: pageSize,
+        access_ip: ipSearch || undefined,
+        user_id: selectedUserId || undefined,
+        start_time: startTime ? Math.floor(new Date(startTime).getTime() / 1000) : undefined,
+        end_time: endTime ? Math.floor(new Date(endTime).getTime() / 1000) : undefined,
+      });
+      if (response.code === 50000 && response.data) {
+        setUsers(response.data.items || []);
+        setTotal(response.data.total);
+      }
+    } catch (error) {
+      console.error('Failed to fetch online users:', error);
+    } finally {
       setLoading(false);
-    }, 800);
+    }
+  }, [page, pageSize, ipSearch, selectedUserId, startTime, endTime]);
 
-    return () => clearTimeout(timer);
+  const fetchLabels = async () => {
+    try {
+      const response = await onlineuserService.fetchOnlineUserLabels();
+      if (response.code === 50000 && response.data) {
+        setLabels(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch labels:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchLabels();
   }, []);
 
-  const filteredUsers = users.filter(user => 
-    user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.ip.includes(searchTerm)
-  );
+  useEffect(() => {
+    fetchUsers();
+  }, [page, pageSize]);
+
+  const handleSearch = () => {
+    if (page === 1) {
+      fetchUsers();
+    } else {
+      setPage(1);
+    }
+  };
+
+  const handleClearUser = async (id: string) => {
+    if (!window.confirm(t('online_users.confirm_clear') || 'Are you sure you want to clear this user?')) {
+      return;
+    }
+    try {
+      const response = await onlineuserService.clearOnlineUser(id);
+      if (response.code === 50000) {
+        fetchUsers(); // Refresh list
+      }
+    } catch (error) {
+      console.error('Failed to clear user:', error);
+    }
+  };
 
   const getPlatformIcon = (platform: string) => {
     if (platform === 'Mobile') return <Smartphone size={16} className="text-slate-400" />;
     return <Monitor size={16} className="text-slate-400" />;
   };
+
+  const formatTime = (timestamp: number) => {
+    return new Date(timestamp * 1000).toLocaleString();
+  };
+
+  const getOperationType = (operationType: number) => {
+    const translationKey = OPERATION_TYPE_MAP[operationType] || DEFAULT_OPERATION_TYPE;
+    return t(translationKey);
+  };
+
+  const totalPages = Math.ceil(total / pageSize);
 
   return (
     <div className="p-6 max-w-[1600px] mx-auto space-y-6">
@@ -105,15 +106,79 @@ const OnlineUsers: React.FC = () => {
           <p className="text-slate-500 dark:text-slate-400 mt-1">{t('online_users.subtitle')}</p>
         </div>
         
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-          <input 
-            type="text" 
-            placeholder={t('common.search')}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-64 transition-all"
-          />
+        <div className="flex flex-col xl:flex-row gap-4 items-end xl:items-center">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* User ID Select */}
+            <div className="relative">
+              <select
+                value={selectedUserId}
+                onChange={(e) => setSelectedUserId(e.target.value)}
+                className="appearance-none pl-4 pr-10 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm min-w-[150px]"
+              >
+                <option value="">All Users</option>
+                {labels.map((label) => (
+                  label.children ? (
+                    <optgroup key={label.value} label={label.label}>
+                      {label.children.map(child => (
+                        <option key={child.value} value={child.value}>{child.label}</option>
+                      ))}
+                    </optgroup>
+                  ) : (
+                    <option key={label.value} value={label.value}>{label.label}</option>
+                  )
+                ))}
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+              </div>
+            </div>
+
+            {/* IP Input */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <input 
+                type="text" 
+                placeholder="Access IP"
+                value={ipSearch}
+                onChange={(e) => setIpSearch(e.target.value)}
+                className="pl-9 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-40 text-sm"
+              />
+            </div>
+
+            {/* Date Range */}
+            <div className="flex items-center gap-2">
+              <DateTimePicker 
+                value={startTime}
+                onChange={setStartTime}
+                language={language}
+                placeholder={t('common.startTime') || 'Start Time'}
+              />
+              <span className="text-slate-400">-</span>
+              <DateTimePicker 
+                value={endTime}
+                onChange={setEndTime}
+                language={language}
+                placeholder={t('common.endTime') || 'End Time'}
+              />
+            </div>
+
+            {/* Actions */}
+            <button 
+              onClick={handleSearch}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
+            >
+              <Search size={16} />
+              {t('common.search')}
+            </button>
+            
+            {/* <button 
+              onClick={fetchUsers}
+              className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+              title={t('common.refresh')}
+            >
+              <RefreshCw size={20} />
+            </button> */}
+          </div>
         </div>
       </div>
 
@@ -130,41 +195,42 @@ const OnlineUsers: React.FC = () => {
                 <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">{t('online_users.table.platform')}</th>
                 <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">{t('online_users.table.browser')}</th>
                 <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">{t('online_users.table.engine')}</th>
+                <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap text-right">{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
+                  <td colSpan={9} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
                     {t('common.loading')}
                   </td>
                 </tr>
-              ) : filteredUsers.length === 0 ? (
+              ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
+                  <td colSpan={9} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
                     No online users found
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map((user) => (
+                users.map((user) => (
                   <tr key={user.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-medium text-xs">
-                          {user.username.substring(0, 2).toUpperCase()}
+                          {user.nickname ? user.nickname.substring(0, 2).toUpperCase() : 'UN'}
                         </div>
-                        <span className="font-medium text-slate-900 dark:text-white">{user.username}</span>
+                        <span className="font-medium text-slate-900 dark:text-white">{user.nickname || 'Unknown'}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300 font-mono">
-                      {user.ip}
+                      {user.access_ip}
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                      {user.lastOperationTime}
+                      {formatTime(user.last_operation_time)}
                     </td>
                     <td className="px-6 py-4">
                       <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                        {user.operationType}
+                        {getOperationType(user.operation_type)}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
@@ -178,15 +244,24 @@ const OnlineUsers: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
                       <div className="flex flex-col">
-                        <span>{user.browserName}</span>
-                        <span className="text-xs text-slate-400">{user.browserVersion}</span>
+                        <span>{user.browser_name}</span>
+                        <span className="text-xs text-slate-400">{user.browser_version}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
                       <div className="flex flex-col">
-                        <span>{user.engineName}</span>
-                        <span className="text-xs text-slate-400">{user.engineVersion}</span>
+                        <span>{user.browser_engine_name}</span>
+                        <span className="text-xs text-slate-400">{user.browser_engine_version}</span>
                       </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-right">
+                      <button 
+                        onClick={() => handleClearUser(user.id)}
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 p-2 rounded-lg transition-colors"
+                        title={t('common.delete')}
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -197,11 +272,26 @@ const OnlineUsers: React.FC = () => {
         
         <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
           <div>
-            {t('common.total')} {filteredUsers.length} {t('common.items')}
+            {t('common.total')} {total} {t('common.items')}
           </div>
           <div className="flex gap-2">
-            <button className="px-3 py-1 border border-slate-200 dark:border-slate-700 rounded hover:bg-white dark:hover:bg-slate-800 disabled:opacity-50" disabled>{t('common.prev')}</button>
-            <button className="px-3 py-1 border border-slate-200 dark:border-slate-700 rounded hover:bg-white dark:hover:bg-slate-800 disabled:opacity-50" disabled>{t('common.next')}</button>
+            <button 
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-3 py-1 border border-slate-200 dark:border-slate-700 rounded hover:bg-white dark:hover:bg-slate-800 disabled:opacity-50"
+            >
+              {t('common.prev')}
+            </button>
+            <span className="px-3 py-1">
+              {page} / {Math.max(1, totalPages)}
+            </span>
+            <button 
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+              className="px-3 py-1 border border-slate-200 dark:border-slate-700 rounded hover:bg-white dark:hover:bg-slate-800 disabled:opacity-50"
+            >
+              {t('common.next')}
+            </button>
           </div>
         </div>
       </div>

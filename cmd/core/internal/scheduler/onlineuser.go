@@ -21,14 +21,14 @@ func DelOnlineuserTask() {
 		Where(coreonlineuser.DeletedAtIsNil()).
 		All(ctx)
 	if qerr != nil {
-		global.Logger.Sugar().Errorf("删除在线用户记录任务查询数据库失败: %v", qerr)
+		global.Logger.Sugar().Errorf("删除在线用户查询数据库失败: %v", qerr)
 		return
 	}
 	// 2、遍历每条记录，检查其在Redis中是否存在
 	for _, user := range u {
 		exists, err := global.RedisCli.Exists(ctx, fmt.Sprintf(common.TokenCache, user.UserID)).Result()
 		if err != nil {
-			global.Logger.Sugar().Errorf("删除在线用户记录任务查询Redis失败: %v", err)
+			global.Logger.Sugar().Errorf("删除在线用户查询Redis失败: %v", err)
 			continue
 		}
 		if exists == 0 {
@@ -37,9 +37,15 @@ func DelOnlineuserTask() {
 				Where(coreonlineuser.UserIDEQ(user.UserID)).
 				Exec(ctx)
 			if derr != nil {
-				global.Logger.Sugar().Errorf("删除在线用户记录任务删除数据库记录失败: %v", derr)
+				global.Logger.Sugar().Errorf("删除在线用户数据库记录失败: %v", derr)
 				continue
 			}
 		}
 	}
+
+	_, derr := global.EntClient.CoreOnLineUser.Delete().Where(coreonlineuser.DeletedAtNotNil()).Exec(ctx)
+	if derr != nil {
+		global.Logger.Sugar().Errorf("删除已过期在线用户数据库记录失败: %v", derr)
+	}
+
 }

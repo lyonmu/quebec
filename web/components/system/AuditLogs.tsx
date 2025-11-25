@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { mockLogs } from '../../services/mockData';
+import { mockLogs } from '../../services/base/mockData';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Search, Filter, Download, CheckCircle, XCircle, Clock } from 'lucide-react';
 

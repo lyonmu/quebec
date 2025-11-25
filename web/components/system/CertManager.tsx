@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Lock, RefreshCw, AlertCircle, CheckCircle, Upload } from 'lucide-react';
-import { mockCerts } from '../../services/mockData';
+import { mockCerts } from '../../services/base/mockData';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 const CertManager: React.FC = () => {

@@ -2,7 +2,7 @@
 import React, { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { Activity, Clock, AlertTriangle, Globe } from 'lucide-react';
-import { generateMetrics, mockNodes } from '../../services/mockData';
+import { generateMetrics, mockNodes } from '../../services/base/mockData';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTheme } from '../../contexts/ThemeContext';
 

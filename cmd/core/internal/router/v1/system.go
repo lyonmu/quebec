@@ -18,5 +18,8 @@ func (r *SystemRouter) InitSystemRouter(Router *gin.RouterGroup, apiGroup v1.V1A
 	systemRouterWithAuth := Router.Group("v1/system", http.JwtAuth())
 	{
 		systemRouterWithAuth.GET("logout", apiGroup.SystemLogout)
+		systemRouterWithAuth.GET("onlineuser/list", apiGroup.SystemOnlineUserList)
+		systemRouterWithAuth.GET("onlineuser/label", apiGroup.SystemOnlineUserLabel)
+		systemRouterWithAuth.DELETE("onlineuser/clearance/:id", apiGroup.SystemOnlineUserClearance)
 	}
 }

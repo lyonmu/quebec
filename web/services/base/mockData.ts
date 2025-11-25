@@ -1,5 +1,5 @@
 
-import { EnvoyNode, Route, Certificate, Protocol, DashboardMetrics, Notification, User, OperationLog } from '../types';
+import { EnvoyNode, Route, Certificate, Protocol, DashboardMetrics, Notification, User, OperationLog } from '../../types';
 
 export const generateMetrics = (): DashboardMetrics => {
   const now = new Date();

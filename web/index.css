@@ -7,11 +7,13 @@
 
 @theme {
   --font-sans: Inter, sans-serif;
-  
+
   --color-slate-850: #1e293b;
   --color-slate-900: #0f172a;
   --color-slate-950: #020617;
 }
+
+@custom-variant dark (.dark &);
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {

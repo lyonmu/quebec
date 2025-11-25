@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Server, ShieldCheck, ShieldAlert, Cpu, MapPin } from 'lucide-react';
-import { mockNodes } from '../../services/mockData';
+import { mockNodes } from '../../services/base/mockData';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 const NodeList: React.FC = () => {

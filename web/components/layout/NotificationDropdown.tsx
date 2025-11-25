@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bell, Info, AlertTriangle, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { Notification } from '../../types';
-import { fetchNotifications } from '../../services/mockData';
+import { fetchNotifications } from '../../services/base/mockData';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 const NotificationDropdown: React.FC = () => {

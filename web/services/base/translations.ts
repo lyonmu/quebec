@@ -1,3 +1,13 @@
+// 操作类型映射常量
+export const OPERATION_TYPE_MAP: Record<number, string> = {
+  1: 'online_users.operation_types.login',
+  // 可以根据实际需求添加更多操作类型
+  // 2: 'online_users.operation_types.logout',
+  // 3: 'online_users.operation_types.update',
+};
+
+// 默认操作类型
+export const DEFAULT_OPERATION_TYPE = 'online_users.operation_types.other';
 
 export const translations = {
   zh: {
@@ -8,6 +18,9 @@ export const translations = {
       items: "条",
       prev: "上一页",
       next: "下一页",
+      actions: "操作",
+      startTime: "开始时间",
+      endTime: "结束时间"
     },
     dashboard: {
       title: "仪表盘",
@@ -125,6 +138,10 @@ export const translations = {
         version: "浏览器版本",
         engine: "引擎名称",
         engineVersion: "引擎版本"
+      },
+      operation_types: {
+        login: "登录",
+        other: "其他"
       }
     },
     roles: {
@@ -222,6 +239,9 @@ export const translations = {
       items: "items",
       prev: "Previous",
       next: "Next",
+      actions: "Actions",
+      startTime: "Start Time",
+      endTime: "End Time"
     },
     dashboard: {
       title: "Dashboard",
@@ -339,6 +359,10 @@ export const translations = {
         version: "Browser Version",
         engine: "Engine Name",
         engineVersion: "Engine Version"
+      },
+      operation_types: {
+        login: "LOGIN",
+        other: "OTHER"
       }
     },
     roles: {

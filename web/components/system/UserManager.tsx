@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Plus, User as UserIcon, Lock, Shield, Key, Mail, Play, Ban } from 'lucide-react';
-import { mockUsers } from '../../services/mockData';
+import { mockUsers } from '../../services/base/mockData';
 import { User } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
 import forge from 'node-forge';

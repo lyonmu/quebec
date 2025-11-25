@@ -27,3 +27,30 @@ export interface Notification {
   read: boolean;
   type: 'info' | 'warning' | 'error' | 'success';
 }
+
+export interface OnlineUser {
+  id: string;
+  access_ip: string;
+  browser_engine_name: string;
+  browser_engine_version: string;
+  browser_name: string;
+  browser_version: string;
+  last_operation_time: number;
+  nickname: string;
+  operation_type: number;
+  os: string;
+  platform: string;
+}
+
+export interface OnlineUserListResponse {
+  items: OnlineUser[];
+  page: number;
+  page_size: number;
+  total: number;
+}
+
+export interface OnlineUserLabel {
+  label: string;
+  value: string;
+  children?: OnlineUserLabel[];
+}

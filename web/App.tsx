@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HashRouter } from 'react-router-dom';
 import Sidebar from './components/layout/Sidebar';
 import Dashboard from './components/dashboard/Dashboard';
@@ -18,26 +18,66 @@ import { Languages, Sun, Moon, Users, Settings } from 'lucide-react';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 
-import { authService } from './services/authService';
+import { loginService } from './services/system/loginService';
 
 // Inner App component to use the context
 const EnvoyNexusApp: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return !!localStorage.getItem('x-quebec-token');
   });
-  const [currentView, setCurrentView] = useState<ViewState>(ViewState.DASHBOARD);
+  const [currentView, setCurrentView] = useState<ViewState>(() => {
+    // 从 localStorage 恢复上次访问的页面
+    const savedView = localStorage.getItem('quebec-current-view');
+    if (savedView && Object.values(ViewState).includes(savedView as ViewState)) {
+      return savedView as ViewState;
+    }
+    return ViewState.DASHBOARD;
+  });
   const { t, language, setLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
+  
+  // 获取用户名
+  const [username, setUsername] = useState(() => {
+    return localStorage.getItem('quebec-username') || 'Admin';
+  });
+  
+  // 获取角色名称
+  const [roleName, setRoleName] = useState(() => {
+    return localStorage.getItem('quebec-role-name') || t('header.superAdmin');
+  });
 
   const toggleLanguage = () => {
     setLanguage(language === 'zh' ? 'en' : 'zh');
   };
 
+  // 保存当前页面到 localStorage
+  const handleViewChange = (view: ViewState) => {
+    setCurrentView(view);
+    localStorage.setItem('quebec-current-view', view);
+  };
+
+  // 获取用户名首字母（最多2个字符）
+  // 优化：中文字符只取1个，英文字符取2个
+  const getUserInitials = (name: string) => {
+    if (!name) return 'AD';
+    // 检查是否包含中文字符
+    const hasChinese = /[\u4e00-\u9fa5]/.test(name);
+    if (hasChinese) {
+      // 中文名只取1个字符
+      return name.substring(0, 1).toUpperCase();
+    }
+    // 英文名取2个字符
+    return name.substring(0, 2).toUpperCase();
+  };
+
   const handleLogout = async () => {
     try {
-      const response = await authService.logout();
+      const response = await loginService.logout();
       if (response.code === 50000) {
         localStorage.removeItem('x-quebec-token');
+        localStorage.removeItem('quebec-username');
+        localStorage.removeItem('quebec-role-name');
+        localStorage.removeItem('quebec-current-view');
         setIsAuthenticated(false);
       } else {
         console.error('Logout failed:', response.message);
@@ -107,14 +147,26 @@ const EnvoyNexusApp: React.FC = () => {
                 {language === 'zh' ? 'English' : '中文'}
             </button>
         </div>
-        <Login onLogin={() => setIsAuthenticated(true)} />
+        <Login onLogin={() => {
+          setIsAuthenticated(true);
+          // 刷新用户名
+          const savedUsername = localStorage.getItem('quebec-username');
+          if (savedUsername) {
+            setUsername(savedUsername);
+          }
+          // 刷新角色名称
+          const savedRoleName = localStorage.getItem('quebec-role-name');
+          if (savedRoleName) {
+            setRoleName(savedRoleName);
+          }
+        }} />
       </>
     );
   }
 
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden font-sans text-slate-900 dark:text-slate-200 transition-colors duration-300">
-      <Sidebar currentView={currentView} onChangeView={setCurrentView} onLogout={handleLogout} />
+      <Sidebar currentView={currentView} onChangeView={handleViewChange} onLogout={handleLogout} />
       
       <main className="flex-1 flex flex-col min-w-0">
         {/* Top Header */}
@@ -150,11 +202,11 @@ const EnvoyNexusApp: React.FC = () => {
               <div className="h-8 w-[1px] bg-slate-200 dark:bg-slate-800"></div>
               <button className="flex items-center gap-3 pl-2">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white shadow-md">
-                    AD
+                    {getUserInitials(username)}
                   </div>
                   <div className="hidden md:block text-left">
-                    <p className="text-sm font-medium text-slate-800 dark:text-white leading-none">{t('header.adminUser')}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">{t('header.superAdmin')}</p>
+                    <p className="text-sm font-medium text-slate-800 dark:text-white leading-none">{username}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">{roleName}</p>
                   </div>
               </button>
             </div>

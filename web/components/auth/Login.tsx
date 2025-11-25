@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { User, Lock, RefreshCw, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { authService } from '../../services/authService';
+import { loginService } from '../../services/system/loginService';
 import { CaptchaData } from '../../types';
 import forge from 'node-forge';
 
@@ -26,7 +26,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     setCaptchaLoading(true);
     setError('');
     try {
-      const response = await authService.fetchCaptcha();
+      const response = await loginService.fetchCaptcha();
       if (response.code === 50000) {
         setCaptchaData(response.data);
       } else {
@@ -81,7 +81,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     });
 
     try {
-      const loginResponse = await authService.login({
+      const loginResponse = await loginService.login({
         username: hashedUsername,
         password: hashedPassword,
         captcha: captchaCode,
@@ -92,6 +92,14 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         // Store token if provided in response
         if (loginResponse.data.token) {
           localStorage.setItem('x-quebec-token', loginResponse.data.token);
+        }
+        // Store username
+        if (loginResponse.data.username) {
+          localStorage.setItem('quebec-username', loginResponse.data.username);
+        }
+        // Store role name
+        if (loginResponse.data.role_name) {
+          localStorage.setItem('quebec-role-name', loginResponse.data.role_name);
         }
         onLogin();
       } else {

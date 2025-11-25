@@ -7,7 +7,9 @@ import (
 	"github.com/lyonmu/quebec/cmd/core/internal/common"
 	"github.com/lyonmu/quebec/cmd/core/internal/dto/request"
 	"github.com/lyonmu/quebec/cmd/core/internal/dto/response"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreonlineuser"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
 	"github.com/lyonmu/quebec/pkg/code"
@@ -31,6 +33,9 @@ func (s *SystemSvc) Login(req *request.SystemLoginRequest, ua *useragent.UserAge
 	}
 
 	u, qerr := global.EntClient.CoreUser.Query().
+		WithUserFromRole(func(q *ent.CoreRoleQuery) {
+			q.Select(corerole.FieldID, corerole.FieldName).Where(corerole.DeletedAtIsNil())
+		}).
 		Where(coreuser.UsernameEQ(req.Username)).
 		Where(coreuser.DeletedAtIsNil()).
 		First(ctx)
@@ -104,6 +109,9 @@ func (s *SystemSvc) Login(req *request.SystemLoginRequest, ua *useragent.UserAge
 
 	resp.Username = u.Nickname
 	resp.Token = token
+	if u.Edges.UserFromRole != nil {
+		resp.RoleName = u.Edges.UserFromRole.Name
+	}
 
 	return &resp, nil
 }
