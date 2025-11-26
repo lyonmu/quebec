@@ -4,13 +4,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
+	accesslogv3 "github.com/envoyproxy/go-control-plane/envoy/config/accesslog/v3"
 	cluster "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	endpoint "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 	listener "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	route "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	accessloggrpcv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/access_loggers/grpc/v3"
 	extauthz "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/ext_authz/v3"
 	router "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/router/v3"
 	hcm "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
@@ -208,6 +211,34 @@ func MakeListener(routeCfg *route.RouteConfiguration) *listener.Listener {
 		RequestTimeout:      durationpb.New(60 * time.Second),    // 减少请求超时时间
 		StreamIdleTimeout:   durationpb.New(60 * time.Second),    // 减少流空闲超时
 		MaxRequestHeadersKb: &wrapperspb.UInt32Value{Value: 256}, // 限制请求头大小
+	}
+
+	// 根据 debug 日志级别动态添加 gRPC Access Log
+	if strings.ToLower(global.Cfg.Log.Level) == "debug" {
+		accessLogConfig, err := anypb.New(&accessloggrpcv3.HttpGrpcAccessLogConfig{
+			CommonConfig: &accessloggrpcv3.CommonGrpcAccessLogConfig{
+				LogName:             common.AccessLogName,
+				TransportApiVersion: core.ApiVersion_V3,
+				GrpcService: &core.GrpcService{
+					TargetSpecifier: &core.GrpcService_EnvoyGrpc_{
+						EnvoyGrpc: &core.GrpcService_EnvoyGrpc{
+							ClusterName: common.ClusterName,
+						},
+					},
+					Timeout: durationpb.New(60 * time.Second),
+				},
+			},
+		})
+		if err != nil {
+			global.Logger.Sugar().Errorf("failed to marshal HttpGrpcAccessLogConfig: %v", err)
+		} else {
+			manager.AccessLog = []*accesslogv3.AccessLog{
+				{
+					Name:       common.AccessLogName,
+					ConfigType: &accesslogv3.AccessLog_TypedConfig{TypedConfig: accessLogConfig},
+				},
+			}
+		}
 	}
 
 	pbst, err := anypb.New(manager)

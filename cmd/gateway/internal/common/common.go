@@ -34,4 +34,5 @@ const (
 	HttpStatPrefixName = "quebec_gateway_http"
 	HttpFilterName     = "quebec_gateway_http_filter"
 	VirtualHostName    = "quebec_gateway_virtual_host"
+	AccessLogName      = "quebec_gateway_access_log"
 )
