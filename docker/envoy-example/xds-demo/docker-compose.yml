@@ -8,10 +8,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: 0.25
-          memory: 256M
+          cpus: 1.00
+          memory: 1024M
         reservations:
-          memory: 128M
+          memory: 512M
     network_mode: host
     volumes:
       - ./envoy.yaml:/etc/envoy/envoy.yaml
@@ -22,4 +22,5 @@ services:
         "--log-level",
         "info",
         "--enable-mutex-tracing",
+        "--base-id 1",
       ]
