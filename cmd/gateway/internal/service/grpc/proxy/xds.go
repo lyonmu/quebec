@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -19,6 +18,7 @@ import (
 	hcm "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
+
 	"github.com/envoyproxy/go-control-plane/pkg/resource/v3"
 	"github.com/google/uuid"
 	"github.com/lyonmu/quebec/cmd/gateway/internal/common"
@@ -28,7 +28,7 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-const ()
+// Create a cache
 
 type SvcInfo struct {
 	Name      string
@@ -75,9 +75,9 @@ func (s *SvcInfo) MakeEndpoint() *endpoint.ClusterLoadAssignment {
 func (s *SvcInfo) MakeCluster() *cluster.Cluster {
 	return &cluster.Cluster{
 		Name:                 s.Name,
-		ConnectTimeout:       durationpb.New(time.Duration(global.Cfg.Gateway.UpstreamTimeout) * time.Second),
+		ConnectTimeout:       durationpb.New(3 * time.Second),
 		ClusterDiscoveryType: &cluster.Cluster_Type{Type: cluster.Cluster_EDS},
-		LbPolicy:             common.LBPolicyMap[global.Cfg.Gateway.Policy],
+		LbPolicy:             common.LBPolicyMap[common.LoadBalancerPolicyMaglev],
 		EdsClusterConfig: &cluster.Cluster_EdsClusterConfig{
 			EdsConfig: &core.ConfigSource{
 				ResourceApiVersion: core.ApiVersion_V3,
@@ -178,14 +178,14 @@ func MakeListener(routeCfg *route.RouteConfiguration) *listener.Listener {
 	httpFilters := []*hcm.HttpFilter{}
 
 	// 如果启用认证，先添加 ext_authz 过滤器
-	if global.Cfg.Gateway.EnableAuth {
-		httpFilters = append(httpFilters, &hcm.HttpFilter{
-			Name: "envoy.filters.http.ext_authz",
-			ConfigType: &hcm.HttpFilter_TypedConfig{
-				TypedConfig: createExtAuthzGrpcConfig(),
-			},
-		})
-	}
+	// if global.Cfg.Gateway.EnableAuth {
+	// 	httpFilters = append(httpFilters, &hcm.HttpFilter{
+	// 		Name: "envoy.filters.http.ext_authz",
+	// 		ConfigType: &hcm.HttpFilter_TypedConfig{
+	// 			TypedConfig: createExtAuthzGrpcConfig(),
+	// 		},
+	// 	})
+	// }
 
 	// router 过滤器必须是最后一个
 	httpFilters = append(httpFilters, &hcm.HttpFilter{
@@ -255,7 +255,7 @@ func MakeListener(routeCfg *route.RouteConfiguration) *listener.Listener {
 					Protocol: core.SocketAddress_TCP,
 					Address:  "0.0.0.0",
 					PortSpecifier: &core.SocketAddress_PortValue{
-						PortValue: uint32(global.Cfg.Gateway.ProxyPort),
+						PortValue: uint32(global.Cfg.Gateway.Port),
 					},
 				},
 			},
@@ -275,14 +275,10 @@ func MakeListener(routeCfg *route.RouteConfiguration) *listener.Listener {
 
 // Snapshot
 func GenerateSnapshot(svcs []*SvcInfo) *cache.Snapshot {
-	// 添加详细日志
-	global.Logger.Sugar().Debugf("开始生成 snapshot, 服务数量: %d", len(svcs))
-
 	// 1. 生成集群配置 CDS
 	clusters := make([]types.Resource, 0, len(svcs))
 	for _, s := range svcs {
 		cluster := s.MakeCluster()
-		global.Logger.Sugar().Debugf("生成集群配置: %s", cluster.Name)
 		clusters = append(clusters, cluster)
 	}
 
@@ -290,17 +286,14 @@ func GenerateSnapshot(svcs []*SvcInfo) *cache.Snapshot {
 	endpoints := make([]types.Resource, 0, len(svcs))
 	for _, s := range svcs {
 		endpoint := s.MakeEndpoint()
-		global.Logger.Sugar().Infof("生成端点配置: %s, 实例数量: %d", endpoint.ClusterName, len(s.Instances))
 		endpoints = append(endpoints, endpoint)
 	}
 
 	// 3. 生成路由配置 RDS
 	routeCfg := MakeRouteConfig(svcs)
-	global.Logger.Sugar().Infof("生成路由配置: %s, 路由数量: %d", routeCfg.Name, len(routeCfg.VirtualHosts[0].Routes))
 
 	// 4. 生成监听器配置 LDS
 	listenerCfg := MakeListener(routeCfg)
-	global.Logger.Sugar().Infof("生成监听器配置: %s", listenerCfg.Name)
 	// 5. 创建 snapshot
 	resources := map[resource.Type][]types.Resource{
 		resource.ClusterType:  clusters,
@@ -309,31 +302,18 @@ func GenerateSnapshot(svcs []*SvcInfo) *cache.Snapshot {
 		resource.ListenerType: {listenerCfg},
 	}
 
-	b, err := json.MarshalIndent(resources, "", "  ")
-	if err == nil {
-		global.Logger.Debug("Resources: ")
-		global.Logger.Debug((string(b)))
-	}
-	// 打印资源统计
-	global.Logger.Sugar().Infof("上游服务统计: Clusters=%d, Endpoints=%d, Routes=%d, Listeners=%d",
-		len(resources[resource.ClusterType]),
-		len(resources[resource.EndpointType]),
-		len(resources[resource.RouteType]),
-		len(resources[resource.ListenerType]),
-	)
-
 	snap, err := cache.NewSnapshot(uuid.Must(uuid.NewV7()).String(), resources)
 	if err != nil {
-		global.Logger.Sugar().Errorf("上游服务生成 snapshot 失败: %v", err)
+		global.Logger.Sugar().Errorf("failed to generate snapshot: %v", err)
 		os.Exit(1)
 	}
 
 	// 验证 snapshot
 	if err := snap.Consistent(); err != nil {
-		global.Logger.Sugar().Errorf("上游服务 snapshot 验证失败: %v", err)
+		global.Logger.Sugar().Errorf("snapshot validation failed: %v", err)
 		os.Exit(1)
 	}
 
-	global.Logger.Sugar().Info("上游服务 snapshot 生成并验证成功")
+	global.Logger.Sugar().Info("snapshot generated and validated successfully")
 	return snap
 }

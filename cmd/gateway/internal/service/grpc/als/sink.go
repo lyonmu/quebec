@@ -7,15 +7,16 @@ import (
 	"github.com/lyonmu/quebec/cmd/gateway/internal/global"
 
 	accesslogv3 "github.com/envoyproxy/go-control-plane/envoy/service/accesslog/v3"
+	"google.golang.org/grpc"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-type AlsEvent struct {
+type AlsSvc struct {
 	marshaler protojson.MarshalOptions
 }
 
-func NewAlsEvent() *AlsEvent {
-	return &AlsEvent{
+func NewAlsSvc() *AlsSvc {
+	return &AlsSvc{
 		marshaler: protojson.MarshalOptions{
 			EmitUnpopulated: true,
 			UseProtoNames:   true,
@@ -23,8 +24,13 @@ func NewAlsEvent() *AlsEvent {
 	}
 }
 
-// StreamAccessLogs 实现流式接收访问日志
-func (a *AlsEvent) StreamAccessLogs(stream accesslogv3.AccessLogService_StreamAccessLogsServer) error {
+func (a *AlsSvc) Register(server *grpc.Server) error {
+	accesslogv3.RegisterAccessLogServiceServer(server, a)
+	global.Logger.Sugar().Info("als service registered")
+	return nil
+}
+
+func (a *AlsSvc) StreamAccessLogs(stream accesslogv3.AccessLogService_StreamAccessLogsServer) error {
 	ctx := stream.Context()
 
 	for {

@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/alecthomas/kong"
+	"github.com/lyonmu/quebec/cmd/gateway/internal/bootstrap"
 	"github.com/lyonmu/quebec/cmd/gateway/internal/global"
 	"github.com/lyonmu/quebec/pkg/constant"
 	"github.com/prometheus/common/version"
@@ -25,4 +26,5 @@ func main() {
 		os.Exit(0)
 	}
 
+	bootstrap.Start()
 }
