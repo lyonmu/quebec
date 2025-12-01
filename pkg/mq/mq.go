@@ -2,11 +2,11 @@ package mq
 
 import "context"
 
-type Producer[K, V any] interface {
+type Publish[K, V any] interface {
 	Produce(ctx context.Context, key *K, payload *V) error
 }
 
-type Subscriber[K, V any] interface {
+type Subscribe[K, V any] interface {
 	Subscribe(ctx context.Context, callback func(key *K, payload *V, err error)) error
 	Close() error
 }
