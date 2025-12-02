@@ -47,6 +47,13 @@ build-all-docker:
 	docker build -t lyonmu/quebec:core-lts -f Dockerfile_core .
 	docker build -t lyonmu/quebec:gateway-lts -f Dockerfile_gateway .
 
+.PHONY: generate-idl
+generate-idl:
+	cd idl/node && go generate
+	cd idl/router && go generate
+
 .PHONY: clean
 clean:
 	rm -rf bin
+	rm -rf idl/node/*.pb.go
+	rm -rf idl/router/*.pb.go

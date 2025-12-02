@@ -65,3 +65,5 @@ bun.lock
 package-lock.json
 
 certs
+
+*.pb.go

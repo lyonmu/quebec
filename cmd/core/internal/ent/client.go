@@ -16,6 +16,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coredatarelationship"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewaycluster"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewaynode"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreonlineuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
@@ -31,6 +33,10 @@ type Client struct {
 	Schema *migrate.Schema
 	// CoreDataRelationship is the client for interacting with the CoreDataRelationship builders.
 	CoreDataRelationship *CoreDataRelationshipClient
+	// CoreGatewayCluster is the client for interacting with the CoreGatewayCluster builders.
+	CoreGatewayCluster *CoreGatewayClusterClient
+	// CoreGatewayNode is the client for interacting with the CoreGatewayNode builders.
+	CoreGatewayNode *CoreGatewayNodeClient
 	// CoreMenu is the client for interacting with the CoreMenu builders.
 	CoreMenu *CoreMenuClient
 	// CoreOnLineUser is the client for interacting with the CoreOnLineUser builders.
@@ -51,6 +57,8 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.CoreDataRelationship = NewCoreDataRelationshipClient(c.config)
+	c.CoreGatewayCluster = NewCoreGatewayClusterClient(c.config)
+	c.CoreGatewayNode = NewCoreGatewayNodeClient(c.config)
 	c.CoreMenu = NewCoreMenuClient(c.config)
 	c.CoreOnLineUser = NewCoreOnLineUserClient(c.config)
 	c.CoreRole = NewCoreRoleClient(c.config)
@@ -148,6 +156,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:                  ctx,
 		config:               cfg,
 		CoreDataRelationship: NewCoreDataRelationshipClient(cfg),
+		CoreGatewayCluster:   NewCoreGatewayClusterClient(cfg),
+		CoreGatewayNode:      NewCoreGatewayNodeClient(cfg),
 		CoreMenu:             NewCoreMenuClient(cfg),
 		CoreOnLineUser:       NewCoreOnLineUserClient(cfg),
 		CoreRole:             NewCoreRoleClient(cfg),
@@ -172,6 +182,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:                  ctx,
 		config:               cfg,
 		CoreDataRelationship: NewCoreDataRelationshipClient(cfg),
+		CoreGatewayCluster:   NewCoreGatewayClusterClient(cfg),
+		CoreGatewayNode:      NewCoreGatewayNodeClient(cfg),
 		CoreMenu:             NewCoreMenuClient(cfg),
 		CoreOnLineUser:       NewCoreOnLineUserClient(cfg),
 		CoreRole:             NewCoreRoleClient(cfg),
@@ -204,21 +216,23 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.CoreDataRelationship.Use(hooks...)
-	c.CoreMenu.Use(hooks...)
-	c.CoreOnLineUser.Use(hooks...)
-	c.CoreRole.Use(hooks...)
-	c.CoreUser.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.CoreDataRelationship, c.CoreGatewayCluster, c.CoreGatewayNode, c.CoreMenu,
+		c.CoreOnLineUser, c.CoreRole, c.CoreUser,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.CoreDataRelationship.Intercept(interceptors...)
-	c.CoreMenu.Intercept(interceptors...)
-	c.CoreOnLineUser.Intercept(interceptors...)
-	c.CoreRole.Intercept(interceptors...)
-	c.CoreUser.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.CoreDataRelationship, c.CoreGatewayCluster, c.CoreGatewayNode, c.CoreMenu,
+		c.CoreOnLineUser, c.CoreRole, c.CoreUser,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -226,6 +240,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *CoreDataRelationshipMutation:
 		return c.CoreDataRelationship.mutate(ctx, m)
+	case *CoreGatewayClusterMutation:
+		return c.CoreGatewayCluster.mutate(ctx, m)
+	case *CoreGatewayNodeMutation:
+		return c.CoreGatewayNode.mutate(ctx, m)
 	case *CoreMenuMutation:
 		return c.CoreMenu.mutate(ctx, m)
 	case *CoreOnLineUserMutation:
@@ -402,6 +420,306 @@ func (c *CoreDataRelationshipClient) mutate(ctx context.Context, m *CoreDataRela
 		return (&CoreDataRelationshipDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown CoreDataRelationship mutation op: %q", m.Op())
+	}
+}
+
+// CoreGatewayClusterClient is a client for the CoreGatewayCluster schema.
+type CoreGatewayClusterClient struct {
+	config
+}
+
+// NewCoreGatewayClusterClient returns a client for the CoreGatewayCluster from the given config.
+func NewCoreGatewayClusterClient(c config) *CoreGatewayClusterClient {
+	return &CoreGatewayClusterClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `coregatewaycluster.Hooks(f(g(h())))`.
+func (c *CoreGatewayClusterClient) Use(hooks ...Hook) {
+	c.hooks.CoreGatewayCluster = append(c.hooks.CoreGatewayCluster, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `coregatewaycluster.Intercept(f(g(h())))`.
+func (c *CoreGatewayClusterClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CoreGatewayCluster = append(c.inters.CoreGatewayCluster, interceptors...)
+}
+
+// Create returns a builder for creating a CoreGatewayCluster entity.
+func (c *CoreGatewayClusterClient) Create() *CoreGatewayClusterCreate {
+	mutation := newCoreGatewayClusterMutation(c.config, OpCreate)
+	return &CoreGatewayClusterCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CoreGatewayCluster entities.
+func (c *CoreGatewayClusterClient) CreateBulk(builders ...*CoreGatewayClusterCreate) *CoreGatewayClusterCreateBulk {
+	return &CoreGatewayClusterCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CoreGatewayClusterClient) MapCreateBulk(slice any, setFunc func(*CoreGatewayClusterCreate, int)) *CoreGatewayClusterCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CoreGatewayClusterCreateBulk{err: fmt.Errorf("calling to CoreGatewayClusterClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CoreGatewayClusterCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CoreGatewayClusterCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CoreGatewayCluster.
+func (c *CoreGatewayClusterClient) Update() *CoreGatewayClusterUpdate {
+	mutation := newCoreGatewayClusterMutation(c.config, OpUpdate)
+	return &CoreGatewayClusterUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CoreGatewayClusterClient) UpdateOne(_m *CoreGatewayCluster) *CoreGatewayClusterUpdateOne {
+	mutation := newCoreGatewayClusterMutation(c.config, OpUpdateOne, withCoreGatewayCluster(_m))
+	return &CoreGatewayClusterUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CoreGatewayClusterClient) UpdateOneID(id string) *CoreGatewayClusterUpdateOne {
+	mutation := newCoreGatewayClusterMutation(c.config, OpUpdateOne, withCoreGatewayClusterID(id))
+	return &CoreGatewayClusterUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CoreGatewayCluster.
+func (c *CoreGatewayClusterClient) Delete() *CoreGatewayClusterDelete {
+	mutation := newCoreGatewayClusterMutation(c.config, OpDelete)
+	return &CoreGatewayClusterDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CoreGatewayClusterClient) DeleteOne(_m *CoreGatewayCluster) *CoreGatewayClusterDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CoreGatewayClusterClient) DeleteOneID(id string) *CoreGatewayClusterDeleteOne {
+	builder := c.Delete().Where(coregatewaycluster.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CoreGatewayClusterDeleteOne{builder}
+}
+
+// Query returns a query builder for CoreGatewayCluster.
+func (c *CoreGatewayClusterClient) Query() *CoreGatewayClusterQuery {
+	return &CoreGatewayClusterQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCoreGatewayCluster},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CoreGatewayCluster entity by its id.
+func (c *CoreGatewayClusterClient) Get(ctx context.Context, id string) (*CoreGatewayCluster, error) {
+	return c.Query().Where(coregatewaycluster.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CoreGatewayClusterClient) GetX(ctx context.Context, id string) *CoreGatewayCluster {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryClusterToNode queries the cluster_to_node edge of a CoreGatewayCluster.
+func (c *CoreGatewayClusterClient) QueryClusterToNode(_m *CoreGatewayCluster) *CoreGatewayNodeQuery {
+	query := (&CoreGatewayNodeClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(coregatewaycluster.Table, coregatewaycluster.FieldID, id),
+			sqlgraph.To(coregatewaynode.Table, coregatewaynode.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, coregatewaycluster.ClusterToNodeTable, coregatewaycluster.ClusterToNodeColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CoreGatewayClusterClient) Hooks() []Hook {
+	hooks := c.hooks.CoreGatewayCluster
+	return append(hooks[:len(hooks):len(hooks)], coregatewaycluster.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *CoreGatewayClusterClient) Interceptors() []Interceptor {
+	return c.inters.CoreGatewayCluster
+}
+
+func (c *CoreGatewayClusterClient) mutate(ctx context.Context, m *CoreGatewayClusterMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CoreGatewayClusterCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CoreGatewayClusterUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CoreGatewayClusterUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CoreGatewayClusterDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CoreGatewayCluster mutation op: %q", m.Op())
+	}
+}
+
+// CoreGatewayNodeClient is a client for the CoreGatewayNode schema.
+type CoreGatewayNodeClient struct {
+	config
+}
+
+// NewCoreGatewayNodeClient returns a client for the CoreGatewayNode from the given config.
+func NewCoreGatewayNodeClient(c config) *CoreGatewayNodeClient {
+	return &CoreGatewayNodeClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `coregatewaynode.Hooks(f(g(h())))`.
+func (c *CoreGatewayNodeClient) Use(hooks ...Hook) {
+	c.hooks.CoreGatewayNode = append(c.hooks.CoreGatewayNode, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `coregatewaynode.Intercept(f(g(h())))`.
+func (c *CoreGatewayNodeClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CoreGatewayNode = append(c.inters.CoreGatewayNode, interceptors...)
+}
+
+// Create returns a builder for creating a CoreGatewayNode entity.
+func (c *CoreGatewayNodeClient) Create() *CoreGatewayNodeCreate {
+	mutation := newCoreGatewayNodeMutation(c.config, OpCreate)
+	return &CoreGatewayNodeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CoreGatewayNode entities.
+func (c *CoreGatewayNodeClient) CreateBulk(builders ...*CoreGatewayNodeCreate) *CoreGatewayNodeCreateBulk {
+	return &CoreGatewayNodeCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CoreGatewayNodeClient) MapCreateBulk(slice any, setFunc func(*CoreGatewayNodeCreate, int)) *CoreGatewayNodeCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CoreGatewayNodeCreateBulk{err: fmt.Errorf("calling to CoreGatewayNodeClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CoreGatewayNodeCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CoreGatewayNodeCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CoreGatewayNode.
+func (c *CoreGatewayNodeClient) Update() *CoreGatewayNodeUpdate {
+	mutation := newCoreGatewayNodeMutation(c.config, OpUpdate)
+	return &CoreGatewayNodeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CoreGatewayNodeClient) UpdateOne(_m *CoreGatewayNode) *CoreGatewayNodeUpdateOne {
+	mutation := newCoreGatewayNodeMutation(c.config, OpUpdateOne, withCoreGatewayNode(_m))
+	return &CoreGatewayNodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CoreGatewayNodeClient) UpdateOneID(id string) *CoreGatewayNodeUpdateOne {
+	mutation := newCoreGatewayNodeMutation(c.config, OpUpdateOne, withCoreGatewayNodeID(id))
+	return &CoreGatewayNodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CoreGatewayNode.
+func (c *CoreGatewayNodeClient) Delete() *CoreGatewayNodeDelete {
+	mutation := newCoreGatewayNodeMutation(c.config, OpDelete)
+	return &CoreGatewayNodeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CoreGatewayNodeClient) DeleteOne(_m *CoreGatewayNode) *CoreGatewayNodeDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CoreGatewayNodeClient) DeleteOneID(id string) *CoreGatewayNodeDeleteOne {
+	builder := c.Delete().Where(coregatewaynode.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CoreGatewayNodeDeleteOne{builder}
+}
+
+// Query returns a query builder for CoreGatewayNode.
+func (c *CoreGatewayNodeClient) Query() *CoreGatewayNodeQuery {
+	return &CoreGatewayNodeQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCoreGatewayNode},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CoreGatewayNode entity by its id.
+func (c *CoreGatewayNodeClient) Get(ctx context.Context, id string) (*CoreGatewayNode, error) {
+	return c.Query().Where(coregatewaynode.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CoreGatewayNodeClient) GetX(ctx context.Context, id string) *CoreGatewayNode {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryNodeFromCluster queries the node_from_cluster edge of a CoreGatewayNode.
+func (c *CoreGatewayNodeClient) QueryNodeFromCluster(_m *CoreGatewayNode) *CoreGatewayClusterQuery {
+	query := (&CoreGatewayClusterClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(coregatewaynode.Table, coregatewaynode.FieldID, id),
+			sqlgraph.To(coregatewaycluster.Table, coregatewaycluster.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, coregatewaynode.NodeFromClusterTable, coregatewaynode.NodeFromClusterColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CoreGatewayNodeClient) Hooks() []Hook {
+	hooks := c.hooks.CoreGatewayNode
+	return append(hooks[:len(hooks):len(hooks)], coregatewaynode.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *CoreGatewayNodeClient) Interceptors() []Interceptor {
+	return c.inters.CoreGatewayNode
+}
+
+func (c *CoreGatewayNodeClient) mutate(ctx context.Context, m *CoreGatewayNodeMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CoreGatewayNodeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CoreGatewayNodeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CoreGatewayNodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CoreGatewayNodeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CoreGatewayNode mutation op: %q", m.Op())
 	}
 }
 
@@ -1072,11 +1390,12 @@ func (c *CoreUserClient) mutate(ctx context.Context, m *CoreUserMutation) (Value
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		CoreDataRelationship, CoreMenu, CoreOnLineUser, CoreRole, CoreUser []ent.Hook
+		CoreDataRelationship, CoreGatewayCluster, CoreGatewayNode, CoreMenu,
+		CoreOnLineUser, CoreRole, CoreUser []ent.Hook
 	}
 	inters struct {
-		CoreDataRelationship, CoreMenu, CoreOnLineUser, CoreRole,
-		CoreUser []ent.Interceptor
+		CoreDataRelationship, CoreGatewayCluster, CoreGatewayNode, CoreMenu,
+		CoreOnLineUser, CoreRole, CoreUser []ent.Interceptor
 	}
 )
 

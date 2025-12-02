@@ -21,6 +21,30 @@ func (f CoreDataRelationshipFunc) Mutate(ctx context.Context, m ent.Mutation) (e
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CoreDataRelationshipMutation", m)
 }
 
+// The CoreGatewayClusterFunc type is an adapter to allow the use of ordinary
+// function as CoreGatewayCluster mutator.
+type CoreGatewayClusterFunc func(context.Context, *ent.CoreGatewayClusterMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CoreGatewayClusterFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CoreGatewayClusterMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CoreGatewayClusterMutation", m)
+}
+
+// The CoreGatewayNodeFunc type is an adapter to allow the use of ordinary
+// function as CoreGatewayNode mutator.
+type CoreGatewayNodeFunc func(context.Context, *ent.CoreGatewayNodeMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CoreGatewayNodeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CoreGatewayNodeMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CoreGatewayNodeMutation", m)
+}
+
 // The CoreMenuFunc type is an adapter to allow the use of ordinary
 // function as CoreMenu mutator.
 type CoreMenuFunc func(context.Context, *ent.CoreMenuMutation) (ent.Value, error)

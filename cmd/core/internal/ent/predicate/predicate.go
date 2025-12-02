@@ -9,6 +9,12 @@ import (
 // CoreDataRelationship is the predicate function for coredatarelationship builders.
 type CoreDataRelationship func(*sql.Selector)
 
+// CoreGatewayCluster is the predicate function for coregatewaycluster builders.
+type CoreGatewayCluster func(*sql.Selector)
+
+// CoreGatewayNode is the predicate function for coregatewaynode builders.
+type CoreGatewayNode func(*sql.Selector)
+
 // CoreMenu is the predicate function for coremenu builders.
 type CoreMenu func(*sql.Selector)
 

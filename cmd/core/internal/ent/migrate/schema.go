@@ -62,6 +62,122 @@ var (
 			},
 		},
 	}
+	// QuebecCoreGatewayClusterColumns holds the columns for the "quebec_core_gateway_cluster" table.
+	QuebecCoreGatewayClusterColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 64, Comment: "主键ID"},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "cluster_id", Type: field.TypeString, Unique: true, Nullable: true, Comment: "集群ID"},
+		{Name: "cluster_create_time", Type: field.TypeInt64, Nullable: true, Comment: "创建时间"},
+	}
+	// QuebecCoreGatewayClusterTable holds the schema information for the "quebec_core_gateway_cluster" table.
+	QuebecCoreGatewayClusterTable = &schema.Table{
+		Name:       "quebec_core_gateway_cluster",
+		Comment:    "网关集群信息表",
+		Columns:    QuebecCoreGatewayClusterColumns,
+		PrimaryKey: []*schema.Column{QuebecCoreGatewayClusterColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "coregatewaycluster_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayClusterColumns[1]},
+			},
+			{
+				Name:    "coregatewaycluster_updated_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayClusterColumns[2]},
+			},
+			{
+				Name:    "coregatewaycluster_deleted_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayClusterColumns[3]},
+			},
+			{
+				Name:    "coregatewaycluster_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayClusterColumns[0]},
+			},
+			{
+				Name:    "coregatewaycluster_cluster_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayClusterColumns[4]},
+			},
+			{
+				Name:    "coregatewaycluster_cluster_create_time",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayClusterColumns[5]},
+			},
+		},
+	}
+	// QuebecCoreGatewayNodeColumns holds the columns for the "quebec_core_gateway_node" table.
+	QuebecCoreGatewayNodeColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 64, Comment: "主键ID"},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "node_id", Type: field.TypeString, Unique: true, Nullable: true, Comment: "节点ID"},
+		{Name: "node_register_time", Type: field.TypeInt64, Nullable: true, Comment: "注册时间"},
+		{Name: "node_last_request_time", Type: field.TypeInt64, Nullable: true, Comment: "最新请求时间"},
+		{Name: "cluster_id", Type: field.TypeString, Nullable: true, Size: 64, Comment: "集群ID"},
+	}
+	// QuebecCoreGatewayNodeTable holds the schema information for the "quebec_core_gateway_node" table.
+	QuebecCoreGatewayNodeTable = &schema.Table{
+		Name:       "quebec_core_gateway_node",
+		Comment:    "网关节点信息表",
+		Columns:    QuebecCoreGatewayNodeColumns,
+		PrimaryKey: []*schema.Column{QuebecCoreGatewayNodeColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "quebec_core_gateway_node_quebec_core_gateway_cluster_cluster_to_node",
+				Columns:    []*schema.Column{QuebecCoreGatewayNodeColumns[7]},
+				RefColumns: []*schema.Column{QuebecCoreGatewayClusterColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "coregatewaynode_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayNodeColumns[1]},
+			},
+			{
+				Name:    "coregatewaynode_updated_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayNodeColumns[2]},
+			},
+			{
+				Name:    "coregatewaynode_deleted_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayNodeColumns[3]},
+			},
+			{
+				Name:    "coregatewaynode_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayNodeColumns[0]},
+			},
+			{
+				Name:    "coregatewaynode_cluster_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayNodeColumns[7]},
+			},
+			{
+				Name:    "coregatewaynode_node_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayNodeColumns[4]},
+			},
+			{
+				Name:    "coregatewaynode_node_register_time",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayNodeColumns[5]},
+			},
+			{
+				Name:    "coregatewaynode_node_last_request_time",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayNodeColumns[6]},
+			},
+		},
+	}
 	// QuebecCoreMenuColumns holds the columns for the "quebec_core_menu" table.
 	QuebecCoreMenuColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 64, Comment: "主键ID"},
@@ -343,6 +459,8 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		QuebecCoreDataRelationshipTable,
+		QuebecCoreGatewayClusterTable,
+		QuebecCoreGatewayNodeTable,
 		QuebecCoreMenuTable,
 		QuebecCoreOnLineUserTable,
 		QuebecCoreRoleTable,
@@ -355,6 +473,17 @@ func init() {
 	QuebecCoreDataRelationshipTable.ForeignKeys[1].RefTable = QuebecCoreRoleTable
 	QuebecCoreDataRelationshipTable.Annotation = &entsql.Annotation{
 		Table:     "quebec_core_data_relationship",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_general_ci",
+	}
+	QuebecCoreGatewayClusterTable.Annotation = &entsql.Annotation{
+		Table:     "quebec_core_gateway_cluster",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_general_ci",
+	}
+	QuebecCoreGatewayNodeTable.ForeignKeys[0].RefTable = QuebecCoreGatewayClusterTable
+	QuebecCoreGatewayNodeTable.Annotation = &entsql.Annotation{
+		Table:     "quebec_core_gateway_node",
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_general_ci",
 	}

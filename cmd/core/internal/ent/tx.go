@@ -16,6 +16,10 @@ type Tx struct {
 	config
 	// CoreDataRelationship is the client for interacting with the CoreDataRelationship builders.
 	CoreDataRelationship *CoreDataRelationshipClient
+	// CoreGatewayCluster is the client for interacting with the CoreGatewayCluster builders.
+	CoreGatewayCluster *CoreGatewayClusterClient
+	// CoreGatewayNode is the client for interacting with the CoreGatewayNode builders.
+	CoreGatewayNode *CoreGatewayNodeClient
 	// CoreMenu is the client for interacting with the CoreMenu builders.
 	CoreMenu *CoreMenuClient
 	// CoreOnLineUser is the client for interacting with the CoreOnLineUser builders.
@@ -156,6 +160,8 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.CoreDataRelationship = NewCoreDataRelationshipClient(tx.config)
+	tx.CoreGatewayCluster = NewCoreGatewayClusterClient(tx.config)
+	tx.CoreGatewayNode = NewCoreGatewayNodeClient(tx.config)
 	tx.CoreMenu = NewCoreMenuClient(tx.config)
 	tx.CoreOnLineUser = NewCoreOnLineUserClient(tx.config)
 	tx.CoreRole = NewCoreRoleClient(tx.config)

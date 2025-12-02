@@ -7,6 +7,8 @@ import (
 
 	"github.com/lyonmu/quebec/cmd/core/internal/common"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coredatarelationship"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewaycluster"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewaynode"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreonlineuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
@@ -46,6 +48,98 @@ func init() {
 	// coredatarelationship.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	coredatarelationship.IDValidator = func() func(string) error {
 		validators := coredatarelationshipDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	coregatewayclusterMixin := schema.CoreGatewayCluster{}.Mixin()
+	coregatewayclusterMixinHooks1 := coregatewayclusterMixin[1].Hooks()
+	coregatewaycluster.Hooks[0] = coregatewayclusterMixinHooks1[0]
+	coregatewaycluster.Hooks[1] = coregatewayclusterMixinHooks1[1]
+	coregatewayclusterMixinFields0 := coregatewayclusterMixin[0].Fields()
+	_ = coregatewayclusterMixinFields0
+	coregatewayclusterMixinFields1 := coregatewayclusterMixin[1].Fields()
+	_ = coregatewayclusterMixinFields1
+	coregatewayclusterFields := schema.CoreGatewayCluster{}.Fields()
+	_ = coregatewayclusterFields
+	// coregatewayclusterDescCreatedAt is the schema descriptor for created_at field.
+	coregatewayclusterDescCreatedAt := coregatewayclusterMixinFields1[0].Descriptor()
+	// coregatewaycluster.DefaultCreatedAt holds the default value on creation for the created_at field.
+	coregatewaycluster.DefaultCreatedAt = coregatewayclusterDescCreatedAt.Default.(func() time.Time)
+	// coregatewayclusterDescUpdatedAt is the schema descriptor for updated_at field.
+	coregatewayclusterDescUpdatedAt := coregatewayclusterMixinFields1[1].Descriptor()
+	// coregatewaycluster.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	coregatewaycluster.DefaultUpdatedAt = coregatewayclusterDescUpdatedAt.Default.(func() time.Time)
+	// coregatewaycluster.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	coregatewaycluster.UpdateDefaultUpdatedAt = coregatewayclusterDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// coregatewayclusterDescClusterCreateTime is the schema descriptor for cluster_create_time field.
+	coregatewayclusterDescClusterCreateTime := coregatewayclusterFields[1].Descriptor()
+	// coregatewaycluster.DefaultClusterCreateTime holds the default value on creation for the cluster_create_time field.
+	coregatewaycluster.DefaultClusterCreateTime = coregatewayclusterDescClusterCreateTime.Default.(func() int64)
+	// coregatewayclusterDescID is the schema descriptor for id field.
+	coregatewayclusterDescID := coregatewayclusterMixinFields0[0].Descriptor()
+	// coregatewaycluster.DefaultID holds the default value on creation for the id field.
+	coregatewaycluster.DefaultID = coregatewayclusterDescID.Default.(func() string)
+	// coregatewaycluster.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	coregatewaycluster.IDValidator = func() func(string) error {
+		validators := coregatewayclusterDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	coregatewaynodeMixin := schema.CoreGatewayNode{}.Mixin()
+	coregatewaynodeMixinHooks1 := coregatewaynodeMixin[1].Hooks()
+	coregatewaynode.Hooks[0] = coregatewaynodeMixinHooks1[0]
+	coregatewaynode.Hooks[1] = coregatewaynodeMixinHooks1[1]
+	coregatewaynodeMixinFields0 := coregatewaynodeMixin[0].Fields()
+	_ = coregatewaynodeMixinFields0
+	coregatewaynodeMixinFields1 := coregatewaynodeMixin[1].Fields()
+	_ = coregatewaynodeMixinFields1
+	coregatewaynodeFields := schema.CoreGatewayNode{}.Fields()
+	_ = coregatewaynodeFields
+	// coregatewaynodeDescCreatedAt is the schema descriptor for created_at field.
+	coregatewaynodeDescCreatedAt := coregatewaynodeMixinFields1[0].Descriptor()
+	// coregatewaynode.DefaultCreatedAt holds the default value on creation for the created_at field.
+	coregatewaynode.DefaultCreatedAt = coregatewaynodeDescCreatedAt.Default.(func() time.Time)
+	// coregatewaynodeDescUpdatedAt is the schema descriptor for updated_at field.
+	coregatewaynodeDescUpdatedAt := coregatewaynodeMixinFields1[1].Descriptor()
+	// coregatewaynode.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	coregatewaynode.DefaultUpdatedAt = coregatewaynodeDescUpdatedAt.Default.(func() time.Time)
+	// coregatewaynode.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	coregatewaynode.UpdateDefaultUpdatedAt = coregatewaynodeDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// coregatewaynodeDescNodeRegisterTime is the schema descriptor for node_register_time field.
+	coregatewaynodeDescNodeRegisterTime := coregatewaynodeFields[2].Descriptor()
+	// coregatewaynode.DefaultNodeRegisterTime holds the default value on creation for the node_register_time field.
+	coregatewaynode.DefaultNodeRegisterTime = coregatewaynodeDescNodeRegisterTime.Default.(func() int64)
+	// coregatewaynodeDescNodeLastRequestTime is the schema descriptor for node_last_request_time field.
+	coregatewaynodeDescNodeLastRequestTime := coregatewaynodeFields[3].Descriptor()
+	// coregatewaynode.DefaultNodeLastRequestTime holds the default value on creation for the node_last_request_time field.
+	coregatewaynode.DefaultNodeLastRequestTime = coregatewaynodeDescNodeLastRequestTime.Default.(func() int64)
+	// coregatewaynodeDescID is the schema descriptor for id field.
+	coregatewaynodeDescID := coregatewaynodeMixinFields0[0].Descriptor()
+	// coregatewaynode.DefaultID holds the default value on creation for the id field.
+	coregatewaynode.DefaultID = coregatewaynodeDescID.Default.(func() string)
+	// coregatewaynode.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	coregatewaynode.IDValidator = func() func(string) error {
+		validators := coregatewaynodeDescID.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),
