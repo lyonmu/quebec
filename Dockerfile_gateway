@@ -1,0 +1,15 @@
+FROM lyonmu/quebec:builder-bookworm AS builder
+
+WORKDIR /build
+
+COPY . .
+
+RUN make build-gateway && chmod +x /build/bin/gateway
+
+FROM busybox:stable-glibc AS runner
+
+COPY --from=builder /build/bin/gateway /usr/bin/gateway
+
+EXPOSE 59025
+
+ENTRYPOINT [ "/usr/bin/gateway" ]

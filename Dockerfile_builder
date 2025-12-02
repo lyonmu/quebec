@@ -1,0 +1,12 @@
+FROM golang:1.25-bookworm AS base
+
+ENV GO111MODULE=on 
+ENV GOPROXY=https://goproxy.cn,direct
+ENV PATH="/root/.bun/bin:/go/bin:/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+WORKDIR /opt
+
+RUN sed -i 's/deb.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list.d/debian.sources \
+    && apt update && apt upgrade -y && apt install -y zip curl \
+    && apt autoclean && apt autoremove \
+    && curl -fsSL https://bun.com/install | bash

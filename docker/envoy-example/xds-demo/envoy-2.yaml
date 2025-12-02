@@ -1,0 +1,46 @@
+# 管理接口
+admin:
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 29901
+  access_log:
+    - name: envoy.access_loggers.stdout
+      typed_config:
+        "@type": type.googleapis.com/envoy.extensions.access_loggers.stream.v3.StdoutAccessLog
+
+node:
+  id: envoy-svc-2 # 节点 ID --service-node
+  cluster: envoy-svc-2-cluster # 节点所属集群 --service-cluster
+
+# 动态资源
+dynamic_resources:
+  ads_config:
+    api_type: GRPC
+    grpc_services:
+      - envoy_grpc:
+          cluster_name: quebec_gateway # xDS Server Cluster
+
+  # 通过 ADS 获取 Listener 和 Cluster
+  lds_config:
+    ads: {}
+  cds_config:
+    ads: {}
+
+# 静态资源：xDS 服务 Cluster
+static_resources:
+  clusters:
+    - name: quebec_gateway
+      connect_timeout: 5s
+      type: strict_dns # DNS 解析 xDS server
+      lb_policy: maglev
+      http2_protocol_options: {} # gRPC 必须
+      load_assignment:
+        cluster_name: quebec_gateway
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: 127.0.0.1 # xDS 服务 IP
+                      port_value: 59025 # xDS 服务 gRPC 端口

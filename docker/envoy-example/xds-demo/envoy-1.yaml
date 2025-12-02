@@ -10,10 +10,8 @@ admin:
         "@type": type.googleapis.com/envoy.extensions.access_loggers.stream.v3.StdoutAccessLog
 
 node:
-  id: envoy-xds-demo # 节点 ID --service-node
-  cluster: envoy-xds-demo-cluster # 节点所属集群 --service-cluster
-  metadata: # 自定义元数据
-    token: e10adc3949ba59abbe56e057f20f883e
+  id: envoy-svc-1 # 节点 ID --service-node
+  cluster: envoy-svc-1-cluster # 节点所属集群 --service-cluster
 
 # 动态资源
 dynamic_resources:

@@ -1,0 +1,58 @@
+services:
+  quebec-core:
+    restart: unless-stopped
+    container_name: quebec-core
+    hostname: quebec-core
+    image: lyonmu/quebec:core-lts
+    deploy:
+      resources:
+        limits:
+          cpus: 0.5
+          memory: 512M
+        reservations:
+          memory: 256M
+    network_mode: host
+    command:
+      [
+        "--log.module=core",
+        "--log.level=info",
+        "--mysql.host=192.168.8.99",
+        "--mysql.port=31681",
+        "--mysql.user=root",
+        "--mysql.password=root",
+        "--mysql.db_name=quebec",
+        "--redis.host=192.168.8.99:31830",
+        "--redis.password=root",
+        "--redis.db=5",
+        "--core.port=59024",
+        "--core.captcha.length=6",
+        "--core.captcha.width=240",
+        "--core.captcha.height=80",
+        "--core.node=24",
+        "--core.jwt.sign=quebec",
+        "--core.jwt.cache=129600",
+        "--log.console",
+      ]
+
+  quebec-gateway:
+    restart: unless-stopped
+    container_name: quebec-gateway
+    hostname: quebec-gateway
+    image: lyonmu/quebec:gateway-lts
+    deploy:
+      resources:
+        limits:
+          cpus: 0.5
+          memory: 512M
+        reservations:
+          memory: 256M
+    network_mode: host
+    command:
+      [
+        "--log.module=gateway",
+        "--log.level=info",
+        "--log.console",
+        "--gateway.port=59025",
+        "--gateway.node=24",
+        "--gateway.prefix=/gateway/api",
+      ]

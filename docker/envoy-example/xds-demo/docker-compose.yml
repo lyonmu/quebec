@@ -1,26 +1,52 @@
 services:
-  envoy-demo:
+  envoy-svc-1:
     # pull_policy: always
     restart: unless-stopped
-    container_name: envoy-demo
-    hostname: envoy-demo
+    container_name: envoy-svc-1
+    hostname: envoy-svc-1
     image: envoyproxy/envoy:distroless-v1.36-latest
     deploy:
       resources:
         limits:
-          cpus: 1.00
-          memory: 1024M
+          cpus: 0.3
+          memory: 256M
         reservations:
-          memory: 512M
+          memory: 128M
     network_mode: host
     volumes:
-      - ./envoy.yaml:/etc/envoy/envoy.yaml
+      - ./envoy-1.yaml:/etc/envoy/envoy-1.yaml
     command:
       [
         "-c",
-        "/etc/envoy/envoy.yaml",
+        "/etc/envoy/envoy-1.yaml",
         "--log-level",
         "info",
         "--enable-mutex-tracing",
         "--base-id 1",
+      ]
+
+  envoy-svc-2:
+    # pull_policy: always
+    restart: unless-stopped
+    container_name: envoy-svc-2
+    hostname: envoy-svc-2
+    image: envoyproxy/envoy:distroless-v1.36-latest
+    deploy:
+      resources:
+        limits:
+          cpus: 0.3
+          memory: 256M
+        reservations:
+          memory: 128M
+    network_mode: host
+    volumes:
+      - ./envoy-2.yaml:/etc/envoy/envoy-2.yaml
+    command:
+      [
+        "-c",
+        "/etc/envoy/envoy-2.yaml",
+        "--log-level",
+        "info",
+        "--enable-mutex-tracing",
+        "--base-id 2",
       ]

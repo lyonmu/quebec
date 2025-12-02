@@ -1,0 +1,15 @@
+FROM lyonmu/quebec:builder-bookworm AS builder
+
+WORKDIR /build
+
+COPY . .
+
+RUN make build-core && chmod +x /build/bin/core
+
+FROM busybox:stable-glibc AS runner
+
+COPY --from=builder /build/bin/core /usr/bin/core
+
+EXPOSE 59024
+
+ENTRYPOINT [ "/usr/bin/core" ]
