@@ -21,8 +21,14 @@ else
 		-X 'github.com/prometheus/common/version.BuildDate=${COMPILE_TIME}'"
 endif
 
+.PHONY: generate-idl
+generate-idl:
+	cd idl/node && go generate
+	cd idl/router && go generate
+
 .PHONY: build-gateway
 build-gateway:
+	make generate-idl
 	CGO_ENABLED=0 go mod download && go build ${FLAGS} -o bin/gateway cmd/gateway/gateway.go
 
 .PHONY: build-ui
@@ -35,6 +41,7 @@ build-ui-dev:
 
 .PHONY: build-core
 build-core:
+	make generate-idl
 	make build-ui
 	CGO_ENABLED=0 go mod download && go build ${FLAGS} -o bin/core cmd/core/core.go
 
@@ -46,11 +53,6 @@ build-all-docker:
 	docker build -t lyonmu/quebec:builder-bookworm -f Dockerfile_builder . 
 	docker build -t lyonmu/quebec:core-lts -f Dockerfile_core .
 	docker build -t lyonmu/quebec:gateway-lts -f Dockerfile_gateway .
-
-.PHONY: generate-idl
-generate-idl:
-	cd idl/node && go generate
-	cd idl/router && go generate
 
 .PHONY: clean
 clean:
