@@ -41,6 +41,12 @@ build-core:
 .PHONY: build-all
 build-all: build-gateway build-core 
 
+.PHONY: build-all-docker
+build-all-docker:
+	docker build -t lyonmu/quebec:builder-bookworm -f Dockerfile_builder . 
+	docker build -t lyonmu/quebec:core-lts -f Dockerfile_core .
+	docker build -t lyonmu/quebec:gateway-lts -f Dockerfile_gateway .
+
 .PHONY: clean
 clean:
 	rm -rf bin
