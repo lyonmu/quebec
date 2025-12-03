@@ -4,8 +4,8 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
-	"github.com/lyonmu/quebec/cmd/core/internal/service/http/grpc/node"
-	"github.com/lyonmu/quebec/cmd/core/internal/service/http/grpc/router"
+	"github.com/lyonmu/quebec/cmd/core/internal/service/grpc/node"
+	"github.com/lyonmu/quebec/cmd/core/internal/service/grpc/router"
 )
 
 type Svc interface {
