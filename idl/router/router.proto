@@ -1,5 +1,0 @@
-syntax = "proto3";
-
-package router;
-
-option go_package = ".;router";

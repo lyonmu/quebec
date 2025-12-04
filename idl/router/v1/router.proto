@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+package router.v1;
+
+option go_package = ".;v1";

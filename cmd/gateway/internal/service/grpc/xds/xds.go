@@ -1,4 +1,4 @@
-package proxy
+package xds
 
 import (
 	"fmt"

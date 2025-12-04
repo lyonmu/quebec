@@ -21,44 +21,44 @@ else
 		-X 'github.com/prometheus/common/version.BuildDate=${COMPILE_TIME}'"
 endif
 
-.PHONY: generate-idl
-generate-idl:
+.PHONY: ui
+ui:
+	cd web && bun install && bun run build
+
+.PHONY: ui-dev
+ui-dev:
+	cd web && bun install && bun run dev
+
+.PHONY: idl
+idl:
 	cd idl/node && go generate
 	cd idl/router && go generate
 
-.PHONY: build-gateway
-build-gateway:
-	make generate-idl
+.PHONY: gateway
+gateway:
+	make idl
 	CGO_ENABLED=0 go mod download && go build ${FLAGS} -o bin/gateway cmd/gateway/gateway.go
 
-.PHONY: build-ui
-build-ui:
-	cd web && bun install && bun run build
-
-.PHONY: build-ui-dev
-build-ui-dev:
-	cd web && bun install && bun run dev
-
-.PHONY: build-core
-build-core:
-	make generate-idl
-	make build-ui
+.PHONY: core
+core:
+	make idl
+	make ui
 	CGO_ENABLED=0 go mod download && go build ${FLAGS} -o bin/core cmd/core/core.go
 
-.PHONY: build-all
-build-all: build-gateway build-core 
+.PHONY: all
+all: gateway core ui
 
-.PHONY: build-builder
-build-all-docker:
+.PHONY: docker-builder
+docker-builder:
 	docker build -t lyonmu/quebec:builder-bookworm -f Dockerfile_builder . 
 
-.PHONY: build-all-docker
-build-all-docker:
+.PHONY: docker-all
+docker-all:
 	docker build -t lyonmu/quebec:core-lts -f Dockerfile_core .
 	docker build -t lyonmu/quebec:gateway-lts -f Dockerfile_gateway .
 
 .PHONY: clean
 clean:
 	rm -rf bin
-	rm -rf idl/node/*.pb.go
-	rm -rf idl/router/*.pb.go
+	rm -rf idl/node/v1/*.pb.go
+	rm -rf idl/router/v1/*.pb.go

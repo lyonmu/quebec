@@ -6,7 +6,7 @@ import (
 	"github.com/lyonmu/quebec/cmd/gateway/internal/global"
 	"github.com/lyonmu/quebec/cmd/gateway/internal/service/grpc/als"
 	"github.com/lyonmu/quebec/cmd/gateway/internal/service/grpc/auth"
-	"github.com/lyonmu/quebec/cmd/gateway/internal/service/grpc/proxy"
+	"github.com/lyonmu/quebec/cmd/gateway/internal/service/grpc/xds"
 )
 
 type Svc interface {
@@ -23,7 +23,7 @@ func NewGrpcSvc(server *grpc.Server) error {
 	auth := auth.NewAuthSvc()
 	registry = append(registry, auth)
 
-	proxy := proxy.NewProxySvc()
+	proxy := xds.NewProxySvc()
 	registry = append(registry, proxy)
 
 	for _, svc := range registry {

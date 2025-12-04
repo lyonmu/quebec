@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package node.v1;
+
+option go_package = ".;v1";
+
+service EnvoyRegistry {
+  // 建立一个长连接，同步 Envoy 状态
+  rpc SyncEnvoyStatus (stream EnvoyStatusEvent) returns (stream BaseResponse);
+}
+
+message EnvoyStatusEvent {
+  enum EventType {
+    UNKNOWN = 0;
+    CONNECT = 1;
+    DISCONNECT = 2;
+    HEARTBEAT = 3; // 可选，用于保活 Gateway 到 Core 的连接
+  }
+  EventType event = 1;
+  string node_id = 2;    // Envoy 的 Node ID
+  string cluster_id = 3; // Envoy 的 Cluster
+  string address = 4;    // Envoy 的 IP:Port
+  string conn_id = 5;    // 关键：本次 xDS 连接的唯一标识 (Stream ID)
+  string gateway_id = 6; // 关键：上报数据的 Gateway 实例 ID (如 Pod Name/IP)
+}
+
+message BaseResponse {
+  string code = 1;
+  string message = 2;
+  oneof data {
+    SyncEnvoyStatusResponse sync_envoy_status = 3;
+  }
+}
+
+// 同步 Envoy 状态
+message SyncEnvoyStatusResponse {
+  int64 timestamp = 1;
+}
+

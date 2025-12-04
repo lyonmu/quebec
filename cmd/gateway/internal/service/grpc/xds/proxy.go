@@ -1,4 +1,4 @@
-package proxy
+package xds
 
 import (
 	"context"
@@ -12,6 +12,7 @@ import (
 	xdsv3log "github.com/envoyproxy/go-control-plane/pkg/log"
 	xdsv3server "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	"github.com/lyonmu/quebec/cmd/gateway/internal/global"
+	"github.com/lyonmu/quebec/cmd/gateway/internal/service/grpc/xds/callback"
 	"google.golang.org/grpc"
 )
 
@@ -38,7 +39,7 @@ func (s *ProxySvc) Register(gs *grpc.Server) error {
 func NewProxySvc() *ProxySvc {
 
 	// create default callback instance to record envoy xDS logs
-	callbacks := &defaultCallbacks{}
+	callbacks := &callback.XDSCallbacks{}
 
 	return &ProxySvc{xdsv3server.NewServer(context.Background(), xdsCache, callbacks)}
 }

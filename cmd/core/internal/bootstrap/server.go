@@ -1,6 +1,7 @@
 package bootstrap
 
 import (
+	grpcApi "github.com/lyonmu/quebec/cmd/core/internal/api/grpc"
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
 	"github.com/lyonmu/quebec/cmd/core/internal/router"
 	"github.com/lyonmu/quebec/pkg/constant"
@@ -13,6 +14,7 @@ func InitServer() error {
 	if err != nil {
 		return err
 	}
+	grpcApi.NewGrpcSvc(grpcServer)
 
 	ginEngine, err := tools.NewGin()
 	if err != nil {

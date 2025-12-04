@@ -13,6 +13,6 @@ func NewRouterSvc() *RouterSvc {
 
 func (r *RouterSvc) Register(server *grpc.Server) error {
 
-	global.Logger.Sugar().Info("router service registered")
+	global.Logger.Sugar().Info("router grpc service registered")
 	return nil
 }

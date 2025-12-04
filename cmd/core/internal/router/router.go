@@ -34,6 +34,6 @@ func InitRouter(e *gin.Engine) {
 		global.Logger.Sugar().Warnf("register embedded web failed: %v", err)
 	}
 
-	global.Logger.Sugar().Info("router register success")
+	global.Logger.Sugar().Info("router http register success")
 
 }
