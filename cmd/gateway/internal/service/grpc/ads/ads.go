@@ -1,7 +1,8 @@
-package xds
+package ads
 
 import (
 	"context"
+	"fmt"
 
 	clusterservice "github.com/envoyproxy/go-control-plane/envoy/service/cluster/v3"
 	discoverygrpc "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
@@ -12,7 +13,7 @@ import (
 	xdsv3log "github.com/envoyproxy/go-control-plane/pkg/log"
 	xdsv3server "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	"github.com/lyonmu/quebec/cmd/gateway/internal/global"
-	"github.com/lyonmu/quebec/cmd/gateway/internal/service/grpc/xds/callback"
+	"github.com/lyonmu/quebec/cmd/gateway/internal/service/grpc/ads/callback"
 	"google.golang.org/grpc"
 )
 
@@ -20,12 +21,12 @@ var (
 	xdsCache = xdsv3cache.NewSnapshotCache(false, xdsv3cache.IDHash{}, &xdsv3log.DefaultLogger{})
 )
 
-type ProxySvc struct {
+type AdsSvc struct {
 	xdsserver xdsv3server.Server
 }
 
 // https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/bootstrap/v3/bootstrap.proto#config-bootstrap-v3-bootstrap-dynamicresources
-func (s *ProxySvc) Register(gs *grpc.Server) error {
+func (s *AdsSvc) Register(gs *grpc.Server) error {
 	// 注册所有需要的 XDS 服务
 	discoverygrpc.RegisterAggregatedDiscoveryServiceServer(gs, s.xdsserver) // ADS 必须
 	clusterservice.RegisterClusterDiscoveryServiceServer(gs, s.xdsserver)   // CDS
@@ -36,10 +37,10 @@ func (s *ProxySvc) Register(gs *grpc.Server) error {
 	return nil
 }
 
-func NewProxySvc() *ProxySvc {
+func NewAdsSvc() *AdsSvc {
 
 	// create default callback instance to record envoy xDS logs
-	callbacks := &callback.XDSCallbacks{}
+	callbacks := callback.NewGatewayCallbacks(global.GrpcClient, fmt.Sprintf("%d", global.Cfg.Gateway.Node))
 
-	return &ProxySvc{xdsv3server.NewServer(context.Background(), xdsCache, callbacks)}
+	return &AdsSvc{xdsv3server.NewServer(context.Background(), xdsCache, callbacks)}
 }

@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/lyonmu/quebec/cmd/gateway/internal/global"
 	v1 "github.com/lyonmu/quebec/idl/node/v1"
 
 	"google.golang.org/grpc"
@@ -46,14 +47,13 @@ func (s *CoreSyncer) runLoop() {
 		default:
 			// 1. 建立连接
 			if stream == nil {
-				log.Println("Connecting to Core...")
+				global.Logger.Sugar().Info("Connecting to Core...")
 				stream, err = s.client.SyncEnvoyStatus(s.ctx)
 				if err != nil {
-					log.Printf("Failed to connect core: %v, retrying in 5s...", err)
+					global.Logger.Sugar().Infof("Failed to connect core: %v, retrying in 5s...", err)
 					time.Sleep(5 * time.Second)
 					continue
 				}
-				// TODO: 可以在这里触发一次“全量上报”，把内存里所有在线的 Envoy 发送给 Core
 			}
 
 			// 2. 监听事件并发送

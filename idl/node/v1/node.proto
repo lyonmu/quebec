@@ -19,9 +19,8 @@ message EnvoyStatusEvent {
   EventType event = 1;
   string node_id = 2;    // Envoy 的 Node ID
   string cluster_id = 3; // Envoy 的 Cluster
-  string address = 4;    // Envoy 的 IP:Port
-  string conn_id = 5;    // 关键：本次 xDS 连接的唯一标识 (Stream ID)
-  string gateway_id = 6; // 关键：上报数据的 Gateway 实例 ID (如 Pod Name/IP)
+  int64 stream_id = 4;    // 关键：本次 xDS 连接的唯一标识 (Stream ID)
+  string gateway_id = 5; // 关键：上报数据的 Gateway 实例 ID (如 Pod Name/IP)
 }
 
 message BaseResponse {
