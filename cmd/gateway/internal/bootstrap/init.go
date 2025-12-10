@@ -9,6 +9,7 @@ import (
 
 	"github.com/lyonmu/quebec/cmd/gateway/internal/global"
 	"github.com/lyonmu/quebec/pkg/logger"
+	"github.com/lyonmu/quebec/pkg/metrics"
 	"github.com/lyonmu/quebec/pkg/tools"
 	"gopkg.in/yaml.v3"
 )
@@ -34,10 +35,9 @@ func Start() {
 			os.Exit(1)
 		}
 		global.Id = idGenerator
+		global.Metrics = metrics.NewPrometheusRegistry()
 
 	})
-
-	// 启动定时任务
 
 	if err := InitServer(); err != nil {
 		global.Logger.Sugar().Error("初始化服务失败: %v", err)

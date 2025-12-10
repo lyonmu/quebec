@@ -10,6 +10,7 @@ import (
 	"github.com/lyonmu/quebec/cmd/core/internal/initialize"
 	"github.com/lyonmu/quebec/cmd/core/internal/scheduler"
 	"github.com/lyonmu/quebec/pkg/logger"
+	"github.com/lyonmu/quebec/pkg/metrics"
 	"github.com/lyonmu/quebec/pkg/tools"
 	"gopkg.in/yaml.v3"
 )
@@ -49,6 +50,8 @@ func Start() {
 			global.Logger.Sugar().Error("初始化数据失败: %v", err)
 			os.Exit(1)
 		}
+
+		global.Metrics = metrics.NewPrometheusRegistry()
 	})
 
 	// 启动定时任务

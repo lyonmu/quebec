@@ -7,8 +7,12 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func RegisterMetrics(engine *gin.Engine) error {
+func NewPrometheusRegistry() *prometheus.Registry {
 	reg := prometheus.NewRegistry()
+	return reg
+}
+
+func RegisterMetrics(engine *gin.Engine, reg *prometheus.Registry) error {
 	collectorsList := []prometheus.Collector{
 		collectors.NewGoCollector(),
 		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),

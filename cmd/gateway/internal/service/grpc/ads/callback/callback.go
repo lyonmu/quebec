@@ -2,7 +2,6 @@ package callback
 
 import (
 	"context"
-	"log"
 	"sync"
 
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
@@ -36,7 +35,7 @@ func NewGatewayCallbacks(conn *grpc.ClientConn, gatewayID string) server.Callbac
 	// 这一步封装在这里，外部调用者就不需要关心内部有个 syncer 需要启动了
 	syncer.Start()
 
-	log.Printf("CoreSyncer started for GatewayID: %s", gatewayID)
+	global.Logger.Sugar().Infof("CoreSyncer started for GatewayID: %s", gatewayID)
 
 	// 3. 返回组装好的 Callbacks
 	// sync.Map 的零值即直接可用，无需显式初始化

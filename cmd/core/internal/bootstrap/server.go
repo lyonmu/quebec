@@ -10,13 +10,13 @@ import (
 
 func InitServer() error {
 
-	grpcServer, err := tools.NewGRPCServer(string(constant.ModuleNameCore))
+	grpcServer, err := tools.NewGRPCServer(string(constant.ModuleNameCore), global.Metrics)
 	if err != nil {
 		return err
 	}
 	grpcApi.NewGrpcSvc(grpcServer)
 
-	ginEngine, err := tools.NewGin()
+	ginEngine, err := tools.NewGin(global.Metrics)
 	if err != nil {
 		return err
 	}

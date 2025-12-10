@@ -47,10 +47,10 @@ func (s *CoreSyncer) runLoop() {
 		default:
 			// 1. 建立连接
 			if stream == nil {
-				global.Logger.Sugar().Info("Connecting to Core...")
+				global.Logger.Sugar().Info("Connecting to core ...")
 				stream, err = s.client.SyncEnvoyStatus(s.ctx)
 				if err != nil {
-					global.Logger.Sugar().Infof("Failed to connect core: %v, retrying in 5s...", err)
+					global.Logger.Sugar().Errorf("Failed to connect core : %v, retrying in 5s...", err)
 					time.Sleep(5 * time.Second)
 					continue
 				}
@@ -61,7 +61,7 @@ func (s *CoreSyncer) runLoop() {
 			case event := <-s.sendCh:
 				event.GatewayId = s.gatewayID // 自动填充 Gateway ID
 				if err := stream.Send(event); err != nil {
-					log.Printf("Stream send error: %v, reconnecting...", err)
+					global.Logger.Sugar().Errorf("Stream send error: %v, reconnecting...", err)
 					stream = nil // 标记重连
 				}
 			case <-s.ctx.Done():
