@@ -90,6 +90,11 @@ func ClusterID(v string) predicate.CoreGatewayNode {
 	return predicate.CoreGatewayNode(sql.FieldEQ(FieldClusterID, v))
 }
 
+// GatewayID applies equality check predicate on the "gateway_id" field. It's identical to GatewayIDEQ.
+func GatewayID(v int64) predicate.CoreGatewayNode {
+	return predicate.CoreGatewayNode(sql.FieldEQ(FieldGatewayID, v))
+}
+
 // NodeRegisterTime applies equality check predicate on the "node_register_time" field. It's identical to NodeRegisterTimeEQ.
 func NodeRegisterTime(v int64) predicate.CoreGatewayNode {
 	return predicate.CoreGatewayNode(sql.FieldEQ(FieldNodeRegisterTime, v))
@@ -378,6 +383,56 @@ func ClusterIDEqualFold(v string) predicate.CoreGatewayNode {
 // ClusterIDContainsFold applies the ContainsFold predicate on the "cluster_id" field.
 func ClusterIDContainsFold(v string) predicate.CoreGatewayNode {
 	return predicate.CoreGatewayNode(sql.FieldContainsFold(FieldClusterID, v))
+}
+
+// GatewayIDEQ applies the EQ predicate on the "gateway_id" field.
+func GatewayIDEQ(v int64) predicate.CoreGatewayNode {
+	return predicate.CoreGatewayNode(sql.FieldEQ(FieldGatewayID, v))
+}
+
+// GatewayIDNEQ applies the NEQ predicate on the "gateway_id" field.
+func GatewayIDNEQ(v int64) predicate.CoreGatewayNode {
+	return predicate.CoreGatewayNode(sql.FieldNEQ(FieldGatewayID, v))
+}
+
+// GatewayIDIn applies the In predicate on the "gateway_id" field.
+func GatewayIDIn(vs ...int64) predicate.CoreGatewayNode {
+	return predicate.CoreGatewayNode(sql.FieldIn(FieldGatewayID, vs...))
+}
+
+// GatewayIDNotIn applies the NotIn predicate on the "gateway_id" field.
+func GatewayIDNotIn(vs ...int64) predicate.CoreGatewayNode {
+	return predicate.CoreGatewayNode(sql.FieldNotIn(FieldGatewayID, vs...))
+}
+
+// GatewayIDGT applies the GT predicate on the "gateway_id" field.
+func GatewayIDGT(v int64) predicate.CoreGatewayNode {
+	return predicate.CoreGatewayNode(sql.FieldGT(FieldGatewayID, v))
+}
+
+// GatewayIDGTE applies the GTE predicate on the "gateway_id" field.
+func GatewayIDGTE(v int64) predicate.CoreGatewayNode {
+	return predicate.CoreGatewayNode(sql.FieldGTE(FieldGatewayID, v))
+}
+
+// GatewayIDLT applies the LT predicate on the "gateway_id" field.
+func GatewayIDLT(v int64) predicate.CoreGatewayNode {
+	return predicate.CoreGatewayNode(sql.FieldLT(FieldGatewayID, v))
+}
+
+// GatewayIDLTE applies the LTE predicate on the "gateway_id" field.
+func GatewayIDLTE(v int64) predicate.CoreGatewayNode {
+	return predicate.CoreGatewayNode(sql.FieldLTE(FieldGatewayID, v))
+}
+
+// GatewayIDIsNil applies the IsNil predicate on the "gateway_id" field.
+func GatewayIDIsNil() predicate.CoreGatewayNode {
+	return predicate.CoreGatewayNode(sql.FieldIsNull(FieldGatewayID))
+}
+
+// GatewayIDNotNil applies the NotNil predicate on the "gateway_id" field.
+func GatewayIDNotNil() predicate.CoreGatewayNode {
+	return predicate.CoreGatewayNode(sql.FieldNotNull(FieldGatewayID))
 }
 
 // NodeRegisterTimeEQ applies the EQ predicate on the "node_register_time" field.

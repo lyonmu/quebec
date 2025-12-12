@@ -26,7 +26,7 @@ type XDSCallbacks struct {
 // NewGatewayCallbacks 初始化 CoreSyncer 并构建 xDS 回调
 // conn: 到 Core 服务的 gRPC 连接
 // gatewayID: 当前 Gateway 的唯一标识
-func NewGatewayCallbacks(conn *grpc.ClientConn, gatewayID string) server.Callbacks {
+func NewGatewayCallbacks(conn *grpc.ClientConn, gatewayID int64) server.Callbacks {
 	// 1. 初始化 CoreSyncer
 	// 注意：这里我们假设 NewCoreSyncer 已经在同一个包或引用的包中定义
 	syncer := node.NewCoreSyncer(conn, gatewayID)
@@ -35,7 +35,7 @@ func NewGatewayCallbacks(conn *grpc.ClientConn, gatewayID string) server.Callbac
 	// 这一步封装在这里，外部调用者就不需要关心内部有个 syncer 需要启动了
 	syncer.Start()
 
-	global.Logger.Sugar().Infof("CoreSyncer started for GatewayID: %s", gatewayID)
+	global.Logger.Sugar().Infof("CoreSyncer started for GatewayID: %d", gatewayID)
 
 	// 3. 返回组装好的 Callbacks
 	// sync.Map 的零值即直接可用，无需显式初始化

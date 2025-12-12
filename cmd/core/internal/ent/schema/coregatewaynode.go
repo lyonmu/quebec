@@ -25,6 +25,7 @@ func (CoreGatewayNode) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("node_id").Optional().Comment("节点ID").Unique(),
 		field.String("cluster_id").Optional().Comment("集群ID"),
+		field.Int64("gateway_id").Optional().Comment("网关ID"),
 		field.Int64("node_register_time").Optional().Comment("注册时间").DefaultFunc(func() int64 { return time.Now().Unix() }),
 		field.Int64("node_last_request_time").Optional().Comment("最新请求时间").DefaultFunc(func() int64 { return time.Now().Unix() }),
 	}
@@ -51,6 +52,7 @@ func (CoreGatewayNode) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("cluster_id"),
 		index.Fields("node_id"),
+		index.Fields("gateway_id"),
 		index.Fields("node_register_time"),
 		index.Fields("node_last_request_time"),
 	}

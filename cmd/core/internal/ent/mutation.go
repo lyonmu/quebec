@@ -888,22 +888,26 @@ func (m *CoreDataRelationshipMutation) ResetEdge(name string) error {
 // CoreGatewayClusterMutation represents an operation that mutates the CoreGatewayCluster nodes in the graph.
 type CoreGatewayClusterMutation struct {
 	config
-	op                     Op
-	typ                    string
-	id                     *string
-	created_at             *time.Time
-	updated_at             *time.Time
-	deleted_at             *time.Time
-	cluster_id             *string
-	cluster_create_time    *int64
-	addcluster_create_time *int64
-	clearedFields          map[string]struct{}
-	cluster_to_node        map[string]struct{}
-	removedcluster_to_node map[string]struct{}
-	clearedcluster_to_node bool
-	done                   bool
-	oldValue               func(context.Context) (*CoreGatewayCluster, error)
-	predicates             []predicate.CoreGatewayCluster
+	op                           Op
+	typ                          string
+	id                           *string
+	created_at                   *time.Time
+	updated_at                   *time.Time
+	deleted_at                   *time.Time
+	cluster_id                   *string
+	gateway_id                   *int64
+	addgateway_id                *int64
+	cluster_create_time          *int64
+	addcluster_create_time       *int64
+	cluster_last_request_time    *int64
+	addcluster_last_request_time *int64
+	clearedFields                map[string]struct{}
+	cluster_to_node              map[string]struct{}
+	removedcluster_to_node       map[string]struct{}
+	clearedcluster_to_node       bool
+	done                         bool
+	oldValue                     func(context.Context) (*CoreGatewayCluster, error)
+	predicates                   []predicate.CoreGatewayCluster
 }
 
 var _ ent.Mutation = (*CoreGatewayClusterMutation)(nil)
@@ -1180,6 +1184,76 @@ func (m *CoreGatewayClusterMutation) ResetClusterID() {
 	delete(m.clearedFields, coregatewaycluster.FieldClusterID)
 }
 
+// SetGatewayID sets the "gateway_id" field.
+func (m *CoreGatewayClusterMutation) SetGatewayID(i int64) {
+	m.gateway_id = &i
+	m.addgateway_id = nil
+}
+
+// GatewayID returns the value of the "gateway_id" field in the mutation.
+func (m *CoreGatewayClusterMutation) GatewayID() (r int64, exists bool) {
+	v := m.gateway_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGatewayID returns the old "gateway_id" field's value of the CoreGatewayCluster entity.
+// If the CoreGatewayCluster object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayClusterMutation) OldGatewayID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGatewayID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGatewayID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGatewayID: %w", err)
+	}
+	return oldValue.GatewayID, nil
+}
+
+// AddGatewayID adds i to the "gateway_id" field.
+func (m *CoreGatewayClusterMutation) AddGatewayID(i int64) {
+	if m.addgateway_id != nil {
+		*m.addgateway_id += i
+	} else {
+		m.addgateway_id = &i
+	}
+}
+
+// AddedGatewayID returns the value that was added to the "gateway_id" field in this mutation.
+func (m *CoreGatewayClusterMutation) AddedGatewayID() (r int64, exists bool) {
+	v := m.addgateway_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGatewayID clears the value of the "gateway_id" field.
+func (m *CoreGatewayClusterMutation) ClearGatewayID() {
+	m.gateway_id = nil
+	m.addgateway_id = nil
+	m.clearedFields[coregatewaycluster.FieldGatewayID] = struct{}{}
+}
+
+// GatewayIDCleared returns if the "gateway_id" field was cleared in this mutation.
+func (m *CoreGatewayClusterMutation) GatewayIDCleared() bool {
+	_, ok := m.clearedFields[coregatewaycluster.FieldGatewayID]
+	return ok
+}
+
+// ResetGatewayID resets all changes to the "gateway_id" field.
+func (m *CoreGatewayClusterMutation) ResetGatewayID() {
+	m.gateway_id = nil
+	m.addgateway_id = nil
+	delete(m.clearedFields, coregatewaycluster.FieldGatewayID)
+}
+
 // SetClusterCreateTime sets the "cluster_create_time" field.
 func (m *CoreGatewayClusterMutation) SetClusterCreateTime(i int64) {
 	m.cluster_create_time = &i
@@ -1248,6 +1322,76 @@ func (m *CoreGatewayClusterMutation) ResetClusterCreateTime() {
 	m.cluster_create_time = nil
 	m.addcluster_create_time = nil
 	delete(m.clearedFields, coregatewaycluster.FieldClusterCreateTime)
+}
+
+// SetClusterLastRequestTime sets the "cluster_last_request_time" field.
+func (m *CoreGatewayClusterMutation) SetClusterLastRequestTime(i int64) {
+	m.cluster_last_request_time = &i
+	m.addcluster_last_request_time = nil
+}
+
+// ClusterLastRequestTime returns the value of the "cluster_last_request_time" field in the mutation.
+func (m *CoreGatewayClusterMutation) ClusterLastRequestTime() (r int64, exists bool) {
+	v := m.cluster_last_request_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldClusterLastRequestTime returns the old "cluster_last_request_time" field's value of the CoreGatewayCluster entity.
+// If the CoreGatewayCluster object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayClusterMutation) OldClusterLastRequestTime(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldClusterLastRequestTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldClusterLastRequestTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldClusterLastRequestTime: %w", err)
+	}
+	return oldValue.ClusterLastRequestTime, nil
+}
+
+// AddClusterLastRequestTime adds i to the "cluster_last_request_time" field.
+func (m *CoreGatewayClusterMutation) AddClusterLastRequestTime(i int64) {
+	if m.addcluster_last_request_time != nil {
+		*m.addcluster_last_request_time += i
+	} else {
+		m.addcluster_last_request_time = &i
+	}
+}
+
+// AddedClusterLastRequestTime returns the value that was added to the "cluster_last_request_time" field in this mutation.
+func (m *CoreGatewayClusterMutation) AddedClusterLastRequestTime() (r int64, exists bool) {
+	v := m.addcluster_last_request_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearClusterLastRequestTime clears the value of the "cluster_last_request_time" field.
+func (m *CoreGatewayClusterMutation) ClearClusterLastRequestTime() {
+	m.cluster_last_request_time = nil
+	m.addcluster_last_request_time = nil
+	m.clearedFields[coregatewaycluster.FieldClusterLastRequestTime] = struct{}{}
+}
+
+// ClusterLastRequestTimeCleared returns if the "cluster_last_request_time" field was cleared in this mutation.
+func (m *CoreGatewayClusterMutation) ClusterLastRequestTimeCleared() bool {
+	_, ok := m.clearedFields[coregatewaycluster.FieldClusterLastRequestTime]
+	return ok
+}
+
+// ResetClusterLastRequestTime resets all changes to the "cluster_last_request_time" field.
+func (m *CoreGatewayClusterMutation) ResetClusterLastRequestTime() {
+	m.cluster_last_request_time = nil
+	m.addcluster_last_request_time = nil
+	delete(m.clearedFields, coregatewaycluster.FieldClusterLastRequestTime)
 }
 
 // AddClusterToNodeIDs adds the "cluster_to_node" edge to the CoreGatewayNode entity by ids.
@@ -1338,7 +1482,7 @@ func (m *CoreGatewayClusterMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CoreGatewayClusterMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 7)
 	if m.created_at != nil {
 		fields = append(fields, coregatewaycluster.FieldCreatedAt)
 	}
@@ -1351,8 +1495,14 @@ func (m *CoreGatewayClusterMutation) Fields() []string {
 	if m.cluster_id != nil {
 		fields = append(fields, coregatewaycluster.FieldClusterID)
 	}
+	if m.gateway_id != nil {
+		fields = append(fields, coregatewaycluster.FieldGatewayID)
+	}
 	if m.cluster_create_time != nil {
 		fields = append(fields, coregatewaycluster.FieldClusterCreateTime)
+	}
+	if m.cluster_last_request_time != nil {
+		fields = append(fields, coregatewaycluster.FieldClusterLastRequestTime)
 	}
 	return fields
 }
@@ -1370,8 +1520,12 @@ func (m *CoreGatewayClusterMutation) Field(name string) (ent.Value, bool) {
 		return m.DeletedAt()
 	case coregatewaycluster.FieldClusterID:
 		return m.ClusterID()
+	case coregatewaycluster.FieldGatewayID:
+		return m.GatewayID()
 	case coregatewaycluster.FieldClusterCreateTime:
 		return m.ClusterCreateTime()
+	case coregatewaycluster.FieldClusterLastRequestTime:
+		return m.ClusterLastRequestTime()
 	}
 	return nil, false
 }
@@ -1389,8 +1543,12 @@ func (m *CoreGatewayClusterMutation) OldField(ctx context.Context, name string) 
 		return m.OldDeletedAt(ctx)
 	case coregatewaycluster.FieldClusterID:
 		return m.OldClusterID(ctx)
+	case coregatewaycluster.FieldGatewayID:
+		return m.OldGatewayID(ctx)
 	case coregatewaycluster.FieldClusterCreateTime:
 		return m.OldClusterCreateTime(ctx)
+	case coregatewaycluster.FieldClusterLastRequestTime:
+		return m.OldClusterLastRequestTime(ctx)
 	}
 	return nil, fmt.Errorf("unknown CoreGatewayCluster field %s", name)
 }
@@ -1428,12 +1586,26 @@ func (m *CoreGatewayClusterMutation) SetField(name string, value ent.Value) erro
 		}
 		m.SetClusterID(v)
 		return nil
+	case coregatewaycluster.FieldGatewayID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGatewayID(v)
+		return nil
 	case coregatewaycluster.FieldClusterCreateTime:
 		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetClusterCreateTime(v)
+		return nil
+	case coregatewaycluster.FieldClusterLastRequestTime:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetClusterLastRequestTime(v)
 		return nil
 	}
 	return fmt.Errorf("unknown CoreGatewayCluster field %s", name)
@@ -1443,8 +1615,14 @@ func (m *CoreGatewayClusterMutation) SetField(name string, value ent.Value) erro
 // this mutation.
 func (m *CoreGatewayClusterMutation) AddedFields() []string {
 	var fields []string
+	if m.addgateway_id != nil {
+		fields = append(fields, coregatewaycluster.FieldGatewayID)
+	}
 	if m.addcluster_create_time != nil {
 		fields = append(fields, coregatewaycluster.FieldClusterCreateTime)
+	}
+	if m.addcluster_last_request_time != nil {
+		fields = append(fields, coregatewaycluster.FieldClusterLastRequestTime)
 	}
 	return fields
 }
@@ -1454,8 +1632,12 @@ func (m *CoreGatewayClusterMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *CoreGatewayClusterMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
+	case coregatewaycluster.FieldGatewayID:
+		return m.AddedGatewayID()
 	case coregatewaycluster.FieldClusterCreateTime:
 		return m.AddedClusterCreateTime()
+	case coregatewaycluster.FieldClusterLastRequestTime:
+		return m.AddedClusterLastRequestTime()
 	}
 	return nil, false
 }
@@ -1465,12 +1647,26 @@ func (m *CoreGatewayClusterMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *CoreGatewayClusterMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case coregatewaycluster.FieldGatewayID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGatewayID(v)
+		return nil
 	case coregatewaycluster.FieldClusterCreateTime:
 		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddClusterCreateTime(v)
+		return nil
+	case coregatewaycluster.FieldClusterLastRequestTime:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddClusterLastRequestTime(v)
 		return nil
 	}
 	return fmt.Errorf("unknown CoreGatewayCluster numeric field %s", name)
@@ -1486,8 +1682,14 @@ func (m *CoreGatewayClusterMutation) ClearedFields() []string {
 	if m.FieldCleared(coregatewaycluster.FieldClusterID) {
 		fields = append(fields, coregatewaycluster.FieldClusterID)
 	}
+	if m.FieldCleared(coregatewaycluster.FieldGatewayID) {
+		fields = append(fields, coregatewaycluster.FieldGatewayID)
+	}
 	if m.FieldCleared(coregatewaycluster.FieldClusterCreateTime) {
 		fields = append(fields, coregatewaycluster.FieldClusterCreateTime)
+	}
+	if m.FieldCleared(coregatewaycluster.FieldClusterLastRequestTime) {
+		fields = append(fields, coregatewaycluster.FieldClusterLastRequestTime)
 	}
 	return fields
 }
@@ -1509,8 +1711,14 @@ func (m *CoreGatewayClusterMutation) ClearField(name string) error {
 	case coregatewaycluster.FieldClusterID:
 		m.ClearClusterID()
 		return nil
+	case coregatewaycluster.FieldGatewayID:
+		m.ClearGatewayID()
+		return nil
 	case coregatewaycluster.FieldClusterCreateTime:
 		m.ClearClusterCreateTime()
+		return nil
+	case coregatewaycluster.FieldClusterLastRequestTime:
+		m.ClearClusterLastRequestTime()
 		return nil
 	}
 	return fmt.Errorf("unknown CoreGatewayCluster nullable field %s", name)
@@ -1532,8 +1740,14 @@ func (m *CoreGatewayClusterMutation) ResetField(name string) error {
 	case coregatewaycluster.FieldClusterID:
 		m.ResetClusterID()
 		return nil
+	case coregatewaycluster.FieldGatewayID:
+		m.ResetGatewayID()
+		return nil
 	case coregatewaycluster.FieldClusterCreateTime:
 		m.ResetClusterCreateTime()
+		return nil
+	case coregatewaycluster.FieldClusterLastRequestTime:
+		m.ResetClusterLastRequestTime()
 		return nil
 	}
 	return fmt.Errorf("unknown CoreGatewayCluster field %s", name)
@@ -1633,6 +1847,8 @@ type CoreGatewayNodeMutation struct {
 	updated_at                *time.Time
 	deleted_at                *time.Time
 	node_id                   *string
+	gateway_id                *int64
+	addgateway_id             *int64
 	node_register_time        *int64
 	addnode_register_time     *int64
 	node_last_request_time    *int64
@@ -1968,6 +2184,76 @@ func (m *CoreGatewayNodeMutation) ResetClusterID() {
 	delete(m.clearedFields, coregatewaynode.FieldClusterID)
 }
 
+// SetGatewayID sets the "gateway_id" field.
+func (m *CoreGatewayNodeMutation) SetGatewayID(i int64) {
+	m.gateway_id = &i
+	m.addgateway_id = nil
+}
+
+// GatewayID returns the value of the "gateway_id" field in the mutation.
+func (m *CoreGatewayNodeMutation) GatewayID() (r int64, exists bool) {
+	v := m.gateway_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGatewayID returns the old "gateway_id" field's value of the CoreGatewayNode entity.
+// If the CoreGatewayNode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayNodeMutation) OldGatewayID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGatewayID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGatewayID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGatewayID: %w", err)
+	}
+	return oldValue.GatewayID, nil
+}
+
+// AddGatewayID adds i to the "gateway_id" field.
+func (m *CoreGatewayNodeMutation) AddGatewayID(i int64) {
+	if m.addgateway_id != nil {
+		*m.addgateway_id += i
+	} else {
+		m.addgateway_id = &i
+	}
+}
+
+// AddedGatewayID returns the value that was added to the "gateway_id" field in this mutation.
+func (m *CoreGatewayNodeMutation) AddedGatewayID() (r int64, exists bool) {
+	v := m.addgateway_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGatewayID clears the value of the "gateway_id" field.
+func (m *CoreGatewayNodeMutation) ClearGatewayID() {
+	m.gateway_id = nil
+	m.addgateway_id = nil
+	m.clearedFields[coregatewaynode.FieldGatewayID] = struct{}{}
+}
+
+// GatewayIDCleared returns if the "gateway_id" field was cleared in this mutation.
+func (m *CoreGatewayNodeMutation) GatewayIDCleared() bool {
+	_, ok := m.clearedFields[coregatewaynode.FieldGatewayID]
+	return ok
+}
+
+// ResetGatewayID resets all changes to the "gateway_id" field.
+func (m *CoreGatewayNodeMutation) ResetGatewayID() {
+	m.gateway_id = nil
+	m.addgateway_id = nil
+	delete(m.clearedFields, coregatewaynode.FieldGatewayID)
+}
+
 // SetNodeRegisterTime sets the "node_register_time" field.
 func (m *CoreGatewayNodeMutation) SetNodeRegisterTime(i int64) {
 	m.node_register_time = &i
@@ -2182,7 +2468,7 @@ func (m *CoreGatewayNodeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CoreGatewayNodeMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.created_at != nil {
 		fields = append(fields, coregatewaynode.FieldCreatedAt)
 	}
@@ -2197,6 +2483,9 @@ func (m *CoreGatewayNodeMutation) Fields() []string {
 	}
 	if m.node_from_cluster != nil {
 		fields = append(fields, coregatewaynode.FieldClusterID)
+	}
+	if m.gateway_id != nil {
+		fields = append(fields, coregatewaynode.FieldGatewayID)
 	}
 	if m.node_register_time != nil {
 		fields = append(fields, coregatewaynode.FieldNodeRegisterTime)
@@ -2222,6 +2511,8 @@ func (m *CoreGatewayNodeMutation) Field(name string) (ent.Value, bool) {
 		return m.NodeID()
 	case coregatewaynode.FieldClusterID:
 		return m.ClusterID()
+	case coregatewaynode.FieldGatewayID:
+		return m.GatewayID()
 	case coregatewaynode.FieldNodeRegisterTime:
 		return m.NodeRegisterTime()
 	case coregatewaynode.FieldNodeLastRequestTime:
@@ -2245,6 +2536,8 @@ func (m *CoreGatewayNodeMutation) OldField(ctx context.Context, name string) (en
 		return m.OldNodeID(ctx)
 	case coregatewaynode.FieldClusterID:
 		return m.OldClusterID(ctx)
+	case coregatewaynode.FieldGatewayID:
+		return m.OldGatewayID(ctx)
 	case coregatewaynode.FieldNodeRegisterTime:
 		return m.OldNodeRegisterTime(ctx)
 	case coregatewaynode.FieldNodeLastRequestTime:
@@ -2293,6 +2586,13 @@ func (m *CoreGatewayNodeMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetClusterID(v)
 		return nil
+	case coregatewaynode.FieldGatewayID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGatewayID(v)
+		return nil
 	case coregatewaynode.FieldNodeRegisterTime:
 		v, ok := value.(int64)
 		if !ok {
@@ -2315,6 +2615,9 @@ func (m *CoreGatewayNodeMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *CoreGatewayNodeMutation) AddedFields() []string {
 	var fields []string
+	if m.addgateway_id != nil {
+		fields = append(fields, coregatewaynode.FieldGatewayID)
+	}
 	if m.addnode_register_time != nil {
 		fields = append(fields, coregatewaynode.FieldNodeRegisterTime)
 	}
@@ -2329,6 +2632,8 @@ func (m *CoreGatewayNodeMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *CoreGatewayNodeMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
+	case coregatewaynode.FieldGatewayID:
+		return m.AddedGatewayID()
 	case coregatewaynode.FieldNodeRegisterTime:
 		return m.AddedNodeRegisterTime()
 	case coregatewaynode.FieldNodeLastRequestTime:
@@ -2342,6 +2647,13 @@ func (m *CoreGatewayNodeMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *CoreGatewayNodeMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case coregatewaynode.FieldGatewayID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGatewayID(v)
+		return nil
 	case coregatewaynode.FieldNodeRegisterTime:
 		v, ok := value.(int64)
 		if !ok {
@@ -2373,6 +2685,9 @@ func (m *CoreGatewayNodeMutation) ClearedFields() []string {
 	if m.FieldCleared(coregatewaynode.FieldClusterID) {
 		fields = append(fields, coregatewaynode.FieldClusterID)
 	}
+	if m.FieldCleared(coregatewaynode.FieldGatewayID) {
+		fields = append(fields, coregatewaynode.FieldGatewayID)
+	}
 	if m.FieldCleared(coregatewaynode.FieldNodeRegisterTime) {
 		fields = append(fields, coregatewaynode.FieldNodeRegisterTime)
 	}
@@ -2402,6 +2717,9 @@ func (m *CoreGatewayNodeMutation) ClearField(name string) error {
 	case coregatewaynode.FieldClusterID:
 		m.ClearClusterID()
 		return nil
+	case coregatewaynode.FieldGatewayID:
+		m.ClearGatewayID()
+		return nil
 	case coregatewaynode.FieldNodeRegisterTime:
 		m.ClearNodeRegisterTime()
 		return nil
@@ -2430,6 +2748,9 @@ func (m *CoreGatewayNodeMutation) ResetField(name string) error {
 		return nil
 	case coregatewaynode.FieldClusterID:
 		m.ResetClusterID()
+		return nil
+	case coregatewaynode.FieldGatewayID:
+		m.ResetGatewayID()
 		return nil
 	case coregatewaynode.FieldNodeRegisterTime:
 		m.ResetNodeRegisterTime()

@@ -82,9 +82,13 @@ func init() {
 	// coregatewaycluster.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	coregatewaycluster.UpdateDefaultUpdatedAt = coregatewayclusterDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// coregatewayclusterDescClusterCreateTime is the schema descriptor for cluster_create_time field.
-	coregatewayclusterDescClusterCreateTime := coregatewayclusterFields[1].Descriptor()
+	coregatewayclusterDescClusterCreateTime := coregatewayclusterFields[2].Descriptor()
 	// coregatewaycluster.DefaultClusterCreateTime holds the default value on creation for the cluster_create_time field.
 	coregatewaycluster.DefaultClusterCreateTime = coregatewayclusterDescClusterCreateTime.Default.(func() int64)
+	// coregatewayclusterDescClusterLastRequestTime is the schema descriptor for cluster_last_request_time field.
+	coregatewayclusterDescClusterLastRequestTime := coregatewayclusterFields[3].Descriptor()
+	// coregatewaycluster.DefaultClusterLastRequestTime holds the default value on creation for the cluster_last_request_time field.
+	coregatewaycluster.DefaultClusterLastRequestTime = coregatewayclusterDescClusterLastRequestTime.Default.(func() int64)
 	// coregatewayclusterDescID is the schema descriptor for id field.
 	coregatewayclusterDescID := coregatewayclusterMixinFields0[0].Descriptor()
 	// coregatewaycluster.DefaultID holds the default value on creation for the id field.
@@ -126,11 +130,11 @@ func init() {
 	// coregatewaynode.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	coregatewaynode.UpdateDefaultUpdatedAt = coregatewaynodeDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// coregatewaynodeDescNodeRegisterTime is the schema descriptor for node_register_time field.
-	coregatewaynodeDescNodeRegisterTime := coregatewaynodeFields[2].Descriptor()
+	coregatewaynodeDescNodeRegisterTime := coregatewaynodeFields[3].Descriptor()
 	// coregatewaynode.DefaultNodeRegisterTime holds the default value on creation for the node_register_time field.
 	coregatewaynode.DefaultNodeRegisterTime = coregatewaynodeDescNodeRegisterTime.Default.(func() int64)
 	// coregatewaynodeDescNodeLastRequestTime is the schema descriptor for node_last_request_time field.
-	coregatewaynodeDescNodeLastRequestTime := coregatewaynodeFields[3].Descriptor()
+	coregatewaynodeDescNodeLastRequestTime := coregatewaynodeFields[4].Descriptor()
 	// coregatewaynode.DefaultNodeLastRequestTime holds the default value on creation for the node_last_request_time field.
 	coregatewaynode.DefaultNodeLastRequestTime = coregatewaynodeDescNodeLastRequestTime.Default.(func() int64)
 	// coregatewaynodeDescID is the schema descriptor for id field.

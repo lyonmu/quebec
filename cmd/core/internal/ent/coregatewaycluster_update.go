@@ -76,6 +76,33 @@ func (_u *CoreGatewayClusterUpdate) ClearClusterID() *CoreGatewayClusterUpdate {
 	return _u
 }
 
+// SetGatewayID sets the "gateway_id" field.
+func (_u *CoreGatewayClusterUpdate) SetGatewayID(v int64) *CoreGatewayClusterUpdate {
+	_u.mutation.ResetGatewayID()
+	_u.mutation.SetGatewayID(v)
+	return _u
+}
+
+// SetNillableGatewayID sets the "gateway_id" field if the given value is not nil.
+func (_u *CoreGatewayClusterUpdate) SetNillableGatewayID(v *int64) *CoreGatewayClusterUpdate {
+	if v != nil {
+		_u.SetGatewayID(*v)
+	}
+	return _u
+}
+
+// AddGatewayID adds value to the "gateway_id" field.
+func (_u *CoreGatewayClusterUpdate) AddGatewayID(v int64) *CoreGatewayClusterUpdate {
+	_u.mutation.AddGatewayID(v)
+	return _u
+}
+
+// ClearGatewayID clears the value of the "gateway_id" field.
+func (_u *CoreGatewayClusterUpdate) ClearGatewayID() *CoreGatewayClusterUpdate {
+	_u.mutation.ClearGatewayID()
+	return _u
+}
+
 // SetClusterCreateTime sets the "cluster_create_time" field.
 func (_u *CoreGatewayClusterUpdate) SetClusterCreateTime(v int64) *CoreGatewayClusterUpdate {
 	_u.mutation.ResetClusterCreateTime()
@@ -100,6 +127,33 @@ func (_u *CoreGatewayClusterUpdate) AddClusterCreateTime(v int64) *CoreGatewayCl
 // ClearClusterCreateTime clears the value of the "cluster_create_time" field.
 func (_u *CoreGatewayClusterUpdate) ClearClusterCreateTime() *CoreGatewayClusterUpdate {
 	_u.mutation.ClearClusterCreateTime()
+	return _u
+}
+
+// SetClusterLastRequestTime sets the "cluster_last_request_time" field.
+func (_u *CoreGatewayClusterUpdate) SetClusterLastRequestTime(v int64) *CoreGatewayClusterUpdate {
+	_u.mutation.ResetClusterLastRequestTime()
+	_u.mutation.SetClusterLastRequestTime(v)
+	return _u
+}
+
+// SetNillableClusterLastRequestTime sets the "cluster_last_request_time" field if the given value is not nil.
+func (_u *CoreGatewayClusterUpdate) SetNillableClusterLastRequestTime(v *int64) *CoreGatewayClusterUpdate {
+	if v != nil {
+		_u.SetClusterLastRequestTime(*v)
+	}
+	return _u
+}
+
+// AddClusterLastRequestTime adds value to the "cluster_last_request_time" field.
+func (_u *CoreGatewayClusterUpdate) AddClusterLastRequestTime(v int64) *CoreGatewayClusterUpdate {
+	_u.mutation.AddClusterLastRequestTime(v)
+	return _u
+}
+
+// ClearClusterLastRequestTime clears the value of the "cluster_last_request_time" field.
+func (_u *CoreGatewayClusterUpdate) ClearClusterLastRequestTime() *CoreGatewayClusterUpdate {
+	_u.mutation.ClearClusterLastRequestTime()
 	return _u
 }
 
@@ -216,6 +270,15 @@ func (_u *CoreGatewayClusterUpdate) sqlSave(ctx context.Context) (_node int, err
 	if _u.mutation.ClusterIDCleared() {
 		_spec.ClearField(coregatewaycluster.FieldClusterID, field.TypeString)
 	}
+	if value, ok := _u.mutation.GatewayID(); ok {
+		_spec.SetField(coregatewaycluster.FieldGatewayID, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedGatewayID(); ok {
+		_spec.AddField(coregatewaycluster.FieldGatewayID, field.TypeInt64, value)
+	}
+	if _u.mutation.GatewayIDCleared() {
+		_spec.ClearField(coregatewaycluster.FieldGatewayID, field.TypeInt64)
+	}
 	if value, ok := _u.mutation.ClusterCreateTime(); ok {
 		_spec.SetField(coregatewaycluster.FieldClusterCreateTime, field.TypeInt64, value)
 	}
@@ -224,6 +287,15 @@ func (_u *CoreGatewayClusterUpdate) sqlSave(ctx context.Context) (_node int, err
 	}
 	if _u.mutation.ClusterCreateTimeCleared() {
 		_spec.ClearField(coregatewaycluster.FieldClusterCreateTime, field.TypeInt64)
+	}
+	if value, ok := _u.mutation.ClusterLastRequestTime(); ok {
+		_spec.SetField(coregatewaycluster.FieldClusterLastRequestTime, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedClusterLastRequestTime(); ok {
+		_spec.AddField(coregatewaycluster.FieldClusterLastRequestTime, field.TypeInt64, value)
+	}
+	if _u.mutation.ClusterLastRequestTimeCleared() {
+		_spec.ClearField(coregatewaycluster.FieldClusterLastRequestTime, field.TypeInt64)
 	}
 	if _u.mutation.ClusterToNodeCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -338,6 +410,33 @@ func (_u *CoreGatewayClusterUpdateOne) ClearClusterID() *CoreGatewayClusterUpdat
 	return _u
 }
 
+// SetGatewayID sets the "gateway_id" field.
+func (_u *CoreGatewayClusterUpdateOne) SetGatewayID(v int64) *CoreGatewayClusterUpdateOne {
+	_u.mutation.ResetGatewayID()
+	_u.mutation.SetGatewayID(v)
+	return _u
+}
+
+// SetNillableGatewayID sets the "gateway_id" field if the given value is not nil.
+func (_u *CoreGatewayClusterUpdateOne) SetNillableGatewayID(v *int64) *CoreGatewayClusterUpdateOne {
+	if v != nil {
+		_u.SetGatewayID(*v)
+	}
+	return _u
+}
+
+// AddGatewayID adds value to the "gateway_id" field.
+func (_u *CoreGatewayClusterUpdateOne) AddGatewayID(v int64) *CoreGatewayClusterUpdateOne {
+	_u.mutation.AddGatewayID(v)
+	return _u
+}
+
+// ClearGatewayID clears the value of the "gateway_id" field.
+func (_u *CoreGatewayClusterUpdateOne) ClearGatewayID() *CoreGatewayClusterUpdateOne {
+	_u.mutation.ClearGatewayID()
+	return _u
+}
+
 // SetClusterCreateTime sets the "cluster_create_time" field.
 func (_u *CoreGatewayClusterUpdateOne) SetClusterCreateTime(v int64) *CoreGatewayClusterUpdateOne {
 	_u.mutation.ResetClusterCreateTime()
@@ -362,6 +461,33 @@ func (_u *CoreGatewayClusterUpdateOne) AddClusterCreateTime(v int64) *CoreGatewa
 // ClearClusterCreateTime clears the value of the "cluster_create_time" field.
 func (_u *CoreGatewayClusterUpdateOne) ClearClusterCreateTime() *CoreGatewayClusterUpdateOne {
 	_u.mutation.ClearClusterCreateTime()
+	return _u
+}
+
+// SetClusterLastRequestTime sets the "cluster_last_request_time" field.
+func (_u *CoreGatewayClusterUpdateOne) SetClusterLastRequestTime(v int64) *CoreGatewayClusterUpdateOne {
+	_u.mutation.ResetClusterLastRequestTime()
+	_u.mutation.SetClusterLastRequestTime(v)
+	return _u
+}
+
+// SetNillableClusterLastRequestTime sets the "cluster_last_request_time" field if the given value is not nil.
+func (_u *CoreGatewayClusterUpdateOne) SetNillableClusterLastRequestTime(v *int64) *CoreGatewayClusterUpdateOne {
+	if v != nil {
+		_u.SetClusterLastRequestTime(*v)
+	}
+	return _u
+}
+
+// AddClusterLastRequestTime adds value to the "cluster_last_request_time" field.
+func (_u *CoreGatewayClusterUpdateOne) AddClusterLastRequestTime(v int64) *CoreGatewayClusterUpdateOne {
+	_u.mutation.AddClusterLastRequestTime(v)
+	return _u
+}
+
+// ClearClusterLastRequestTime clears the value of the "cluster_last_request_time" field.
+func (_u *CoreGatewayClusterUpdateOne) ClearClusterLastRequestTime() *CoreGatewayClusterUpdateOne {
+	_u.mutation.ClearClusterLastRequestTime()
 	return _u
 }
 
@@ -508,6 +634,15 @@ func (_u *CoreGatewayClusterUpdateOne) sqlSave(ctx context.Context) (_node *Core
 	if _u.mutation.ClusterIDCleared() {
 		_spec.ClearField(coregatewaycluster.FieldClusterID, field.TypeString)
 	}
+	if value, ok := _u.mutation.GatewayID(); ok {
+		_spec.SetField(coregatewaycluster.FieldGatewayID, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedGatewayID(); ok {
+		_spec.AddField(coregatewaycluster.FieldGatewayID, field.TypeInt64, value)
+	}
+	if _u.mutation.GatewayIDCleared() {
+		_spec.ClearField(coregatewaycluster.FieldGatewayID, field.TypeInt64)
+	}
 	if value, ok := _u.mutation.ClusterCreateTime(); ok {
 		_spec.SetField(coregatewaycluster.FieldClusterCreateTime, field.TypeInt64, value)
 	}
@@ -516,6 +651,15 @@ func (_u *CoreGatewayClusterUpdateOne) sqlSave(ctx context.Context) (_node *Core
 	}
 	if _u.mutation.ClusterCreateTimeCleared() {
 		_spec.ClearField(coregatewaycluster.FieldClusterCreateTime, field.TypeInt64)
+	}
+	if value, ok := _u.mutation.ClusterLastRequestTime(); ok {
+		_spec.SetField(coregatewaycluster.FieldClusterLastRequestTime, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedClusterLastRequestTime(); ok {
+		_spec.AddField(coregatewaycluster.FieldClusterLastRequestTime, field.TypeInt64, value)
+	}
+	if _u.mutation.ClusterLastRequestTimeCleared() {
+		_spec.ClearField(coregatewaycluster.FieldClusterLastRequestTime, field.TypeInt64)
 	}
 	if _u.mutation.ClusterToNodeCleared() {
 		edge := &sqlgraph.EdgeSpec{

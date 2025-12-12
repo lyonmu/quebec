@@ -23,8 +23,12 @@ const (
 	FieldDeletedAt = "deleted_at"
 	// FieldClusterID holds the string denoting the cluster_id field in the database.
 	FieldClusterID = "cluster_id"
+	// FieldGatewayID holds the string denoting the gateway_id field in the database.
+	FieldGatewayID = "gateway_id"
 	// FieldClusterCreateTime holds the string denoting the cluster_create_time field in the database.
 	FieldClusterCreateTime = "cluster_create_time"
+	// FieldClusterLastRequestTime holds the string denoting the cluster_last_request_time field in the database.
+	FieldClusterLastRequestTime = "cluster_last_request_time"
 	// EdgeClusterToNode holds the string denoting the cluster_to_node edge name in mutations.
 	EdgeClusterToNode = "cluster_to_node"
 	// Table holds the table name of the coregatewaycluster in the database.
@@ -45,7 +49,9 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldDeletedAt,
 	FieldClusterID,
+	FieldGatewayID,
 	FieldClusterCreateTime,
+	FieldClusterLastRequestTime,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -73,6 +79,8 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// DefaultClusterCreateTime holds the default value on creation for the "cluster_create_time" field.
 	DefaultClusterCreateTime func() int64
+	// DefaultClusterLastRequestTime holds the default value on creation for the "cluster_last_request_time" field.
+	DefaultClusterLastRequestTime func() int64
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -107,9 +115,19 @@ func ByClusterID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldClusterID, opts...).ToFunc()
 }
 
+// ByGatewayID orders the results by the gateway_id field.
+func ByGatewayID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldGatewayID, opts...).ToFunc()
+}
+
 // ByClusterCreateTime orders the results by the cluster_create_time field.
 func ByClusterCreateTime(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldClusterCreateTime, opts...).ToFunc()
+}
+
+// ByClusterLastRequestTime orders the results by the cluster_last_request_time field.
+func ByClusterLastRequestTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldClusterLastRequestTime, opts...).ToFunc()
 }
 
 // ByClusterToNodeCount orders the results by cluster_to_node count.

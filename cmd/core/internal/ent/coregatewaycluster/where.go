@@ -85,9 +85,19 @@ func ClusterID(v string) predicate.CoreGatewayCluster {
 	return predicate.CoreGatewayCluster(sql.FieldEQ(FieldClusterID, v))
 }
 
+// GatewayID applies equality check predicate on the "gateway_id" field. It's identical to GatewayIDEQ.
+func GatewayID(v int64) predicate.CoreGatewayCluster {
+	return predicate.CoreGatewayCluster(sql.FieldEQ(FieldGatewayID, v))
+}
+
 // ClusterCreateTime applies equality check predicate on the "cluster_create_time" field. It's identical to ClusterCreateTimeEQ.
 func ClusterCreateTime(v int64) predicate.CoreGatewayCluster {
 	return predicate.CoreGatewayCluster(sql.FieldEQ(FieldClusterCreateTime, v))
+}
+
+// ClusterLastRequestTime applies equality check predicate on the "cluster_last_request_time" field. It's identical to ClusterLastRequestTimeEQ.
+func ClusterLastRequestTime(v int64) predicate.CoreGatewayCluster {
+	return predicate.CoreGatewayCluster(sql.FieldEQ(FieldClusterLastRequestTime, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -295,6 +305,56 @@ func ClusterIDContainsFold(v string) predicate.CoreGatewayCluster {
 	return predicate.CoreGatewayCluster(sql.FieldContainsFold(FieldClusterID, v))
 }
 
+// GatewayIDEQ applies the EQ predicate on the "gateway_id" field.
+func GatewayIDEQ(v int64) predicate.CoreGatewayCluster {
+	return predicate.CoreGatewayCluster(sql.FieldEQ(FieldGatewayID, v))
+}
+
+// GatewayIDNEQ applies the NEQ predicate on the "gateway_id" field.
+func GatewayIDNEQ(v int64) predicate.CoreGatewayCluster {
+	return predicate.CoreGatewayCluster(sql.FieldNEQ(FieldGatewayID, v))
+}
+
+// GatewayIDIn applies the In predicate on the "gateway_id" field.
+func GatewayIDIn(vs ...int64) predicate.CoreGatewayCluster {
+	return predicate.CoreGatewayCluster(sql.FieldIn(FieldGatewayID, vs...))
+}
+
+// GatewayIDNotIn applies the NotIn predicate on the "gateway_id" field.
+func GatewayIDNotIn(vs ...int64) predicate.CoreGatewayCluster {
+	return predicate.CoreGatewayCluster(sql.FieldNotIn(FieldGatewayID, vs...))
+}
+
+// GatewayIDGT applies the GT predicate on the "gateway_id" field.
+func GatewayIDGT(v int64) predicate.CoreGatewayCluster {
+	return predicate.CoreGatewayCluster(sql.FieldGT(FieldGatewayID, v))
+}
+
+// GatewayIDGTE applies the GTE predicate on the "gateway_id" field.
+func GatewayIDGTE(v int64) predicate.CoreGatewayCluster {
+	return predicate.CoreGatewayCluster(sql.FieldGTE(FieldGatewayID, v))
+}
+
+// GatewayIDLT applies the LT predicate on the "gateway_id" field.
+func GatewayIDLT(v int64) predicate.CoreGatewayCluster {
+	return predicate.CoreGatewayCluster(sql.FieldLT(FieldGatewayID, v))
+}
+
+// GatewayIDLTE applies the LTE predicate on the "gateway_id" field.
+func GatewayIDLTE(v int64) predicate.CoreGatewayCluster {
+	return predicate.CoreGatewayCluster(sql.FieldLTE(FieldGatewayID, v))
+}
+
+// GatewayIDIsNil applies the IsNil predicate on the "gateway_id" field.
+func GatewayIDIsNil() predicate.CoreGatewayCluster {
+	return predicate.CoreGatewayCluster(sql.FieldIsNull(FieldGatewayID))
+}
+
+// GatewayIDNotNil applies the NotNil predicate on the "gateway_id" field.
+func GatewayIDNotNil() predicate.CoreGatewayCluster {
+	return predicate.CoreGatewayCluster(sql.FieldNotNull(FieldGatewayID))
+}
+
 // ClusterCreateTimeEQ applies the EQ predicate on the "cluster_create_time" field.
 func ClusterCreateTimeEQ(v int64) predicate.CoreGatewayCluster {
 	return predicate.CoreGatewayCluster(sql.FieldEQ(FieldClusterCreateTime, v))
@@ -343,6 +403,56 @@ func ClusterCreateTimeIsNil() predicate.CoreGatewayCluster {
 // ClusterCreateTimeNotNil applies the NotNil predicate on the "cluster_create_time" field.
 func ClusterCreateTimeNotNil() predicate.CoreGatewayCluster {
 	return predicate.CoreGatewayCluster(sql.FieldNotNull(FieldClusterCreateTime))
+}
+
+// ClusterLastRequestTimeEQ applies the EQ predicate on the "cluster_last_request_time" field.
+func ClusterLastRequestTimeEQ(v int64) predicate.CoreGatewayCluster {
+	return predicate.CoreGatewayCluster(sql.FieldEQ(FieldClusterLastRequestTime, v))
+}
+
+// ClusterLastRequestTimeNEQ applies the NEQ predicate on the "cluster_last_request_time" field.
+func ClusterLastRequestTimeNEQ(v int64) predicate.CoreGatewayCluster {
+	return predicate.CoreGatewayCluster(sql.FieldNEQ(FieldClusterLastRequestTime, v))
+}
+
+// ClusterLastRequestTimeIn applies the In predicate on the "cluster_last_request_time" field.
+func ClusterLastRequestTimeIn(vs ...int64) predicate.CoreGatewayCluster {
+	return predicate.CoreGatewayCluster(sql.FieldIn(FieldClusterLastRequestTime, vs...))
+}
+
+// ClusterLastRequestTimeNotIn applies the NotIn predicate on the "cluster_last_request_time" field.
+func ClusterLastRequestTimeNotIn(vs ...int64) predicate.CoreGatewayCluster {
+	return predicate.CoreGatewayCluster(sql.FieldNotIn(FieldClusterLastRequestTime, vs...))
+}
+
+// ClusterLastRequestTimeGT applies the GT predicate on the "cluster_last_request_time" field.
+func ClusterLastRequestTimeGT(v int64) predicate.CoreGatewayCluster {
+	return predicate.CoreGatewayCluster(sql.FieldGT(FieldClusterLastRequestTime, v))
+}
+
+// ClusterLastRequestTimeGTE applies the GTE predicate on the "cluster_last_request_time" field.
+func ClusterLastRequestTimeGTE(v int64) predicate.CoreGatewayCluster {
+	return predicate.CoreGatewayCluster(sql.FieldGTE(FieldClusterLastRequestTime, v))
+}
+
+// ClusterLastRequestTimeLT applies the LT predicate on the "cluster_last_request_time" field.
+func ClusterLastRequestTimeLT(v int64) predicate.CoreGatewayCluster {
+	return predicate.CoreGatewayCluster(sql.FieldLT(FieldClusterLastRequestTime, v))
+}
+
+// ClusterLastRequestTimeLTE applies the LTE predicate on the "cluster_last_request_time" field.
+func ClusterLastRequestTimeLTE(v int64) predicate.CoreGatewayCluster {
+	return predicate.CoreGatewayCluster(sql.FieldLTE(FieldClusterLastRequestTime, v))
+}
+
+// ClusterLastRequestTimeIsNil applies the IsNil predicate on the "cluster_last_request_time" field.
+func ClusterLastRequestTimeIsNil() predicate.CoreGatewayCluster {
+	return predicate.CoreGatewayCluster(sql.FieldIsNull(FieldClusterLastRequestTime))
+}
+
+// ClusterLastRequestTimeNotNil applies the NotNil predicate on the "cluster_last_request_time" field.
+func ClusterLastRequestTimeNotNil() predicate.CoreGatewayCluster {
+	return predicate.CoreGatewayCluster(sql.FieldNotNull(FieldClusterLastRequestTime))
 }
 
 // HasClusterToNode applies the HasEdge predicate on the "cluster_to_node" edge.

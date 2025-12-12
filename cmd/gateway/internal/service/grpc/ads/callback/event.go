@@ -53,6 +53,7 @@ func (c *XDSCallbacks) OnStreamRequest(id int64, request *discoverygrpc.Discover
 			NodeId:    newNodeInfo.NodeID,
 			ClusterId: newNodeInfo.Cluster,
 			StreamId:  newNodeInfo.StreamID,
+			GatewayId: int64(global.Cfg.Gateway.Node),
 		})
 	}
 

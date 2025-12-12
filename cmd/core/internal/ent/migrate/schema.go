@@ -69,7 +69,9 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
 		{Name: "cluster_id", Type: field.TypeString, Unique: true, Nullable: true, Comment: "集群ID"},
+		{Name: "gateway_id", Type: field.TypeInt64, Nullable: true, Comment: "网关ID"},
 		{Name: "cluster_create_time", Type: field.TypeInt64, Nullable: true, Comment: "创建时间"},
+		{Name: "cluster_last_request_time", Type: field.TypeInt64, Nullable: true, Comment: "最新请求时间"},
 	}
 	// QuebecCoreGatewayClusterTable holds the schema information for the "quebec_core_gateway_cluster" table.
 	QuebecCoreGatewayClusterTable = &schema.Table{
@@ -106,6 +108,16 @@ var (
 			{
 				Name:    "coregatewaycluster_cluster_create_time",
 				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayClusterColumns[6]},
+			},
+			{
+				Name:    "coregatewaycluster_cluster_last_request_time",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayClusterColumns[7]},
+			},
+			{
+				Name:    "coregatewaycluster_gateway_id",
+				Unique:  false,
 				Columns: []*schema.Column{QuebecCoreGatewayClusterColumns[5]},
 			},
 		},
@@ -117,6 +129,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
 		{Name: "node_id", Type: field.TypeString, Unique: true, Nullable: true, Comment: "节点ID"},
+		{Name: "gateway_id", Type: field.TypeInt64, Nullable: true, Comment: "网关ID"},
 		{Name: "node_register_time", Type: field.TypeInt64, Nullable: true, Comment: "注册时间"},
 		{Name: "node_last_request_time", Type: field.TypeInt64, Nullable: true, Comment: "最新请求时间"},
 		{Name: "cluster_id", Type: field.TypeString, Nullable: true, Size: 64, Comment: "集群ID"},
@@ -130,7 +143,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "quebec_core_gateway_node_quebec_core_gateway_cluster_cluster_to_node",
-				Columns:    []*schema.Column{QuebecCoreGatewayNodeColumns[7]},
+				Columns:    []*schema.Column{QuebecCoreGatewayNodeColumns[8]},
 				RefColumns: []*schema.Column{QuebecCoreGatewayClusterColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -159,7 +172,7 @@ var (
 			{
 				Name:    "coregatewaynode_cluster_id",
 				Unique:  false,
-				Columns: []*schema.Column{QuebecCoreGatewayNodeColumns[7]},
+				Columns: []*schema.Column{QuebecCoreGatewayNodeColumns[8]},
 			},
 			{
 				Name:    "coregatewaynode_node_id",
@@ -167,14 +180,19 @@ var (
 				Columns: []*schema.Column{QuebecCoreGatewayNodeColumns[4]},
 			},
 			{
-				Name:    "coregatewaynode_node_register_time",
+				Name:    "coregatewaynode_gateway_id",
 				Unique:  false,
 				Columns: []*schema.Column{QuebecCoreGatewayNodeColumns[5]},
 			},
 			{
-				Name:    "coregatewaynode_node_last_request_time",
+				Name:    "coregatewaynode_node_register_time",
 				Unique:  false,
 				Columns: []*schema.Column{QuebecCoreGatewayNodeColumns[6]},
+			},
+			{
+				Name:    "coregatewaynode_node_last_request_time",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayNodeColumns[7]},
 			},
 		},
 	}

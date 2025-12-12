@@ -26,8 +26,12 @@ type CoreGatewayCluster struct {
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// 集群ID
 	ClusterID string `json:"cluster_id,omitempty"`
+	// 网关ID
+	GatewayID int64 `json:"gateway_id,omitempty"`
 	// 创建时间
 	ClusterCreateTime int64 `json:"cluster_create_time,omitempty"`
+	// 最新请求时间
+	ClusterLastRequestTime int64 `json:"cluster_last_request_time,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CoreGatewayClusterQuery when eager-loading is set.
 	Edges        CoreGatewayClusterEdges `json:"-" gorm:"-"`
@@ -57,7 +61,7 @@ func (*CoreGatewayCluster) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case coregatewaycluster.FieldClusterCreateTime:
+		case coregatewaycluster.FieldGatewayID, coregatewaycluster.FieldClusterCreateTime, coregatewaycluster.FieldClusterLastRequestTime:
 			values[i] = new(sql.NullInt64)
 		case coregatewaycluster.FieldID, coregatewaycluster.FieldClusterID:
 			values[i] = new(sql.NullString)
@@ -109,11 +113,23 @@ func (_m *CoreGatewayCluster) assignValues(columns []string, values []any) error
 			} else if value.Valid {
 				_m.ClusterID = value.String
 			}
+		case coregatewaycluster.FieldGatewayID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field gateway_id", values[i])
+			} else if value.Valid {
+				_m.GatewayID = value.Int64
+			}
 		case coregatewaycluster.FieldClusterCreateTime:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field cluster_create_time", values[i])
 			} else if value.Valid {
 				_m.ClusterCreateTime = value.Int64
+			}
+		case coregatewaycluster.FieldClusterLastRequestTime:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field cluster_last_request_time", values[i])
+			} else if value.Valid {
+				_m.ClusterLastRequestTime = value.Int64
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -170,8 +186,14 @@ func (_m *CoreGatewayCluster) String() string {
 	builder.WriteString("cluster_id=")
 	builder.WriteString(_m.ClusterID)
 	builder.WriteString(", ")
+	builder.WriteString("gateway_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.GatewayID))
+	builder.WriteString(", ")
 	builder.WriteString("cluster_create_time=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ClusterCreateTime))
+	builder.WriteString(", ")
+	builder.WriteString("cluster_last_request_time=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ClusterLastRequestTime))
 	builder.WriteByte(')')
 	return builder.String()
 }

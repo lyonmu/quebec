@@ -94,6 +94,20 @@ func (_c *CoreGatewayNodeCreate) SetNillableClusterID(v *string) *CoreGatewayNod
 	return _c
 }
 
+// SetGatewayID sets the "gateway_id" field.
+func (_c *CoreGatewayNodeCreate) SetGatewayID(v int64) *CoreGatewayNodeCreate {
+	_c.mutation.SetGatewayID(v)
+	return _c
+}
+
+// SetNillableGatewayID sets the "gateway_id" field if the given value is not nil.
+func (_c *CoreGatewayNodeCreate) SetNillableGatewayID(v *int64) *CoreGatewayNodeCreate {
+	if v != nil {
+		_c.SetGatewayID(*v)
+	}
+	return _c
+}
+
 // SetNodeRegisterTime sets the "node_register_time" field.
 func (_c *CoreGatewayNodeCreate) SetNodeRegisterTime(v int64) *CoreGatewayNodeCreate {
 	_c.mutation.SetNodeRegisterTime(v)
@@ -295,6 +309,10 @@ func (_c *CoreGatewayNodeCreate) createSpec() (*CoreGatewayNode, *sqlgraph.Creat
 		_spec.SetField(coregatewaynode.FieldNodeID, field.TypeString, value)
 		_node.NodeID = value
 	}
+	if value, ok := _c.mutation.GatewayID(); ok {
+		_spec.SetField(coregatewaynode.FieldGatewayID, field.TypeInt64, value)
+		_node.GatewayID = value
+	}
 	if value, ok := _c.mutation.NodeRegisterTime(); ok {
 		_spec.SetField(coregatewaynode.FieldNodeRegisterTime, field.TypeInt64, value)
 		_node.NodeRegisterTime = value
@@ -435,6 +453,30 @@ func (u *CoreGatewayNodeUpsert) UpdateClusterID() *CoreGatewayNodeUpsert {
 // ClearClusterID clears the value of the "cluster_id" field.
 func (u *CoreGatewayNodeUpsert) ClearClusterID() *CoreGatewayNodeUpsert {
 	u.SetNull(coregatewaynode.FieldClusterID)
+	return u
+}
+
+// SetGatewayID sets the "gateway_id" field.
+func (u *CoreGatewayNodeUpsert) SetGatewayID(v int64) *CoreGatewayNodeUpsert {
+	u.Set(coregatewaynode.FieldGatewayID, v)
+	return u
+}
+
+// UpdateGatewayID sets the "gateway_id" field to the value that was provided on create.
+func (u *CoreGatewayNodeUpsert) UpdateGatewayID() *CoreGatewayNodeUpsert {
+	u.SetExcluded(coregatewaynode.FieldGatewayID)
+	return u
+}
+
+// AddGatewayID adds v to the "gateway_id" field.
+func (u *CoreGatewayNodeUpsert) AddGatewayID(v int64) *CoreGatewayNodeUpsert {
+	u.Add(coregatewaynode.FieldGatewayID, v)
+	return u
+}
+
+// ClearGatewayID clears the value of the "gateway_id" field.
+func (u *CoreGatewayNodeUpsert) ClearGatewayID() *CoreGatewayNodeUpsert {
+	u.SetNull(coregatewaynode.FieldGatewayID)
 	return u
 }
 
@@ -611,6 +653,34 @@ func (u *CoreGatewayNodeUpsertOne) UpdateClusterID() *CoreGatewayNodeUpsertOne {
 func (u *CoreGatewayNodeUpsertOne) ClearClusterID() *CoreGatewayNodeUpsertOne {
 	return u.Update(func(s *CoreGatewayNodeUpsert) {
 		s.ClearClusterID()
+	})
+}
+
+// SetGatewayID sets the "gateway_id" field.
+func (u *CoreGatewayNodeUpsertOne) SetGatewayID(v int64) *CoreGatewayNodeUpsertOne {
+	return u.Update(func(s *CoreGatewayNodeUpsert) {
+		s.SetGatewayID(v)
+	})
+}
+
+// AddGatewayID adds v to the "gateway_id" field.
+func (u *CoreGatewayNodeUpsertOne) AddGatewayID(v int64) *CoreGatewayNodeUpsertOne {
+	return u.Update(func(s *CoreGatewayNodeUpsert) {
+		s.AddGatewayID(v)
+	})
+}
+
+// UpdateGatewayID sets the "gateway_id" field to the value that was provided on create.
+func (u *CoreGatewayNodeUpsertOne) UpdateGatewayID() *CoreGatewayNodeUpsertOne {
+	return u.Update(func(s *CoreGatewayNodeUpsert) {
+		s.UpdateGatewayID()
+	})
+}
+
+// ClearGatewayID clears the value of the "gateway_id" field.
+func (u *CoreGatewayNodeUpsertOne) ClearGatewayID() *CoreGatewayNodeUpsertOne {
+	return u.Update(func(s *CoreGatewayNodeUpsert) {
+		s.ClearGatewayID()
 	})
 }
 
@@ -962,6 +1032,34 @@ func (u *CoreGatewayNodeUpsertBulk) UpdateClusterID() *CoreGatewayNodeUpsertBulk
 func (u *CoreGatewayNodeUpsertBulk) ClearClusterID() *CoreGatewayNodeUpsertBulk {
 	return u.Update(func(s *CoreGatewayNodeUpsert) {
 		s.ClearClusterID()
+	})
+}
+
+// SetGatewayID sets the "gateway_id" field.
+func (u *CoreGatewayNodeUpsertBulk) SetGatewayID(v int64) *CoreGatewayNodeUpsertBulk {
+	return u.Update(func(s *CoreGatewayNodeUpsert) {
+		s.SetGatewayID(v)
+	})
+}
+
+// AddGatewayID adds v to the "gateway_id" field.
+func (u *CoreGatewayNodeUpsertBulk) AddGatewayID(v int64) *CoreGatewayNodeUpsertBulk {
+	return u.Update(func(s *CoreGatewayNodeUpsert) {
+		s.AddGatewayID(v)
+	})
+}
+
+// UpdateGatewayID sets the "gateway_id" field to the value that was provided on create.
+func (u *CoreGatewayNodeUpsertBulk) UpdateGatewayID() *CoreGatewayNodeUpsertBulk {
+	return u.Update(func(s *CoreGatewayNodeUpsert) {
+		s.UpdateGatewayID()
+	})
+}
+
+// ClearGatewayID clears the value of the "gateway_id" field.
+func (u *CoreGatewayNodeUpsertBulk) ClearGatewayID() *CoreGatewayNodeUpsertBulk {
+	return u.Update(func(s *CoreGatewayNodeUpsert) {
+		s.ClearGatewayID()
 	})
 }
 

@@ -29,6 +29,8 @@ type CoreGatewayNode struct {
 	NodeID string `json:"node_id,omitempty"`
 	// 集群ID
 	ClusterID string `json:"cluster_id,omitempty"`
+	// 网关ID
+	GatewayID int64 `json:"gateway_id,omitempty"`
 	// 注册时间
 	NodeRegisterTime int64 `json:"node_register_time,omitempty"`
 	// 最新请求时间
@@ -64,7 +66,7 @@ func (*CoreGatewayNode) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case coregatewaynode.FieldNodeRegisterTime, coregatewaynode.FieldNodeLastRequestTime:
+		case coregatewaynode.FieldGatewayID, coregatewaynode.FieldNodeRegisterTime, coregatewaynode.FieldNodeLastRequestTime:
 			values[i] = new(sql.NullInt64)
 		case coregatewaynode.FieldID, coregatewaynode.FieldNodeID, coregatewaynode.FieldClusterID:
 			values[i] = new(sql.NullString)
@@ -121,6 +123,12 @@ func (_m *CoreGatewayNode) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field cluster_id", values[i])
 			} else if value.Valid {
 				_m.ClusterID = value.String
+			}
+		case coregatewaynode.FieldGatewayID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field gateway_id", values[i])
+			} else if value.Valid {
+				_m.GatewayID = value.Int64
 			}
 		case coregatewaynode.FieldNodeRegisterTime:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -191,6 +199,9 @@ func (_m *CoreGatewayNode) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("cluster_id=")
 	builder.WriteString(_m.ClusterID)
+	builder.WriteString(", ")
+	builder.WriteString("gateway_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.GatewayID))
 	builder.WriteString(", ")
 	builder.WriteString("node_register_time=")
 	builder.WriteString(fmt.Sprintf("%v", _m.NodeRegisterTime))

@@ -24,7 +24,9 @@ type CoreGatewayCluster struct {
 func (CoreGatewayCluster) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("cluster_id").Optional().Comment("集群ID").Unique(),
+		field.Int64("gateway_id").Optional().Comment("网关ID"),
 		field.Int64("cluster_create_time").Optional().Comment("创建时间").DefaultFunc(func() int64 { return time.Now().Unix() }),
+		field.Int64("cluster_last_request_time").Optional().Comment("最新请求时间").DefaultFunc(func() int64 { return time.Now().Unix() }),
 	}
 }
 
@@ -49,6 +51,8 @@ func (CoreGatewayCluster) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("cluster_id"),
 		index.Fields("cluster_create_time"),
+		index.Fields("cluster_last_request_time"),
+		index.Fields("gateway_id"),
 	}
 }
 

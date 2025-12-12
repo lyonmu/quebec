@@ -25,6 +25,8 @@ const (
 	FieldNodeID = "node_id"
 	// FieldClusterID holds the string denoting the cluster_id field in the database.
 	FieldClusterID = "cluster_id"
+	// FieldGatewayID holds the string denoting the gateway_id field in the database.
+	FieldGatewayID = "gateway_id"
 	// FieldNodeRegisterTime holds the string denoting the node_register_time field in the database.
 	FieldNodeRegisterTime = "node_register_time"
 	// FieldNodeLastRequestTime holds the string denoting the node_last_request_time field in the database.
@@ -50,6 +52,7 @@ var Columns = []string{
 	FieldDeletedAt,
 	FieldNodeID,
 	FieldClusterID,
+	FieldGatewayID,
 	FieldNodeRegisterTime,
 	FieldNodeLastRequestTime,
 }
@@ -118,6 +121,11 @@ func ByNodeID(opts ...sql.OrderTermOption) OrderOption {
 // ByClusterID orders the results by the cluster_id field.
 func ByClusterID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldClusterID, opts...).ToFunc()
+}
+
+// ByGatewayID orders the results by the gateway_id field.
+func ByGatewayID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldGatewayID, opts...).ToFunc()
 }
 
 // ByNodeRegisterTime orders the results by the node_register_time field.

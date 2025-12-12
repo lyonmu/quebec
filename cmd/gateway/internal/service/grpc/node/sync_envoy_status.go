@@ -15,12 +15,12 @@ import (
 type CoreSyncer struct {
 	client    v1.EnvoyRegistryClient
 	sendCh    chan *v1.EnvoyStatusEvent
-	gatewayID string
+	gatewayID int64
 	ctx       context.Context
 	cancel    context.CancelFunc
 }
 
-func NewCoreSyncer(conn *grpc.ClientConn, gatewayID string) *CoreSyncer {
+func NewCoreSyncer(conn *grpc.ClientConn, gatewayID int64) *CoreSyncer {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &CoreSyncer{
 		client:    v1.NewEnvoyRegistryClient(conn),

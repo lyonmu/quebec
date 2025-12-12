@@ -2,7 +2,6 @@ package ads
 
 import (
 	"context"
-	"fmt"
 
 	clusterservice "github.com/envoyproxy/go-control-plane/envoy/service/cluster/v3"
 	discoverygrpc "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
@@ -40,7 +39,7 @@ func (s *AdsSvc) Register(gs *grpc.Server) error {
 func NewAdsSvc() *AdsSvc {
 
 	// create default callback instance to record envoy xDS logs
-	callbacks := callback.NewGatewayCallbacks(global.GrpcClient, fmt.Sprintf("%d", global.Cfg.Gateway.Node))
+	callbacks := callback.NewGatewayCallbacks(global.GrpcClient, int64(global.Cfg.Gateway.Node))
 
 	return &AdsSvc{xdsv3server.NewServer(context.Background(), xdsCache, callbacks)}
 }

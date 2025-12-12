@@ -96,6 +96,33 @@ func (_u *CoreGatewayNodeUpdate) ClearClusterID() *CoreGatewayNodeUpdate {
 	return _u
 }
 
+// SetGatewayID sets the "gateway_id" field.
+func (_u *CoreGatewayNodeUpdate) SetGatewayID(v int64) *CoreGatewayNodeUpdate {
+	_u.mutation.ResetGatewayID()
+	_u.mutation.SetGatewayID(v)
+	return _u
+}
+
+// SetNillableGatewayID sets the "gateway_id" field if the given value is not nil.
+func (_u *CoreGatewayNodeUpdate) SetNillableGatewayID(v *int64) *CoreGatewayNodeUpdate {
+	if v != nil {
+		_u.SetGatewayID(*v)
+	}
+	return _u
+}
+
+// AddGatewayID adds value to the "gateway_id" field.
+func (_u *CoreGatewayNodeUpdate) AddGatewayID(v int64) *CoreGatewayNodeUpdate {
+	_u.mutation.AddGatewayID(v)
+	return _u
+}
+
+// ClearGatewayID clears the value of the "gateway_id" field.
+func (_u *CoreGatewayNodeUpdate) ClearGatewayID() *CoreGatewayNodeUpdate {
+	_u.mutation.ClearGatewayID()
+	return _u
+}
+
 // SetNodeRegisterTime sets the "node_register_time" field.
 func (_u *CoreGatewayNodeUpdate) SetNodeRegisterTime(v int64) *CoreGatewayNodeUpdate {
 	_u.mutation.ResetNodeRegisterTime()
@@ -252,6 +279,15 @@ func (_u *CoreGatewayNodeUpdate) sqlSave(ctx context.Context) (_node int, err er
 	if _u.mutation.NodeIDCleared() {
 		_spec.ClearField(coregatewaynode.FieldNodeID, field.TypeString)
 	}
+	if value, ok := _u.mutation.GatewayID(); ok {
+		_spec.SetField(coregatewaynode.FieldGatewayID, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedGatewayID(); ok {
+		_spec.AddField(coregatewaynode.FieldGatewayID, field.TypeInt64, value)
+	}
+	if _u.mutation.GatewayIDCleared() {
+		_spec.ClearField(coregatewaynode.FieldGatewayID, field.TypeInt64)
+	}
 	if value, ok := _u.mutation.NodeRegisterTime(); ok {
 		_spec.SetField(coregatewaynode.FieldNodeRegisterTime, field.TypeInt64, value)
 	}
@@ -384,6 +420,33 @@ func (_u *CoreGatewayNodeUpdateOne) SetNillableClusterID(v *string) *CoreGateway
 // ClearClusterID clears the value of the "cluster_id" field.
 func (_u *CoreGatewayNodeUpdateOne) ClearClusterID() *CoreGatewayNodeUpdateOne {
 	_u.mutation.ClearClusterID()
+	return _u
+}
+
+// SetGatewayID sets the "gateway_id" field.
+func (_u *CoreGatewayNodeUpdateOne) SetGatewayID(v int64) *CoreGatewayNodeUpdateOne {
+	_u.mutation.ResetGatewayID()
+	_u.mutation.SetGatewayID(v)
+	return _u
+}
+
+// SetNillableGatewayID sets the "gateway_id" field if the given value is not nil.
+func (_u *CoreGatewayNodeUpdateOne) SetNillableGatewayID(v *int64) *CoreGatewayNodeUpdateOne {
+	if v != nil {
+		_u.SetGatewayID(*v)
+	}
+	return _u
+}
+
+// AddGatewayID adds value to the "gateway_id" field.
+func (_u *CoreGatewayNodeUpdateOne) AddGatewayID(v int64) *CoreGatewayNodeUpdateOne {
+	_u.mutation.AddGatewayID(v)
+	return _u
+}
+
+// ClearGatewayID clears the value of the "gateway_id" field.
+func (_u *CoreGatewayNodeUpdateOne) ClearGatewayID() *CoreGatewayNodeUpdateOne {
+	_u.mutation.ClearGatewayID()
 	return _u
 }
 
@@ -572,6 +635,15 @@ func (_u *CoreGatewayNodeUpdateOne) sqlSave(ctx context.Context) (_node *CoreGat
 	}
 	if _u.mutation.NodeIDCleared() {
 		_spec.ClearField(coregatewaynode.FieldNodeID, field.TypeString)
+	}
+	if value, ok := _u.mutation.GatewayID(); ok {
+		_spec.SetField(coregatewaynode.FieldGatewayID, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedGatewayID(); ok {
+		_spec.AddField(coregatewaynode.FieldGatewayID, field.TypeInt64, value)
+	}
+	if _u.mutation.GatewayIDCleared() {
+		_spec.ClearField(coregatewaynode.FieldGatewayID, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.NodeRegisterTime(); ok {
 		_spec.SetField(coregatewaynode.FieldNodeRegisterTime, field.TypeInt64, value)

@@ -29,7 +29,7 @@ func (n *NodeSvc) Register(server *grpc.Server) error {
 // SyncEnvoyStatus 处理双向流
 func (s *NodeSvc) SyncEnvoyStatus(stream v1.EnvoyRegistry_SyncEnvoyStatusServer) error {
 	// 用于记录当前流对应的 Gateway ID，以便断开时清理
-	var currentGatewayID string
+	var currentGatewayID int64
 
 	global.Logger.Sugar().Info("New Gateway connection established")
 
@@ -53,7 +53,7 @@ func (s *NodeSvc) SyncEnvoyStatus(stream v1.EnvoyRegistry_SyncEnvoyStatusServer)
 
 		// 3. 处理正常逻辑
 		// 第一次收到消息时，锁定该流对应的 GatewayID
-		if currentGatewayID == "" && event.GatewayId != "" {
+		if currentGatewayID == 0 && event.GatewayId != 0 {
 			currentGatewayID = event.GatewayId
 		}
 
@@ -81,15 +81,20 @@ func (s *NodeSvc) SyncEnvoyStatus(stream v1.EnvoyRegistry_SyncEnvoyStatusServer)
 
 // processEvent 处理具体的业务逻辑
 func (s *NodeSvc) processEvent(event *v1.EnvoyStatusEvent) {
+	requestTS := time.Now().Unix()
+
 	switch event.Event {
 	case v1.EnvoyStatusEvent_CONNECT:
 		global.Logger.Sugar().Infof("[CONNECT] Gateway:%s -> Node:%s", event.GatewayId, event.NodeId)
-		s.registry.AddOrUpdate(event.GatewayId, &EnvoyNode{
-			NodeID:    event.NodeId,
-			ClusterID: event.ClusterId,
-			GatewayID: event.GatewayId,
-			ConnectAt: time.Now(),
-		})
+		if err := s.registry.AddOrUpdate(event.GatewayId, &EnvoyNode{
+			NodeID:        event.NodeId,
+			ClusterID:     event.ClusterId,
+			GatewayID:     event.GatewayId,
+			ConnectAt:     time.Now(),
+			LastRequestAt: requestTS,
+		}); err != nil {
+			global.Logger.Sugar().Errorf("upsert node failed: %v", err)
+		}
 
 	case v1.EnvoyStatusEvent_DISCONNECT:
 		global.Logger.Sugar().Infof("[DISCONNECT] Gateway:%s -> Node:%s", event.GatewayId, event.NodeId)
@@ -98,12 +103,15 @@ func (s *NodeSvc) processEvent(event *v1.EnvoyStatusEvent) {
 	case v1.EnvoyStatusEvent_HEARTBEAT:
 		// 可以在这里更新 Gateway 的最后活跃时间
 		global.Logger.Sugar().Infof("[HEARTBEAT] from %s", event.GatewayId)
+		if err := s.registry.UpdateLastRequestTime(event.GatewayId, event.ClusterId, event.NodeId, requestTS); err != nil {
+			global.Logger.Sugar().Errorf("update last request time failed: %v", err)
+		}
 	}
 }
 
 // handleGatewayDisconnect 当 Gateway 整个服务断开时的兜底逻辑
-func (s *NodeSvc) handleGatewayDisconnect(gatewayID string) {
-	if gatewayID == "" {
+func (s *NodeSvc) handleGatewayDisconnect(gatewayID int64) {
+	if gatewayID == 0 {
 		return
 	}
 	// 策略选择：
