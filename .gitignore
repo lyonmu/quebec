@@ -67,3 +67,7 @@ package-lock.json
 certs
 
 *.pb.go
+
+AGENTS.md
+openspec
+.cursor
