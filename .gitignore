@@ -52,9 +52,9 @@ dist-ssr
 *.local
 
 # Editor directories and files
-.vscode/*
+.vscode/
 !.vscode/extensions.json
-.idea
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
@@ -64,10 +64,10 @@ dist-ssr
 bun.lock
 package-lock.json
 
-certs
+certs/
 
 *.pb.go
 
 AGENTS.md
-openspec
-.cursor
+openspec/
+.cursor/
