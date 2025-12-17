@@ -22,6 +22,7 @@ services:
         "--log-level",
         "info",
         "--enable-mutex-tracing",
+        "--concurrency 4",
         "--base-id 1",
       ]
 
@@ -48,5 +49,6 @@ services:
         "--log-level",
         "info",
         "--enable-mutex-tracing",
+        "--concurrency 4",
         "--base-id 2",
       ]

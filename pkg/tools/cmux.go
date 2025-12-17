@@ -19,7 +19,6 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
-	"google.golang.org/grpc/keepalive"
 )
 
 func NewGin(reg *prometheus.Registry) (*gin.Engine, error) {
@@ -89,11 +88,6 @@ func NewGRPCConn(endpoint string, reg *prometheus.Registry, opts ...grpc.DialOpt
 	// Base options that are always applied
 	defaultOpts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithKeepaliveParams(keepalive.ClientParameters{
-			Time:                30 * time.Second,
-			Timeout:             20 * time.Second,
-			PermitWithoutStream: true,
-		}),
 		grpc.WithUnaryInterceptor(c.UnaryClientInterceptor()),
 		grpc.WithStreamInterceptor(c.StreamClientInterceptor()),
 	}

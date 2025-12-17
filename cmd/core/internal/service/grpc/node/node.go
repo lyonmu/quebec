@@ -39,14 +39,14 @@ func (s *NodeSvc) SyncEnvoyStatus(stream v1.EnvoyRegistry_SyncEnvoyStatusServer)
 
 		// 1. 处理流断开 (EOF)
 		if err == io.EOF {
-			global.Logger.Sugar().Infof("Gateway %s disconnected (EOF)", currentGatewayID)
+			global.Logger.Sugar().Infof("Gateway %d disconnected (EOF)", currentGatewayID)
 			s.handleGatewayDisconnect(currentGatewayID)
 			return nil
 		}
 
 		// 2. 处理错误 (网络中断等)
 		if err != nil {
-			global.Logger.Sugar().Infof("Stream error from Gateway %s: %v", currentGatewayID, err)
+			global.Logger.Sugar().Infof("Stream error from Gateway %d: %v", currentGatewayID, err)
 			s.handleGatewayDisconnect(currentGatewayID)
 			return err
 		}
@@ -85,7 +85,7 @@ func (s *NodeSvc) processEvent(event *v1.EnvoyStatusEvent) {
 
 	switch event.Event {
 	case v1.EnvoyStatusEvent_CONNECT:
-		global.Logger.Sugar().Infof("[CONNECT] Gateway:%s -> Node:%s", event.GatewayId, event.NodeId)
+		global.Logger.Sugar().Infof("[CONNECT] Gateway:%d -> Node:%s", event.GatewayId, event.NodeId)
 		if err := s.registry.AddOrUpdate(event.GatewayId, &EnvoyNode{
 			NodeID:        event.NodeId,
 			ClusterID:     event.ClusterId,
@@ -97,12 +97,12 @@ func (s *NodeSvc) processEvent(event *v1.EnvoyStatusEvent) {
 		}
 
 	case v1.EnvoyStatusEvent_DISCONNECT:
-		global.Logger.Sugar().Infof("[DISCONNECT] Gateway:%s -> Node:%s", event.GatewayId, event.NodeId)
+		global.Logger.Sugar().Infof("[DISCONNECT] Gateway:%d -> Node:%s", event.GatewayId, event.NodeId)
 		s.registry.Remove(event.GatewayId, event.NodeId)
 
 	case v1.EnvoyStatusEvent_HEARTBEAT:
 		// 可以在这里更新 Gateway 的最后活跃时间
-		global.Logger.Sugar().Infof("[HEARTBEAT] from %s", event.GatewayId)
+		global.Logger.Sugar().Infof("[HEARTBEAT] from %d", event.GatewayId)
 		if err := s.registry.UpdateLastRequestTime(event.GatewayId, event.ClusterId, event.NodeId, requestTS); err != nil {
 			global.Logger.Sugar().Errorf("update last request time failed: %v", err)
 		}
@@ -118,7 +118,7 @@ func (s *NodeSvc) handleGatewayDisconnect(gatewayID int64) {
 	// 1. 悲观策略（推荐）：认为 Gateway 挂了，它管理的 Envoy 可能也都失联了，或者会重连到其他 Gateway。
 	//    为了数据一致性，清理该 Gateway 的所有记录。
 	s.registry.ClearGateway(gatewayID)
-	global.Logger.Sugar().Infof("Cleaned up all nodes for Gateway: %s", gatewayID)
+	global.Logger.Sugar().Infof("Cleaned up all nodes for Gateway: %d", gatewayID)
 
 	// 2. 乐观策略：保留数据，等待 Envoy 自动重连到别的 Gateway 并触发新的 CONNECT 事件来覆盖旧数据。
 	//    这种策略需要配合 Redis TTL 才能避免数据永久残留。
