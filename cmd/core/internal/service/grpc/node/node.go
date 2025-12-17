@@ -1,9 +1,12 @@
 package node
 
 import (
+	"context"
 	"io"
 	"time"
 
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewaycluster"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewaynode"
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
 	v1 "github.com/lyonmu/quebec/idl/node/v1"
 	"google.golang.org/grpc"
@@ -114,12 +117,53 @@ func (s *NodeSvc) handleGatewayDisconnect(gatewayID int64) {
 	if gatewayID == 0 {
 		return
 	}
-	// 策略选择：
-	// 1. 悲观策略（推荐）：认为 Gateway 挂了，它管理的 Envoy 可能也都失联了，或者会重连到其他 Gateway。
-	//    为了数据一致性，清理该 Gateway 的所有记录。
+
+	ctx := context.Background()
+	now := time.Now()
+
+	tx, err := global.EntClient.Tx(ctx)
+	if err != nil {
+		global.Logger.Sugar().Errorf("create tx failed: %v", err)
+		return
+	}
+
+	// 统一回滚兜底
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	if _, err = tx.CoreGatewayCluster.
+		Update().
+		Where(
+			coregatewaycluster.GatewayID(gatewayID),
+			coregatewaycluster.DeletedAtIsNil(),
+		).
+		SetDeletedAt(now).
+		Save(ctx); err != nil {
+		global.Logger.Sugar().Errorf("update core_gateway_cluster failed: %v", err)
+		return
+	}
+
+	if _, err = tx.CoreGatewayNode.
+		Update().
+		Where(
+			coregatewaynode.GatewayID(gatewayID),
+			coregatewaynode.DeletedAtIsNil(),
+		).
+		SetDeletedAt(now).
+		Save(ctx); err != nil {
+		global.Logger.Sugar().Errorf("update core_gateway_node failed: %v", err)
+		return
+	}
+
+	if err = tx.Commit(); err != nil {
+		global.Logger.Sugar().Errorf("commit tx failed: %v", err)
+		return
+	}
+
+	// 事务成功后再清理内存态
 	s.registry.ClearGateway(gatewayID)
 	global.Logger.Sugar().Infof("Cleaned up all nodes for Gateway: %d", gatewayID)
-
-	// 2. 乐观策略：保留数据，等待 Envoy 自动重连到别的 Gateway 并触发新的 CONNECT 事件来覆盖旧数据。
-	//    这种策略需要配合 Redis TTL 才能避免数据永久残留。
 }
