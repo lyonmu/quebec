@@ -97,6 +97,12 @@ func Status(v constant.YesOrNo) predicate.CoreRole {
 	return predicate.CoreRole(sql.FieldEQ(FieldStatus, vc))
 }
 
+// System applies equality check predicate on the "system" field. It's identical to SystemEQ.
+func System(v constant.YesOrNo) predicate.CoreRole {
+	vc := int8(v)
+	return predicate.CoreRole(sql.FieldEQ(FieldSystem, vc))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.CoreRole {
 	return predicate.CoreRole(sql.FieldEQ(FieldCreatedAt, v))
@@ -439,6 +445,70 @@ func StatusIsNil() predicate.CoreRole {
 // StatusNotNil applies the NotNil predicate on the "status" field.
 func StatusNotNil() predicate.CoreRole {
 	return predicate.CoreRole(sql.FieldNotNull(FieldStatus))
+}
+
+// SystemEQ applies the EQ predicate on the "system" field.
+func SystemEQ(v constant.YesOrNo) predicate.CoreRole {
+	vc := int8(v)
+	return predicate.CoreRole(sql.FieldEQ(FieldSystem, vc))
+}
+
+// SystemNEQ applies the NEQ predicate on the "system" field.
+func SystemNEQ(v constant.YesOrNo) predicate.CoreRole {
+	vc := int8(v)
+	return predicate.CoreRole(sql.FieldNEQ(FieldSystem, vc))
+}
+
+// SystemIn applies the In predicate on the "system" field.
+func SystemIn(vs ...constant.YesOrNo) predicate.CoreRole {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = int8(vs[i])
+	}
+	return predicate.CoreRole(sql.FieldIn(FieldSystem, v...))
+}
+
+// SystemNotIn applies the NotIn predicate on the "system" field.
+func SystemNotIn(vs ...constant.YesOrNo) predicate.CoreRole {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = int8(vs[i])
+	}
+	return predicate.CoreRole(sql.FieldNotIn(FieldSystem, v...))
+}
+
+// SystemGT applies the GT predicate on the "system" field.
+func SystemGT(v constant.YesOrNo) predicate.CoreRole {
+	vc := int8(v)
+	return predicate.CoreRole(sql.FieldGT(FieldSystem, vc))
+}
+
+// SystemGTE applies the GTE predicate on the "system" field.
+func SystemGTE(v constant.YesOrNo) predicate.CoreRole {
+	vc := int8(v)
+	return predicate.CoreRole(sql.FieldGTE(FieldSystem, vc))
+}
+
+// SystemLT applies the LT predicate on the "system" field.
+func SystemLT(v constant.YesOrNo) predicate.CoreRole {
+	vc := int8(v)
+	return predicate.CoreRole(sql.FieldLT(FieldSystem, vc))
+}
+
+// SystemLTE applies the LTE predicate on the "system" field.
+func SystemLTE(v constant.YesOrNo) predicate.CoreRole {
+	vc := int8(v)
+	return predicate.CoreRole(sql.FieldLTE(FieldSystem, vc))
+}
+
+// SystemIsNil applies the IsNil predicate on the "system" field.
+func SystemIsNil() predicate.CoreRole {
+	return predicate.CoreRole(sql.FieldIsNull(FieldSystem))
+}
+
+// SystemNotNil applies the NotNil predicate on the "system" field.
+func SystemNotNil() predicate.CoreRole {
+	return predicate.CoreRole(sql.FieldNotNull(FieldSystem))
 }
 
 // HasRoleToUser applies the HasEdge predicate on the "role_to_user" edge.

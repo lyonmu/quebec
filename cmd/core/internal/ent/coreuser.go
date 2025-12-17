@@ -42,6 +42,8 @@ type CoreUser struct {
 	Remark string `json:"remark,omitempty"`
 	// 最后密码修改时间戳
 	LastPasswordChange int64 `json:"last_password_change,omitempty"`
+	// 是否系统用户 [1: 是, 2: 否]
+	System constant.YesOrNo `json:"system,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CoreUserQuery when eager-loading is set.
 	Edges        CoreUserEdges `json:"-" gorm:"-"`
@@ -84,7 +86,7 @@ func (*CoreUser) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case coreuser.FieldStatus, coreuser.FieldLastPasswordChange:
+		case coreuser.FieldStatus, coreuser.FieldLastPasswordChange, coreuser.FieldSystem:
 			values[i] = new(sql.NullInt64)
 		case coreuser.FieldID, coreuser.FieldUsername, coreuser.FieldPassword, coreuser.FieldEmail, coreuser.FieldNickname, coreuser.FieldRoleID, coreuser.FieldRemark:
 			values[i] = new(sql.NullString)
@@ -178,6 +180,12 @@ func (_m *CoreUser) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.LastPasswordChange = value.Int64
 			}
+		case coreuser.FieldSystem:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field system", values[i])
+			} else if value.Valid {
+				_m.System = constant.YesOrNo(value.Int64)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -258,6 +266,9 @@ func (_m *CoreUser) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("last_password_change=")
 	builder.WriteString(fmt.Sprintf("%v", _m.LastPasswordChange))
+	builder.WriteString(", ")
+	builder.WriteString("system=")
+	builder.WriteString(fmt.Sprintf("%v", _m.System))
 	builder.WriteByte(')')
 	return builder.String()
 }

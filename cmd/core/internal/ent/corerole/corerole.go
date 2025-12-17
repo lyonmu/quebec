@@ -28,6 +28,8 @@ const (
 	FieldRemark = "remark"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
+	// FieldSystem holds the string denoting the system field in the database.
+	FieldSystem = "system"
 	// EdgeRoleToUser holds the string denoting the role_to_user edge name in mutations.
 	EdgeRoleToUser = "role_to_user"
 	// EdgeRoleToDataRelationship holds the string denoting the role_to_data_relationship edge name in mutations.
@@ -59,6 +61,7 @@ var Columns = []string{
 	FieldName,
 	FieldRemark,
 	FieldStatus,
+	FieldSystem,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -86,6 +89,8 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// DefaultStatus holds the default value on creation for the "status" field.
 	DefaultStatus constant.YesOrNo
+	// DefaultSystem holds the default value on creation for the "system" field.
+	DefaultSystem constant.YesOrNo
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -128,6 +133,11 @@ func ByRemark(opts ...sql.OrderTermOption) OrderOption {
 // ByStatus orders the results by the status field.
 func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// BySystem orders the results by the system field.
+func BySystem(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSystem, opts...).ToFunc()
 }
 
 // ByRoleToUserCount orders the results by role_to_user count.

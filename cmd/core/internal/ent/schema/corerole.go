@@ -25,6 +25,7 @@ func (CoreRole) Fields() []ent.Field {
 		field.String("name").Optional().Comment("角色名称"),
 		field.String("remark").Optional().Comment("角色备注"),
 		field.Int8("status").Optional().GoType(constant.YesOrNo(1)).Optional().Comment("角色状态 [1: 启用, 2: 禁用]").Default(int8(constant.Yes)),
+		field.Int8("system").Optional().GoType(constant.YesOrNo(1)).Optional().Comment("是否系统角色 [1: 是, 2: 否]").Default(int8(constant.No)),
 	}
 }
 

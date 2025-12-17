@@ -17,7 +17,7 @@ func (s *SystemSvc) ListOnlineUser(req *request.SystemOnlineUserListReq, ctx con
 	var (
 		total    int
 		items    = make([]*response.SystemOnlineUserResp, 0)
-		page     = req.Page
+		page     = (req.Page - 1) * req.PageSize
 		pageSize = req.PageSize
 		resp     = &response.SystemOnlineUserListResp{}
 	)
@@ -41,7 +41,7 @@ func (s *SystemSvc) ListOnlineUser(req *request.SystemOnlineUserListReq, ctx con
 		return nil, &code.Failed
 	}
 
-	rows, err := query.Offset((page - 1) * pageSize).Limit(pageSize).
+	rows, err := query.Offset(page).Limit(pageSize).
 		WithOnLineFromUser(
 			func(q *ent.CoreUserQuery) {
 				q.Select(coreuser.FieldID, coreuser.FieldNickname).Where(coreuser.DeletedAtIsNil())
@@ -61,13 +61,13 @@ func (s *SystemSvc) ListOnlineUser(req *request.SystemOnlineUserListReq, ctx con
 
 	resp.Total = total
 	resp.Items = items
-	resp.Page = page
+	resp.Page = req.Page
 	resp.PageSize = pageSize
 
 	return resp, nil
 }
 
-func (s *SystemSvc) Label(ctx context.Context) ([]*response.Options, error) {
+func (s *SystemSvc) UserLabel(ctx context.Context) ([]*response.Options, error) {
 
 	var (
 		resp = make([]*response.Options, 0)

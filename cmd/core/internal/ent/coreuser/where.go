@@ -122,6 +122,12 @@ func LastPasswordChange(v int64) predicate.CoreUser {
 	return predicate.CoreUser(sql.FieldEQ(FieldLastPasswordChange, v))
 }
 
+// System applies equality check predicate on the "system" field. It's identical to SystemEQ.
+func System(v constant.YesOrNo) predicate.CoreUser {
+	vc := int8(v)
+	return predicate.CoreUser(sql.FieldEQ(FieldSystem, vc))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.CoreUser {
 	return predicate.CoreUser(sql.FieldEQ(FieldCreatedAt, v))
@@ -814,6 +820,70 @@ func LastPasswordChangeIsNil() predicate.CoreUser {
 // LastPasswordChangeNotNil applies the NotNil predicate on the "last_password_change" field.
 func LastPasswordChangeNotNil() predicate.CoreUser {
 	return predicate.CoreUser(sql.FieldNotNull(FieldLastPasswordChange))
+}
+
+// SystemEQ applies the EQ predicate on the "system" field.
+func SystemEQ(v constant.YesOrNo) predicate.CoreUser {
+	vc := int8(v)
+	return predicate.CoreUser(sql.FieldEQ(FieldSystem, vc))
+}
+
+// SystemNEQ applies the NEQ predicate on the "system" field.
+func SystemNEQ(v constant.YesOrNo) predicate.CoreUser {
+	vc := int8(v)
+	return predicate.CoreUser(sql.FieldNEQ(FieldSystem, vc))
+}
+
+// SystemIn applies the In predicate on the "system" field.
+func SystemIn(vs ...constant.YesOrNo) predicate.CoreUser {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = int8(vs[i])
+	}
+	return predicate.CoreUser(sql.FieldIn(FieldSystem, v...))
+}
+
+// SystemNotIn applies the NotIn predicate on the "system" field.
+func SystemNotIn(vs ...constant.YesOrNo) predicate.CoreUser {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = int8(vs[i])
+	}
+	return predicate.CoreUser(sql.FieldNotIn(FieldSystem, v...))
+}
+
+// SystemGT applies the GT predicate on the "system" field.
+func SystemGT(v constant.YesOrNo) predicate.CoreUser {
+	vc := int8(v)
+	return predicate.CoreUser(sql.FieldGT(FieldSystem, vc))
+}
+
+// SystemGTE applies the GTE predicate on the "system" field.
+func SystemGTE(v constant.YesOrNo) predicate.CoreUser {
+	vc := int8(v)
+	return predicate.CoreUser(sql.FieldGTE(FieldSystem, vc))
+}
+
+// SystemLT applies the LT predicate on the "system" field.
+func SystemLT(v constant.YesOrNo) predicate.CoreUser {
+	vc := int8(v)
+	return predicate.CoreUser(sql.FieldLT(FieldSystem, vc))
+}
+
+// SystemLTE applies the LTE predicate on the "system" field.
+func SystemLTE(v constant.YesOrNo) predicate.CoreUser {
+	vc := int8(v)
+	return predicate.CoreUser(sql.FieldLTE(FieldSystem, vc))
+}
+
+// SystemIsNil applies the IsNil predicate on the "system" field.
+func SystemIsNil() predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldIsNull(FieldSystem))
+}
+
+// SystemNotNil applies the NotNil predicate on the "system" field.
+func SystemNotNil() predicate.CoreUser {
+	return predicate.CoreUser(sql.FieldNotNull(FieldSystem))
 }
 
 // HasUserFromRole applies the HasEdge predicate on the "user_from_role" edge.

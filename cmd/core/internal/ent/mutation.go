@@ -5638,6 +5638,8 @@ type CoreRoleMutation struct {
 	remark                           *string
 	status                           *constant.YesOrNo
 	addstatus                        *constant.YesOrNo
+	system                           *constant.YesOrNo
+	addsystem                        *constant.YesOrNo
 	clearedFields                    map[string]struct{}
 	role_to_user                     map[string]struct{}
 	removedrole_to_user              map[string]struct{}
@@ -6043,6 +6045,76 @@ func (m *CoreRoleMutation) ResetStatus() {
 	delete(m.clearedFields, corerole.FieldStatus)
 }
 
+// SetSystem sets the "system" field.
+func (m *CoreRoleMutation) SetSystem(con constant.YesOrNo) {
+	m.system = &con
+	m.addsystem = nil
+}
+
+// System returns the value of the "system" field in the mutation.
+func (m *CoreRoleMutation) System() (r constant.YesOrNo, exists bool) {
+	v := m.system
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSystem returns the old "system" field's value of the CoreRole entity.
+// If the CoreRole object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreRoleMutation) OldSystem(ctx context.Context) (v constant.YesOrNo, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSystem is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSystem requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSystem: %w", err)
+	}
+	return oldValue.System, nil
+}
+
+// AddSystem adds con to the "system" field.
+func (m *CoreRoleMutation) AddSystem(con constant.YesOrNo) {
+	if m.addsystem != nil {
+		*m.addsystem += con
+	} else {
+		m.addsystem = &con
+	}
+}
+
+// AddedSystem returns the value that was added to the "system" field in this mutation.
+func (m *CoreRoleMutation) AddedSystem() (r constant.YesOrNo, exists bool) {
+	v := m.addsystem
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearSystem clears the value of the "system" field.
+func (m *CoreRoleMutation) ClearSystem() {
+	m.system = nil
+	m.addsystem = nil
+	m.clearedFields[corerole.FieldSystem] = struct{}{}
+}
+
+// SystemCleared returns if the "system" field was cleared in this mutation.
+func (m *CoreRoleMutation) SystemCleared() bool {
+	_, ok := m.clearedFields[corerole.FieldSystem]
+	return ok
+}
+
+// ResetSystem resets all changes to the "system" field.
+func (m *CoreRoleMutation) ResetSystem() {
+	m.system = nil
+	m.addsystem = nil
+	delete(m.clearedFields, corerole.FieldSystem)
+}
+
 // AddRoleToUserIDs adds the "role_to_user" edge to the CoreUser entity by ids.
 func (m *CoreRoleMutation) AddRoleToUserIDs(ids ...string) {
 	if m.role_to_user == nil {
@@ -6185,7 +6257,7 @@ func (m *CoreRoleMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CoreRoleMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.created_at != nil {
 		fields = append(fields, corerole.FieldCreatedAt)
 	}
@@ -6203,6 +6275,9 @@ func (m *CoreRoleMutation) Fields() []string {
 	}
 	if m.status != nil {
 		fields = append(fields, corerole.FieldStatus)
+	}
+	if m.system != nil {
+		fields = append(fields, corerole.FieldSystem)
 	}
 	return fields
 }
@@ -6224,6 +6299,8 @@ func (m *CoreRoleMutation) Field(name string) (ent.Value, bool) {
 		return m.Remark()
 	case corerole.FieldStatus:
 		return m.Status()
+	case corerole.FieldSystem:
+		return m.System()
 	}
 	return nil, false
 }
@@ -6245,6 +6322,8 @@ func (m *CoreRoleMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldRemark(ctx)
 	case corerole.FieldStatus:
 		return m.OldStatus(ctx)
+	case corerole.FieldSystem:
+		return m.OldSystem(ctx)
 	}
 	return nil, fmt.Errorf("unknown CoreRole field %s", name)
 }
@@ -6296,6 +6375,13 @@ func (m *CoreRoleMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetStatus(v)
 		return nil
+	case corerole.FieldSystem:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSystem(v)
+		return nil
 	}
 	return fmt.Errorf("unknown CoreRole field %s", name)
 }
@@ -6307,6 +6393,9 @@ func (m *CoreRoleMutation) AddedFields() []string {
 	if m.addstatus != nil {
 		fields = append(fields, corerole.FieldStatus)
 	}
+	if m.addsystem != nil {
+		fields = append(fields, corerole.FieldSystem)
+	}
 	return fields
 }
 
@@ -6317,6 +6406,8 @@ func (m *CoreRoleMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case corerole.FieldStatus:
 		return m.AddedStatus()
+	case corerole.FieldSystem:
+		return m.AddedSystem()
 	}
 	return nil, false
 }
@@ -6332,6 +6423,13 @@ func (m *CoreRoleMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddStatus(v)
+		return nil
+	case corerole.FieldSystem:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSystem(v)
 		return nil
 	}
 	return fmt.Errorf("unknown CoreRole numeric field %s", name)
@@ -6352,6 +6450,9 @@ func (m *CoreRoleMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(corerole.FieldStatus) {
 		fields = append(fields, corerole.FieldStatus)
+	}
+	if m.FieldCleared(corerole.FieldSystem) {
+		fields = append(fields, corerole.FieldSystem)
 	}
 	return fields
 }
@@ -6379,6 +6480,9 @@ func (m *CoreRoleMutation) ClearField(name string) error {
 	case corerole.FieldStatus:
 		m.ClearStatus()
 		return nil
+	case corerole.FieldSystem:
+		m.ClearSystem()
+		return nil
 	}
 	return fmt.Errorf("unknown CoreRole nullable field %s", name)
 }
@@ -6404,6 +6508,9 @@ func (m *CoreRoleMutation) ResetField(name string) error {
 		return nil
 	case corerole.FieldStatus:
 		m.ResetStatus()
+		return nil
+	case corerole.FieldSystem:
+		m.ResetSystem()
 		return nil
 	}
 	return fmt.Errorf("unknown CoreRole field %s", name)
@@ -6537,6 +6644,8 @@ type CoreUserMutation struct {
 	remark                  *string
 	last_password_change    *int64
 	addlast_password_change *int64
+	system                  *constant.YesOrNo
+	addsystem               *constant.YesOrNo
 	clearedFields           map[string]struct{}
 	user_from_role          *string
 	cleareduser_from_role   bool
@@ -7207,6 +7316,76 @@ func (m *CoreUserMutation) ResetLastPasswordChange() {
 	delete(m.clearedFields, coreuser.FieldLastPasswordChange)
 }
 
+// SetSystem sets the "system" field.
+func (m *CoreUserMutation) SetSystem(con constant.YesOrNo) {
+	m.system = &con
+	m.addsystem = nil
+}
+
+// System returns the value of the "system" field in the mutation.
+func (m *CoreUserMutation) System() (r constant.YesOrNo, exists bool) {
+	v := m.system
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSystem returns the old "system" field's value of the CoreUser entity.
+// If the CoreUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUserMutation) OldSystem(ctx context.Context) (v constant.YesOrNo, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSystem is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSystem requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSystem: %w", err)
+	}
+	return oldValue.System, nil
+}
+
+// AddSystem adds con to the "system" field.
+func (m *CoreUserMutation) AddSystem(con constant.YesOrNo) {
+	if m.addsystem != nil {
+		*m.addsystem += con
+	} else {
+		m.addsystem = &con
+	}
+}
+
+// AddedSystem returns the value that was added to the "system" field in this mutation.
+func (m *CoreUserMutation) AddedSystem() (r constant.YesOrNo, exists bool) {
+	v := m.addsystem
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearSystem clears the value of the "system" field.
+func (m *CoreUserMutation) ClearSystem() {
+	m.system = nil
+	m.addsystem = nil
+	m.clearedFields[coreuser.FieldSystem] = struct{}{}
+}
+
+// SystemCleared returns if the "system" field was cleared in this mutation.
+func (m *CoreUserMutation) SystemCleared() bool {
+	_, ok := m.clearedFields[coreuser.FieldSystem]
+	return ok
+}
+
+// ResetSystem resets all changes to the "system" field.
+func (m *CoreUserMutation) ResetSystem() {
+	m.system = nil
+	m.addsystem = nil
+	delete(m.clearedFields, coreuser.FieldSystem)
+}
+
 // SetUserFromRoleID sets the "user_from_role" edge to the CoreRole entity by id.
 func (m *CoreUserMutation) SetUserFromRoleID(id string) {
 	m.user_from_role = &id
@@ -7335,7 +7514,7 @@ func (m *CoreUserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CoreUserMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.created_at != nil {
 		fields = append(fields, coreuser.FieldCreatedAt)
 	}
@@ -7369,6 +7548,9 @@ func (m *CoreUserMutation) Fields() []string {
 	if m.last_password_change != nil {
 		fields = append(fields, coreuser.FieldLastPasswordChange)
 	}
+	if m.system != nil {
+		fields = append(fields, coreuser.FieldSystem)
+	}
 	return fields
 }
 
@@ -7399,6 +7581,8 @@ func (m *CoreUserMutation) Field(name string) (ent.Value, bool) {
 		return m.Remark()
 	case coreuser.FieldLastPasswordChange:
 		return m.LastPasswordChange()
+	case coreuser.FieldSystem:
+		return m.System()
 	}
 	return nil, false
 }
@@ -7430,6 +7614,8 @@ func (m *CoreUserMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldRemark(ctx)
 	case coreuser.FieldLastPasswordChange:
 		return m.OldLastPasswordChange(ctx)
+	case coreuser.FieldSystem:
+		return m.OldSystem(ctx)
 	}
 	return nil, fmt.Errorf("unknown CoreUser field %s", name)
 }
@@ -7516,6 +7702,13 @@ func (m *CoreUserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetLastPasswordChange(v)
 		return nil
+	case coreuser.FieldSystem:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSystem(v)
+		return nil
 	}
 	return fmt.Errorf("unknown CoreUser field %s", name)
 }
@@ -7530,6 +7723,9 @@ func (m *CoreUserMutation) AddedFields() []string {
 	if m.addlast_password_change != nil {
 		fields = append(fields, coreuser.FieldLastPasswordChange)
 	}
+	if m.addsystem != nil {
+		fields = append(fields, coreuser.FieldSystem)
+	}
 	return fields
 }
 
@@ -7542,6 +7738,8 @@ func (m *CoreUserMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedStatus()
 	case coreuser.FieldLastPasswordChange:
 		return m.AddedLastPasswordChange()
+	case coreuser.FieldSystem:
+		return m.AddedSystem()
 	}
 	return nil, false
 }
@@ -7564,6 +7762,13 @@ func (m *CoreUserMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddLastPasswordChange(v)
+		return nil
+	case coreuser.FieldSystem:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSystem(v)
 		return nil
 	}
 	return fmt.Errorf("unknown CoreUser numeric field %s", name)
@@ -7599,6 +7804,9 @@ func (m *CoreUserMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(coreuser.FieldLastPasswordChange) {
 		fields = append(fields, coreuser.FieldLastPasswordChange)
+	}
+	if m.FieldCleared(coreuser.FieldSystem) {
+		fields = append(fields, coreuser.FieldSystem)
 	}
 	return fields
 }
@@ -7641,6 +7849,9 @@ func (m *CoreUserMutation) ClearField(name string) error {
 	case coreuser.FieldLastPasswordChange:
 		m.ClearLastPasswordChange()
 		return nil
+	case coreuser.FieldSystem:
+		m.ClearSystem()
+		return nil
 	}
 	return fmt.Errorf("unknown CoreUser nullable field %s", name)
 }
@@ -7681,6 +7892,9 @@ func (m *CoreUserMutation) ResetField(name string) error {
 		return nil
 	case coreuser.FieldLastPasswordChange:
 		m.ResetLastPasswordChange()
+		return nil
+	case coreuser.FieldSystem:
+		m.ResetSystem()
 		return nil
 	}
 	return fmt.Errorf("unknown CoreUser field %s", name)

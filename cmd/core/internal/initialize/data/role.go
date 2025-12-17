@@ -26,9 +26,22 @@ func InitRole(client *ent.Client) ([]*ent.CoreRole, error) {
 		roles, err := client.CoreRole.CreateBulk(
 			client.CoreRole.Create().
 				SetID(fmt.Sprintf("%d", global.Id.GenID())).
-				SetName("system").
-				SetRemark("system").
-				SetStatus(constant.Yes),
+				SetName("系统管理员").
+				SetRemark("系统管理员").
+				SetStatus(constant.Yes).
+				SetSystem(constant.Yes),
+			client.CoreRole.Create().
+				SetID(fmt.Sprintf("%d", global.Id.GenID())).
+				SetName("运维操作员").
+				SetRemark("运维操作员").
+				SetStatus(constant.Yes).
+				SetSystem(constant.Yes),
+			client.CoreRole.Create().
+				SetID(fmt.Sprintf("%d", global.Id.GenID())).
+				SetName("普通用户").
+				SetRemark("普通用户").
+				SetStatus(constant.Yes).
+				SetSystem(constant.Yes),
 		).Save(ctx)
 		if err != nil {
 			return nil, err

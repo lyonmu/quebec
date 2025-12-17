@@ -31,6 +31,8 @@ type CoreRole struct {
 	Remark string `json:"remark,omitempty"`
 	// 角色状态 [1: 启用, 2: 禁用]
 	Status constant.YesOrNo `json:"status,omitempty"`
+	// 是否系统角色 [1: 是, 2: 否]
+	System constant.YesOrNo `json:"system,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CoreRoleQuery when eager-loading is set.
 	Edges        CoreRoleEdges `json:"-" gorm:"-"`
@@ -71,7 +73,7 @@ func (*CoreRole) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case corerole.FieldStatus:
+		case corerole.FieldStatus, corerole.FieldSystem:
 			values[i] = new(sql.NullInt64)
 		case corerole.FieldID, corerole.FieldName, corerole.FieldRemark:
 			values[i] = new(sql.NullString)
@@ -134,6 +136,12 @@ func (_m *CoreRole) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
 				_m.Status = constant.YesOrNo(value.Int64)
+			}
+		case corerole.FieldSystem:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field system", values[i])
+			} else if value.Valid {
+				_m.System = constant.YesOrNo(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -200,6 +208,9 @@ func (_m *CoreRole) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Status))
+	builder.WriteString(", ")
+	builder.WriteString("system=")
+	builder.WriteString(fmt.Sprintf("%v", _m.System))
 	builder.WriteByte(')')
 	return builder.String()
 }

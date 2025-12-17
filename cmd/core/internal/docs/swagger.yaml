@@ -16,6 +16,26 @@ definitions:
     type: integer
     x-enum-varnames:
     - OperationLogin
+  constant.YesOrNo:
+    enum:
+    - 1
+    - 2
+    format: int32
+    type: integer
+    x-enum-varnames:
+    - "Yes"
+    - "No"
+  request.EnableReq:
+    properties:
+      status:
+        allOf:
+        - $ref: '#/definitions/constant.YesOrNo'
+        description: '状态 [1: 启用, 2: 禁用]'
+        maximum: 2
+        minimum: 1
+    required:
+    - status
+    type: object
   request.SystemLoginRequest:
     properties:
       captcha:
@@ -35,6 +55,17 @@ definitions:
     - captcha_id
     - password
     - username
+    type: object
+  request.SystemRoleAddReq:
+    properties:
+      name:
+        description: 角色名称
+        type: string
+      remark:
+        description: 角色备注
+        type: string
+    required:
+    - name
     type: object
   response.CaptchaResponse:
     properties:
@@ -130,6 +161,39 @@ definitions:
       platform:
         description: 操作平台
         type: string
+    type: object
+  response.SystemRoleListResp:
+    properties:
+      items:
+        description: 角色列表
+        items:
+          $ref: '#/definitions/response.SystemRoleResp'
+        type: array
+      page:
+        description: 页码
+        type: integer
+      page_size:
+        description: 每页条数
+        type: integer
+      total:
+        description: 总条数
+        type: integer
+    type: object
+  response.SystemRoleResp:
+    properties:
+      id:
+        description: 角色ID
+        type: string
+      name:
+        description: 角色名称
+        type: string
+      remark:
+        description: 角色备注
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/constant.YesOrNo'
+        description: '角色状态 [1: 启用, 2: 禁用]'
     type: object
 host: http://localhost:59024
 info:
@@ -287,7 +351,7 @@ paths:
       - default: 10
         description: 每页条数
         in: query
-        maximum: 100
+        maximum: 1000
         minimum: 10
         name: page_size
         required: true
@@ -317,6 +381,264 @@ paths:
                   type: string
               type: object
       summary: 在线用户列表
+      tags:
+      - 系统管理
+  /v1/system/role:
+    post:
+      description: 添加角色信息
+      parameters:
+      - description: 角色信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.SystemRoleAddReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 50000,success
+          schema:
+            allOf:
+            - $ref: '#/definitions/code.Response'
+            - properties:
+                code:
+                  type: number
+                message:
+                  type: string
+              type: object
+      summary: 添加角色信息
+      tags:
+      - 系统管理
+  /v1/system/role/{id}:
+    delete:
+      description: 删除角色
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 50000,success
+          schema:
+            allOf:
+            - $ref: '#/definitions/code.Response'
+            - properties:
+                code:
+                  type: number
+                message:
+                  type: string
+              type: object
+      summary: 删除角色
+      tags:
+      - 系统管理
+    get:
+      description: 获取角色详情
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 50000,success
+          schema:
+            allOf:
+            - $ref: '#/definitions/code.Response'
+            - properties:
+                code:
+                  type: number
+                data:
+                  $ref: '#/definitions/response.SystemRoleResp'
+                message:
+                  type: string
+              type: object
+      summary: 获取角色详情
+      tags:
+      - 系统管理
+    put:
+      description: 编辑角色信息
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 角色信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.SystemRoleAddReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 50000,success
+          schema:
+            allOf:
+            - $ref: '#/definitions/code.Response'
+            - properties:
+                code:
+                  type: number
+                message:
+                  type: string
+              type: object
+      summary: 编辑角色信息
+      tags:
+      - 系统管理
+  /v1/system/role/enable/{id}:
+    put:
+      description: 启停角色状态
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: '状态 [1: 启用, 2: 禁用]'
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.EnableReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 50000,success
+          schema:
+            allOf:
+            - $ref: '#/definitions/code.Response'
+            - properties:
+                code:
+                  type: number
+                message:
+                  type: string
+              type: object
+      summary: 启停角色
+      tags:
+      - 系统管理
+  /v1/system/role/label:
+    get:
+      description: 获取角色标签
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 50000,success
+          schema:
+            allOf:
+            - $ref: '#/definitions/code.Response'
+            - properties:
+                code:
+                  type: number
+                data:
+                  items:
+                    $ref: '#/definitions/response.Options'
+                  type: array
+                message:
+                  type: string
+              type: object
+      summary: 角色标签
+      tags:
+      - 系统管理
+  /v1/system/role/list:
+    get:
+      description: 获取全部角色列表
+      parameters:
+      - description: 角色名称
+        in: query
+        name: name
+        type: string
+      - description: '角色状态 [1: 启用, 2: 禁用]'
+        enum:
+        - 1
+        - 2
+        format: int32
+        in: query
+        name: status
+        type: integer
+        x-enum-varnames:
+        - "Yes"
+        - "No"
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 50000,success
+          schema:
+            allOf:
+            - $ref: '#/definitions/code.Response'
+            - properties:
+                code:
+                  type: number
+                data:
+                  $ref: '#/definitions/response.SystemRoleListResp'
+                message:
+                  type: string
+              type: object
+      summary: 全部角色列表
+      tags:
+      - 系统管理
+  /v1/system/role/page:
+    get:
+      description: 获取角色分页列表
+      parameters:
+      - description: 角色名称
+        in: query
+        name: name
+        type: string
+      - default: 1
+        description: 页码
+        in: query
+        minimum: 1
+        name: page
+        required: true
+        type: integer
+      - default: 10
+        description: 每页条数
+        in: query
+        maximum: 1000
+        minimum: 10
+        name: page_size
+        required: true
+        type: integer
+      - description: '角色状态 [1: 启用, 2: 禁用]'
+        enum:
+        - 1
+        - 2
+        format: int32
+        in: query
+        name: status
+        type: integer
+        x-enum-varnames:
+        - "Yes"
+        - "No"
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 50000,success
+          schema:
+            allOf:
+            - $ref: '#/definitions/code.Response'
+            - properties:
+                code:
+                  type: number
+                data:
+                  $ref: '#/definitions/response.SystemRoleListResp'
+                message:
+                  type: string
+              type: object
+      summary: 角色分页列表
       tags:
       - 系统管理
 schemes:

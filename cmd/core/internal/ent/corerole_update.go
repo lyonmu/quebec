@@ -125,6 +125,33 @@ func (_u *CoreRoleUpdate) ClearStatus() *CoreRoleUpdate {
 	return _u
 }
 
+// SetSystem sets the "system" field.
+func (_u *CoreRoleUpdate) SetSystem(v constant.YesOrNo) *CoreRoleUpdate {
+	_u.mutation.ResetSystem()
+	_u.mutation.SetSystem(v)
+	return _u
+}
+
+// SetNillableSystem sets the "system" field if the given value is not nil.
+func (_u *CoreRoleUpdate) SetNillableSystem(v *constant.YesOrNo) *CoreRoleUpdate {
+	if v != nil {
+		_u.SetSystem(*v)
+	}
+	return _u
+}
+
+// AddSystem adds value to the "system" field.
+func (_u *CoreRoleUpdate) AddSystem(v constant.YesOrNo) *CoreRoleUpdate {
+	_u.mutation.AddSystem(v)
+	return _u
+}
+
+// ClearSystem clears the value of the "system" field.
+func (_u *CoreRoleUpdate) ClearSystem() *CoreRoleUpdate {
+	_u.mutation.ClearSystem()
+	return _u
+}
+
 // AddRoleToUserIDs adds the "role_to_user" edge to the CoreUser entity by IDs.
 func (_u *CoreRoleUpdate) AddRoleToUserIDs(ids ...string) *CoreRoleUpdate {
 	_u.mutation.AddRoleToUserIDs(ids...)
@@ -288,6 +315,15 @@ func (_u *CoreRoleUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.StatusCleared() {
 		_spec.ClearField(corerole.FieldStatus, field.TypeInt8)
+	}
+	if value, ok := _u.mutation.System(); ok {
+		_spec.SetField(corerole.FieldSystem, field.TypeInt8, value)
+	}
+	if value, ok := _u.mutation.AddedSystem(); ok {
+		_spec.AddField(corerole.FieldSystem, field.TypeInt8, value)
+	}
+	if _u.mutation.SystemCleared() {
+		_spec.ClearField(corerole.FieldSystem, field.TypeInt8)
 	}
 	if _u.mutation.RoleToUserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -494,6 +530,33 @@ func (_u *CoreRoleUpdateOne) ClearStatus() *CoreRoleUpdateOne {
 	return _u
 }
 
+// SetSystem sets the "system" field.
+func (_u *CoreRoleUpdateOne) SetSystem(v constant.YesOrNo) *CoreRoleUpdateOne {
+	_u.mutation.ResetSystem()
+	_u.mutation.SetSystem(v)
+	return _u
+}
+
+// SetNillableSystem sets the "system" field if the given value is not nil.
+func (_u *CoreRoleUpdateOne) SetNillableSystem(v *constant.YesOrNo) *CoreRoleUpdateOne {
+	if v != nil {
+		_u.SetSystem(*v)
+	}
+	return _u
+}
+
+// AddSystem adds value to the "system" field.
+func (_u *CoreRoleUpdateOne) AddSystem(v constant.YesOrNo) *CoreRoleUpdateOne {
+	_u.mutation.AddSystem(v)
+	return _u
+}
+
+// ClearSystem clears the value of the "system" field.
+func (_u *CoreRoleUpdateOne) ClearSystem() *CoreRoleUpdateOne {
+	_u.mutation.ClearSystem()
+	return _u
+}
+
 // AddRoleToUserIDs adds the "role_to_user" edge to the CoreUser entity by IDs.
 func (_u *CoreRoleUpdateOne) AddRoleToUserIDs(ids ...string) *CoreRoleUpdateOne {
 	_u.mutation.AddRoleToUserIDs(ids...)
@@ -687,6 +750,15 @@ func (_u *CoreRoleUpdateOne) sqlSave(ctx context.Context) (_node *CoreRole, err 
 	}
 	if _u.mutation.StatusCleared() {
 		_spec.ClearField(corerole.FieldStatus, field.TypeInt8)
+	}
+	if value, ok := _u.mutation.System(); ok {
+		_spec.SetField(corerole.FieldSystem, field.TypeInt8, value)
+	}
+	if value, ok := _u.mutation.AddedSystem(); ok {
+		_spec.AddField(corerole.FieldSystem, field.TypeInt8, value)
+	}
+	if _u.mutation.SystemCleared() {
+		_spec.ClearField(corerole.FieldSystem, field.TypeInt8)
 	}
 	if _u.mutation.RoleToUserCleared() {
 		edge := &sqlgraph.EdgeSpec{

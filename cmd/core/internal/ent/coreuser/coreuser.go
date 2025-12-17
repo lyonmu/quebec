@@ -38,6 +38,8 @@ const (
 	FieldRemark = "remark"
 	// FieldLastPasswordChange holds the string denoting the last_password_change field in the database.
 	FieldLastPasswordChange = "last_password_change"
+	// FieldSystem holds the string denoting the system field in the database.
+	FieldSystem = "system"
 	// EdgeUserFromRole holds the string denoting the user_from_role edge name in mutations.
 	EdgeUserFromRole = "user_from_role"
 	// EdgeOnLineToUser holds the string denoting the on_line_to_user edge name in mutations.
@@ -74,6 +76,7 @@ var Columns = []string{
 	FieldRoleID,
 	FieldRemark,
 	FieldLastPasswordChange,
+	FieldSystem,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -103,6 +106,8 @@ var (
 	DefaultStatus constant.YesOrNo
 	// DefaultLastPasswordChange holds the default value on creation for the "last_password_change" field.
 	DefaultLastPasswordChange func() int64
+	// DefaultSystem holds the default value on creation for the "system" field.
+	DefaultSystem constant.YesOrNo
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -170,6 +175,11 @@ func ByRemark(opts ...sql.OrderTermOption) OrderOption {
 // ByLastPasswordChange orders the results by the last_password_change field.
 func ByLastPasswordChange(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLastPasswordChange, opts...).ToFunc()
+}
+
+// BySystem orders the results by the system field.
+func BySystem(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSystem, opts...).ToFunc()
 }
 
 // ByUserFromRoleField orders the results by user_from_role field.

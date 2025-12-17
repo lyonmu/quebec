@@ -32,6 +32,7 @@ func (CoreUser) Fields() []ent.Field {
 		field.String("role_id").Optional().Comment("角色ID"),
 		field.String("remark").SchemaType(map[string]string{dialect.MySQL: "text", dialect.SQLite: "text", dialect.Postgres: "text"}).Optional().Comment("用户备注"),
 		field.Int64("last_password_change").Optional().Comment("最后密码修改时间戳").DefaultFunc(func() int64 { return time.Now().Unix() }),
+		field.Int8("system").Optional().GoType(constant.YesOrNo(1)).Optional().Comment("是否系统用户 [1: 是, 2: 否]").Default(int8(constant.No)),
 	}
 }
 

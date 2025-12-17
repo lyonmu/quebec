@@ -11,10 +11,25 @@ import (
 	"github.com/lyonmu/quebec/pkg/tools/encrypt"
 )
 
-func InitUser(client *ent.Client, role_id string) error {
-	ctx := context.Background()
+func InitUser(client *ent.Client, roles []*ent.CoreRole) error {
 
-	password, _ := encrypt.HashWithBcryptBytes(encrypt.HashWithSHA256Bytes([]byte("Quebec@123456")))
+	var system, operator, user = "", "", ""
+	systemPassword, _ := encrypt.HashWithBcryptBytes(encrypt.HashWithSHA256Bytes([]byte("system@123456")))
+	operatorPassword, _ := encrypt.HashWithBcryptBytes(encrypt.HashWithSHA256Bytes([]byte("operator@123456")))
+	userPassword, _ := encrypt.HashWithBcryptBytes(encrypt.HashWithSHA256Bytes([]byte("user@123456")))
+
+	for _, role := range roles {
+		switch role.Name {
+		case "系统管理员":
+			system = role.ID
+		case "运维操作员":
+			operator = role.ID
+		case "普通用户":
+			user = role.ID
+		}
+	}
+
+	ctx := context.Background()
 
 	exists, err := client.CoreUser.Query().Where(coreuser.DeletedAtIsNil()).Exist(ctx)
 	if err != nil {
@@ -28,11 +43,30 @@ func InitUser(client *ent.Client, role_id string) error {
 			client.CoreUser.Create().
 				SetID(fmt.Sprintf("%d", global.Id.GenID())).
 				SetUsername(encrypt.HashWithSHA256String("system")).
-				SetPassword(string(password)).
-				SetNickname("system").
+				SetPassword(string(systemPassword)).
+				SetNickname("系统管理员").
 				SetStatus(constant.Yes).
 				SetRemark("system").
-				SetRoleID(role_id),
+				SetRoleID(system).
+				SetSystem(constant.Yes),
+			client.CoreUser.Create().
+				SetID(fmt.Sprintf("%d", global.Id.GenID())).
+				SetUsername(encrypt.HashWithSHA256String("operator")).
+				SetPassword(string(operatorPassword)).
+				SetNickname("运维操作员").
+				SetStatus(constant.Yes).
+				SetRemark("operator").
+				SetRoleID(operator).
+				SetSystem(constant.Yes),
+			client.CoreUser.Create().
+				SetID(fmt.Sprintf("%d", global.Id.GenID())).
+				SetUsername(encrypt.HashWithSHA256String("user")).
+				SetPassword(string(userPassword)).
+				SetNickname("普通用户").
+				SetStatus(constant.Yes).
+				SetRemark("user").
+				SetRoleID(user).
+				SetSystem(constant.Yes),
 		).Save(ctx)
 		if err != nil {
 			return err

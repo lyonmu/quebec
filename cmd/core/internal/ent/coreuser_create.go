@@ -180,6 +180,20 @@ func (_c *CoreUserCreate) SetNillableLastPasswordChange(v *int64) *CoreUserCreat
 	return _c
 }
 
+// SetSystem sets the "system" field.
+func (_c *CoreUserCreate) SetSystem(v constant.YesOrNo) *CoreUserCreate {
+	_c.mutation.SetSystem(v)
+	return _c
+}
+
+// SetNillableSystem sets the "system" field if the given value is not nil.
+func (_c *CoreUserCreate) SetNillableSystem(v *constant.YesOrNo) *CoreUserCreate {
+	if v != nil {
+		_c.SetSystem(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *CoreUserCreate) SetID(v string) *CoreUserCreate {
 	_c.mutation.SetID(v)
@@ -290,6 +304,10 @@ func (_c *CoreUserCreate) defaults() error {
 		v := coreuser.DefaultLastPasswordChange()
 		_c.mutation.SetLastPasswordChange(v)
 	}
+	if _, ok := _c.mutation.System(); !ok {
+		v := coreuser.DefaultSystem
+		_c.mutation.SetSystem(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		if coreuser.DefaultID == nil {
 			return fmt.Errorf("ent: uninitialized coreuser.DefaultID (forgotten import ent/runtime?)")
@@ -388,6 +406,10 @@ func (_c *CoreUserCreate) createSpec() (*CoreUser, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.LastPasswordChange(); ok {
 		_spec.SetField(coreuser.FieldLastPasswordChange, field.TypeInt64, value)
 		_node.LastPasswordChange = value
+	}
+	if value, ok := _c.mutation.System(); ok {
+		_spec.SetField(coreuser.FieldSystem, field.TypeInt8, value)
+		_node.System = value
 	}
 	if nodes := _c.mutation.UserFromRoleIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -660,6 +682,30 @@ func (u *CoreUserUpsert) ClearLastPasswordChange() *CoreUserUpsert {
 	return u
 }
 
+// SetSystem sets the "system" field.
+func (u *CoreUserUpsert) SetSystem(v constant.YesOrNo) *CoreUserUpsert {
+	u.Set(coreuser.FieldSystem, v)
+	return u
+}
+
+// UpdateSystem sets the "system" field to the value that was provided on create.
+func (u *CoreUserUpsert) UpdateSystem() *CoreUserUpsert {
+	u.SetExcluded(coreuser.FieldSystem)
+	return u
+}
+
+// AddSystem adds v to the "system" field.
+func (u *CoreUserUpsert) AddSystem(v constant.YesOrNo) *CoreUserUpsert {
+	u.Add(coreuser.FieldSystem, v)
+	return u
+}
+
+// ClearSystem clears the value of the "system" field.
+func (u *CoreUserUpsert) ClearSystem() *CoreUserUpsert {
+	u.SetNull(coreuser.FieldSystem)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -925,6 +971,34 @@ func (u *CoreUserUpsertOne) UpdateLastPasswordChange() *CoreUserUpsertOne {
 func (u *CoreUserUpsertOne) ClearLastPasswordChange() *CoreUserUpsertOne {
 	return u.Update(func(s *CoreUserUpsert) {
 		s.ClearLastPasswordChange()
+	})
+}
+
+// SetSystem sets the "system" field.
+func (u *CoreUserUpsertOne) SetSystem(v constant.YesOrNo) *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.SetSystem(v)
+	})
+}
+
+// AddSystem adds v to the "system" field.
+func (u *CoreUserUpsertOne) AddSystem(v constant.YesOrNo) *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.AddSystem(v)
+	})
+}
+
+// UpdateSystem sets the "system" field to the value that was provided on create.
+func (u *CoreUserUpsertOne) UpdateSystem() *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.UpdateSystem()
+	})
+}
+
+// ClearSystem clears the value of the "system" field.
+func (u *CoreUserUpsertOne) ClearSystem() *CoreUserUpsertOne {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.ClearSystem()
 	})
 }
 
@@ -1360,6 +1434,34 @@ func (u *CoreUserUpsertBulk) UpdateLastPasswordChange() *CoreUserUpsertBulk {
 func (u *CoreUserUpsertBulk) ClearLastPasswordChange() *CoreUserUpsertBulk {
 	return u.Update(func(s *CoreUserUpsert) {
 		s.ClearLastPasswordChange()
+	})
+}
+
+// SetSystem sets the "system" field.
+func (u *CoreUserUpsertBulk) SetSystem(v constant.YesOrNo) *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.SetSystem(v)
+	})
+}
+
+// AddSystem adds v to the "system" field.
+func (u *CoreUserUpsertBulk) AddSystem(v constant.YesOrNo) *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.AddSystem(v)
+	})
+}
+
+// UpdateSystem sets the "system" field to the value that was provided on create.
+func (u *CoreUserUpsertBulk) UpdateSystem() *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.UpdateSystem()
+	})
+}
+
+// ClearSystem clears the value of the "system" field.
+func (u *CoreUserUpsertBulk) ClearSystem() *CoreUserUpsertBulk {
+	return u.Update(func(s *CoreUserUpsert) {
+		s.ClearSystem()
 	})
 }
 

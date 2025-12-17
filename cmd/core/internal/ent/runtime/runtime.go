@@ -277,6 +277,10 @@ func init() {
 	coreroleDescStatus := coreroleFields[2].Descriptor()
 	// corerole.DefaultStatus holds the default value on creation for the status field.
 	corerole.DefaultStatus = constant.YesOrNo(coreroleDescStatus.Default.(int8))
+	// coreroleDescSystem is the schema descriptor for system field.
+	coreroleDescSystem := coreroleFields[3].Descriptor()
+	// corerole.DefaultSystem holds the default value on creation for the system field.
+	corerole.DefaultSystem = constant.YesOrNo(coreroleDescSystem.Default.(int8))
 	// coreroleDescID is the schema descriptor for id field.
 	coreroleDescID := coreroleMixinFields0[0].Descriptor()
 	// corerole.DefaultID holds the default value on creation for the id field.
@@ -325,6 +329,10 @@ func init() {
 	coreuserDescLastPasswordChange := coreuserFields[7].Descriptor()
 	// coreuser.DefaultLastPasswordChange holds the default value on creation for the last_password_change field.
 	coreuser.DefaultLastPasswordChange = coreuserDescLastPasswordChange.Default.(func() int64)
+	// coreuserDescSystem is the schema descriptor for system field.
+	coreuserDescSystem := coreuserFields[8].Descriptor()
+	// coreuser.DefaultSystem holds the default value on creation for the system field.
+	coreuser.DefaultSystem = constant.YesOrNo(coreuserDescSystem.Default.(int8))
 	// coreuserDescID is the schema descriptor for id field.
 	coreuserDescID := coreuserMixinFields0[0].Descriptor()
 	// coreuser.DefaultID holds the default value on creation for the id field.

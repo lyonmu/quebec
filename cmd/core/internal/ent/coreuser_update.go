@@ -232,6 +232,33 @@ func (_u *CoreUserUpdate) ClearLastPasswordChange() *CoreUserUpdate {
 	return _u
 }
 
+// SetSystem sets the "system" field.
+func (_u *CoreUserUpdate) SetSystem(v constant.YesOrNo) *CoreUserUpdate {
+	_u.mutation.ResetSystem()
+	_u.mutation.SetSystem(v)
+	return _u
+}
+
+// SetNillableSystem sets the "system" field if the given value is not nil.
+func (_u *CoreUserUpdate) SetNillableSystem(v *constant.YesOrNo) *CoreUserUpdate {
+	if v != nil {
+		_u.SetSystem(*v)
+	}
+	return _u
+}
+
+// AddSystem adds value to the "system" field.
+func (_u *CoreUserUpdate) AddSystem(v constant.YesOrNo) *CoreUserUpdate {
+	_u.mutation.AddSystem(v)
+	return _u
+}
+
+// ClearSystem clears the value of the "system" field.
+func (_u *CoreUserUpdate) ClearSystem() *CoreUserUpdate {
+	_u.mutation.ClearSystem()
+	return _u
+}
+
 // SetUserFromRoleID sets the "user_from_role" edge to the CoreRole entity by ID.
 func (_u *CoreUserUpdate) SetUserFromRoleID(id string) *CoreUserUpdate {
 	_u.mutation.SetUserFromRoleID(id)
@@ -411,6 +438,15 @@ func (_u *CoreUserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.LastPasswordChangeCleared() {
 		_spec.ClearField(coreuser.FieldLastPasswordChange, field.TypeInt64)
+	}
+	if value, ok := _u.mutation.System(); ok {
+		_spec.SetField(coreuser.FieldSystem, field.TypeInt8, value)
+	}
+	if value, ok := _u.mutation.AddedSystem(); ok {
+		_spec.AddField(coreuser.FieldSystem, field.TypeInt8, value)
+	}
+	if _u.mutation.SystemCleared() {
+		_spec.ClearField(coreuser.FieldSystem, field.TypeInt8)
 	}
 	if _u.mutation.UserFromRoleCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -708,6 +744,33 @@ func (_u *CoreUserUpdateOne) ClearLastPasswordChange() *CoreUserUpdateOne {
 	return _u
 }
 
+// SetSystem sets the "system" field.
+func (_u *CoreUserUpdateOne) SetSystem(v constant.YesOrNo) *CoreUserUpdateOne {
+	_u.mutation.ResetSystem()
+	_u.mutation.SetSystem(v)
+	return _u
+}
+
+// SetNillableSystem sets the "system" field if the given value is not nil.
+func (_u *CoreUserUpdateOne) SetNillableSystem(v *constant.YesOrNo) *CoreUserUpdateOne {
+	if v != nil {
+		_u.SetSystem(*v)
+	}
+	return _u
+}
+
+// AddSystem adds value to the "system" field.
+func (_u *CoreUserUpdateOne) AddSystem(v constant.YesOrNo) *CoreUserUpdateOne {
+	_u.mutation.AddSystem(v)
+	return _u
+}
+
+// ClearSystem clears the value of the "system" field.
+func (_u *CoreUserUpdateOne) ClearSystem() *CoreUserUpdateOne {
+	_u.mutation.ClearSystem()
+	return _u
+}
+
 // SetUserFromRoleID sets the "user_from_role" edge to the CoreRole entity by ID.
 func (_u *CoreUserUpdateOne) SetUserFromRoleID(id string) *CoreUserUpdateOne {
 	_u.mutation.SetUserFromRoleID(id)
@@ -917,6 +980,15 @@ func (_u *CoreUserUpdateOne) sqlSave(ctx context.Context) (_node *CoreUser, err 
 	}
 	if _u.mutation.LastPasswordChangeCleared() {
 		_spec.ClearField(coreuser.FieldLastPasswordChange, field.TypeInt64)
+	}
+	if value, ok := _u.mutation.System(); ok {
+		_spec.SetField(coreuser.FieldSystem, field.TypeInt8, value)
+	}
+	if value, ok := _u.mutation.AddedSystem(); ok {
+		_spec.AddField(coreuser.FieldSystem, field.TypeInt8, value)
+	}
+	if _u.mutation.SystemCleared() {
+		_spec.ClearField(coreuser.FieldSystem, field.TypeInt8)
 	}
 	if _u.mutation.UserFromRoleCleared() {
 		edge := &sqlgraph.EdgeSpec{

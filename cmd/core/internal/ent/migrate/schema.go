@@ -357,6 +357,7 @@ var (
 		{Name: "name", Type: field.TypeString, Nullable: true, Comment: "角色名称"},
 		{Name: "remark", Type: field.TypeString, Nullable: true, Comment: "角色备注"},
 		{Name: "status", Type: field.TypeInt8, Nullable: true, Comment: "角色状态 [1: 启用, 2: 禁用]", Default: 1},
+		{Name: "system", Type: field.TypeInt8, Nullable: true, Comment: "是否系统角色 [1: 是, 2: 否]", Default: 2},
 	}
 	// QuebecCoreRoleTable holds the schema information for the "quebec_core_role" table.
 	QuebecCoreRoleTable = &schema.Table{
@@ -410,6 +411,7 @@ var (
 		{Name: "status", Type: field.TypeInt8, Nullable: true, Comment: "用户状态 [1: 启用, 2: 禁用]", Default: 1},
 		{Name: "remark", Type: field.TypeString, Nullable: true, Comment: "用户备注", SchemaType: map[string]string{"mysql": "text", "postgres": "text", "sqlite3": "text"}},
 		{Name: "last_password_change", Type: field.TypeInt64, Nullable: true, Comment: "最后密码修改时间戳"},
+		{Name: "system", Type: field.TypeInt8, Nullable: true, Comment: "是否系统用户 [1: 是, 2: 否]", Default: 2},
 		{Name: "role_id", Type: field.TypeString, Nullable: true, Size: 64, Comment: "角色ID"},
 	}
 	// QuebecCoreUserTable holds the schema information for the "quebec_core_user" table.
@@ -421,7 +423,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "quebec_core_user_quebec_core_role_role_to_user",
-				Columns:    []*schema.Column{QuebecCoreUserColumns[11]},
+				Columns:    []*schema.Column{QuebecCoreUserColumns[12]},
 				RefColumns: []*schema.Column{QuebecCoreRoleColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -465,7 +467,7 @@ var (
 			{
 				Name:    "coreuser_role_id",
 				Unique:  false,
-				Columns: []*schema.Column{QuebecCoreUserColumns[11]},
+				Columns: []*schema.Column{QuebecCoreUserColumns[12]},
 			},
 			{
 				Name:    "coreuser_last_password_change",

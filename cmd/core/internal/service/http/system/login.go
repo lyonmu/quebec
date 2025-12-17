@@ -13,6 +13,7 @@ import (
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
 	"github.com/lyonmu/quebec/pkg/code"
+	"github.com/lyonmu/quebec/pkg/constant"
 	"github.com/lyonmu/quebec/pkg/tools/encrypt"
 	"github.com/mssola/useragent"
 )
@@ -34,7 +35,7 @@ func (s *SystemSvc) Login(req *request.SystemLoginRequest, ua *useragent.UserAge
 
 	u, qerr := global.EntClient.CoreUser.Query().
 		WithUserFromRole(func(q *ent.CoreRoleQuery) {
-			q.Select(corerole.FieldID, corerole.FieldName).Where(corerole.DeletedAtIsNil())
+			q.Select(corerole.FieldID, corerole.FieldName, corerole.FieldStatus).Where(corerole.DeletedAtIsNil())
 		}).
 		Where(coreuser.UsernameEQ(req.Username)).
 		Where(coreuser.DeletedAtIsNil()).
@@ -44,6 +45,17 @@ func (s *SystemSvc) Login(req *request.SystemLoginRequest, ua *useragent.UserAge
 		global.Logger.Sugar().Errorf("用户登录查询数据库失败:", qerr)
 		return nil, &code.UserNotExists
 	}
+
+	if u.Edges.UserFromRole != nil {
+		if u.Edges.UserFromRole.Status != constant.Yes {
+			global.Logger.Sugar().Errorf("角色 %s 被禁用", u.Edges.UserFromRole.Name)
+			return nil, &code.RoleDisabled
+		}
+	} else {
+		global.Logger.Sugar().Error("角色查询失败")
+		return nil, &code.RoleNotExists
+	}
+
 	if encrypt.CompareWithBcryptString(u.Password, req.Password) {
 		global.Logger.Sugar().Errorf("用户 %s 登录密码错误", req.Username)
 		return nil, &code.UserPasswordError
@@ -109,9 +121,7 @@ func (s *SystemSvc) Login(req *request.SystemLoginRequest, ua *useragent.UserAge
 
 	resp.Username = u.Nickname
 	resp.Token = token
-	if u.Edges.UserFromRole != nil {
-		resp.RoleName = u.Edges.UserFromRole.Name
-	}
+	resp.RoleName = u.Edges.UserFromRole.Name
 
 	return &resp, nil
 }

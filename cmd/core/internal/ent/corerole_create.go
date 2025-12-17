@@ -110,6 +110,20 @@ func (_c *CoreRoleCreate) SetNillableStatus(v *constant.YesOrNo) *CoreRoleCreate
 	return _c
 }
 
+// SetSystem sets the "system" field.
+func (_c *CoreRoleCreate) SetSystem(v constant.YesOrNo) *CoreRoleCreate {
+	_c.mutation.SetSystem(v)
+	return _c
+}
+
+// SetNillableSystem sets the "system" field if the given value is not nil.
+func (_c *CoreRoleCreate) SetNillableSystem(v *constant.YesOrNo) *CoreRoleCreate {
+	if v != nil {
+		_c.SetSystem(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *CoreRoleCreate) SetID(v string) *CoreRoleCreate {
 	_c.mutation.SetID(v)
@@ -209,6 +223,10 @@ func (_c *CoreRoleCreate) defaults() error {
 		v := corerole.DefaultStatus
 		_c.mutation.SetStatus(v)
 	}
+	if _, ok := _c.mutation.System(); !ok {
+		v := corerole.DefaultSystem
+		_c.mutation.SetSystem(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		if corerole.DefaultID == nil {
 			return fmt.Errorf("ent: uninitialized corerole.DefaultID (forgotten import ent/runtime?)")
@@ -291,6 +309,10 @@ func (_c *CoreRoleCreate) createSpec() (*CoreRole, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(corerole.FieldStatus, field.TypeInt8, value)
 		_node.Status = value
+	}
+	if value, ok := _c.mutation.System(); ok {
+		_spec.SetField(corerole.FieldSystem, field.TypeInt8, value)
+		_node.System = value
 	}
 	if nodes := _c.mutation.RoleToUserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -466,6 +488,30 @@ func (u *CoreRoleUpsert) ClearStatus() *CoreRoleUpsert {
 	return u
 }
 
+// SetSystem sets the "system" field.
+func (u *CoreRoleUpsert) SetSystem(v constant.YesOrNo) *CoreRoleUpsert {
+	u.Set(corerole.FieldSystem, v)
+	return u
+}
+
+// UpdateSystem sets the "system" field to the value that was provided on create.
+func (u *CoreRoleUpsert) UpdateSystem() *CoreRoleUpsert {
+	u.SetExcluded(corerole.FieldSystem)
+	return u
+}
+
+// AddSystem adds v to the "system" field.
+func (u *CoreRoleUpsert) AddSystem(v constant.YesOrNo) *CoreRoleUpsert {
+	u.Add(corerole.FieldSystem, v)
+	return u
+}
+
+// ClearSystem clears the value of the "system" field.
+func (u *CoreRoleUpsert) ClearSystem() *CoreRoleUpsert {
+	u.SetNull(corerole.FieldSystem)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -619,6 +665,34 @@ func (u *CoreRoleUpsertOne) UpdateStatus() *CoreRoleUpsertOne {
 func (u *CoreRoleUpsertOne) ClearStatus() *CoreRoleUpsertOne {
 	return u.Update(func(s *CoreRoleUpsert) {
 		s.ClearStatus()
+	})
+}
+
+// SetSystem sets the "system" field.
+func (u *CoreRoleUpsertOne) SetSystem(v constant.YesOrNo) *CoreRoleUpsertOne {
+	return u.Update(func(s *CoreRoleUpsert) {
+		s.SetSystem(v)
+	})
+}
+
+// AddSystem adds v to the "system" field.
+func (u *CoreRoleUpsertOne) AddSystem(v constant.YesOrNo) *CoreRoleUpsertOne {
+	return u.Update(func(s *CoreRoleUpsert) {
+		s.AddSystem(v)
+	})
+}
+
+// UpdateSystem sets the "system" field to the value that was provided on create.
+func (u *CoreRoleUpsertOne) UpdateSystem() *CoreRoleUpsertOne {
+	return u.Update(func(s *CoreRoleUpsert) {
+		s.UpdateSystem()
+	})
+}
+
+// ClearSystem clears the value of the "system" field.
+func (u *CoreRoleUpsertOne) ClearSystem() *CoreRoleUpsertOne {
+	return u.Update(func(s *CoreRoleUpsert) {
+		s.ClearSystem()
 	})
 }
 
@@ -942,6 +1016,34 @@ func (u *CoreRoleUpsertBulk) UpdateStatus() *CoreRoleUpsertBulk {
 func (u *CoreRoleUpsertBulk) ClearStatus() *CoreRoleUpsertBulk {
 	return u.Update(func(s *CoreRoleUpsert) {
 		s.ClearStatus()
+	})
+}
+
+// SetSystem sets the "system" field.
+func (u *CoreRoleUpsertBulk) SetSystem(v constant.YesOrNo) *CoreRoleUpsertBulk {
+	return u.Update(func(s *CoreRoleUpsert) {
+		s.SetSystem(v)
+	})
+}
+
+// AddSystem adds v to the "system" field.
+func (u *CoreRoleUpsertBulk) AddSystem(v constant.YesOrNo) *CoreRoleUpsertBulk {
+	return u.Update(func(s *CoreRoleUpsert) {
+		s.AddSystem(v)
+	})
+}
+
+// UpdateSystem sets the "system" field to the value that was provided on create.
+func (u *CoreRoleUpsertBulk) UpdateSystem() *CoreRoleUpsertBulk {
+	return u.Update(func(s *CoreRoleUpsert) {
+		s.UpdateSystem()
+	})
+}
+
+// ClearSystem clears the value of the "system" field.
+func (u *CoreRoleUpsertBulk) ClearSystem() *CoreRoleUpsertBulk {
+	return u.Update(func(s *CoreRoleUpsert) {
+		s.ClearSystem()
 	})
 }
 

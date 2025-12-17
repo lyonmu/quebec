@@ -3,6 +3,7 @@ package response
 import (
 	"github.com/lyonmu/quebec/cmd/core/internal/common"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent"
+	"github.com/lyonmu/quebec/pkg/constant"
 )
 
 type CaptchaResponse struct {
@@ -53,4 +54,25 @@ type SystemOnlineUserListResp struct {
 	Items    []*SystemOnlineUserResp `json:"items,omitempty"`     // 在线用户列表
 	Page     int                     `json:"page,omitempty"`      // 页码
 	PageSize int                     `json:"page_size,omitempty"` // 每页条数
+}
+
+type SystemRoleResp struct {
+	ID     string           `json:"id,omitempty"`     // 角色ID
+	Name   string           `json:"name,omitempty"`   // 角色名称
+	Remark string           `json:"remark,omitempty"` // 角色备注
+	Status constant.YesOrNo `json:"status,omitempty"` // 角色状态 [1: 启用, 2: 禁用]
+}
+
+func (r *SystemRoleResp) LoadDb(e *ent.CoreRole) {
+	r.ID = e.ID
+	r.Name = e.Name
+	r.Remark = e.Remark
+	r.Status = e.Status
+}
+
+type SystemRoleListResp struct {
+	Total    int               `json:"total,omitempty"`     // 总条数
+	Items    []*SystemRoleResp `json:"items,omitempty"`     // 角色列表
+	Page     int               `json:"page,omitempty"`      // 页码
+	PageSize int               `json:"page_size,omitempty"` // 每页条数
 }
