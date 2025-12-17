@@ -4,9 +4,9 @@ WORKDIR /build
 
 COPY . .
 
-RUN make build-gateway && chmod +x /build/bin/gateway
+RUN make gateway && chmod +x /build/bin/gateway
 
-FROM busybox:stable-glibc AS runner
+FROM busybox:stable-uclibc AS runner
 
 COPY --from=builder /build/bin/gateway /usr/bin/gateway
 
