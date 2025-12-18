@@ -733,6 +733,562 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/v1/system/user": {
+            "post": {
+                "description": "添加用户信息",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "添加用户信息",
+                "parameters": [
+                    {
+                        "description": "用户信息",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.SystemUserAddReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/system/user/enable/{id}": {
+            "put": {
+                "description": "启停用户状态",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "启停用户",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "状态 [1: 启用, 2: 禁用]",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.EnableReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/system/user/label": {
+            "get": {
+                "description": "获取用户标签",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "用户标签",
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.Options"
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/system/user/list": {
+            "get": {
+                "description": "获取全部用户列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "全部用户列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "用户邮箱",
+                        "name": "email",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户昵称",
+                        "name": "nickname",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "角色ID",
+                        "name": "role_id",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            1,
+                            2
+                        ],
+                        "type": "integer",
+                        "format": "int32",
+                        "x-enum-varnames": [
+                            "Yes",
+                            "No"
+                        ],
+                        "description": "用户状态 [1: 启用, 2: 禁用]",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户名",
+                        "name": "username",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "data": {
+                                            "$ref": "#/definitions/response.SystemUserListResp"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/system/user/page": {
+            "get": {
+                "description": "获取用户分页列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "用户分页列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "用户邮箱",
+                        "name": "email",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户昵称",
+                        "name": "nickname",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "maximum": 1000,
+                        "minimum": 10,
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页条数",
+                        "name": "page_size",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "角色ID",
+                        "name": "role_id",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            1,
+                            2
+                        ],
+                        "type": "integer",
+                        "format": "int32",
+                        "x-enum-varnames": [
+                            "Yes",
+                            "No"
+                        ],
+                        "description": "用户状态 [1: 启用, 2: 禁用]",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户名名称",
+                        "name": "username",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "data": {
+                                            "$ref": "#/definitions/response.SystemUserListResp"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/system/user/password/self": {
+            "put": {
+                "description": "修改自己的密码",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "修改自己的密码",
+                "parameters": [
+                    {
+                        "description": "用户密码信息",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.SystemUserEditPasswordReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/system/user/password/{id}": {
+            "put": {
+                "description": "修改用户密码",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "修改用户密码",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "用户密码信息",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.SystemUserEditPasswordReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/system/user/{id}": {
+            "get": {
+                "description": "获取用户详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "获取用户详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "data": {
+                                            "$ref": "#/definitions/response.SystemUserResp"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "编辑用户信息",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "编辑用户信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "用户信息",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.SystemUserUpdateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "删除用户",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "删除用户",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -832,6 +1388,97 @@ const docTemplate = `{
                 }
             }
         },
+        "request.SystemUserAddReq": {
+            "type": "object",
+            "required": [
+                "email",
+                "nickname",
+                "password",
+                "role_id",
+                "username"
+            ],
+            "properties": {
+                "email": {
+                    "description": "用户邮箱",
+                    "type": "string"
+                },
+                "nickname": {
+                    "description": "用户昵称",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "密码",
+                    "type": "string"
+                },
+                "remark": {
+                    "description": "用户备注",
+                    "type": "string"
+                },
+                "role_id": {
+                    "description": "角色ID",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "用户状态 [1: 启用, 2: 禁用]",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/constant.YesOrNo"
+                        }
+                    ]
+                },
+                "username": {
+                    "description": "用户名",
+                    "type": "string"
+                }
+            }
+        },
+        "request.SystemUserEditPasswordReq": {
+            "type": "object",
+            "required": [
+                "confirm_password",
+                "new_password",
+                "pre_password"
+            ],
+            "properties": {
+                "confirm_password": {
+                    "description": "确认密码",
+                    "type": "string"
+                },
+                "new_password": {
+                    "description": "新密码",
+                    "type": "string"
+                },
+                "pre_password": {
+                    "description": "旧密码",
+                    "type": "string"
+                }
+            }
+        },
+        "request.SystemUserUpdateReq": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "description": "用户邮箱",
+                    "type": "string"
+                },
+                "nickname": {
+                    "description": "用户昵称",
+                    "type": "string"
+                },
+                "remark": {
+                    "description": "用户备注",
+                    "type": "string"
+                },
+                "role_id": {
+                    "description": "角色ID",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "用户名",
+                    "type": "string"
+                }
+            }
+        },
         "response.CaptchaResponse": {
             "type": "object",
             "properties": {
@@ -875,6 +1522,10 @@ const docTemplate = `{
         "response.SystemInfoResponse": {
             "type": "object",
             "properties": {
+                "nickname": {
+                    "description": "用户昵称",
+                    "type": "string"
+                },
                 "role_name": {
                     "description": "角色名称",
                     "type": "string"
@@ -963,6 +1614,10 @@ const docTemplate = `{
                 "platform": {
                     "description": "操作平台",
                     "type": "string"
+                },
+                "username": {
+                    "description": "用户名",
+                    "type": "string"
                 }
             }
         },
@@ -1012,6 +1667,87 @@ const docTemplate = `{
                             "$ref": "#/definitions/constant.YesOrNo"
                         }
                     ]
+                }
+            }
+        },
+        "response.SystemUserListResp": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "description": "用户列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.SystemUserResp"
+                    }
+                },
+                "page": {
+                    "description": "页码",
+                    "type": "integer"
+                },
+                "page_size": {
+                    "description": "每页条数",
+                    "type": "integer"
+                },
+                "total": {
+                    "description": "总条数",
+                    "type": "integer"
+                }
+            }
+        },
+        "response.SystemUserResp": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "description": "用户邮箱",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "用户ID",
+                    "type": "string"
+                },
+                "last_operation_time": {
+                    "description": "最后操作时间",
+                    "type": "integer"
+                },
+                "last_password_change": {
+                    "description": "最后密码修改时间",
+                    "type": "integer"
+                },
+                "nickname": {
+                    "description": "用户昵称",
+                    "type": "string"
+                },
+                "operation_type": {
+                    "description": "操作类型",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/common.OperationType"
+                        }
+                    ]
+                },
+                "remark": {
+                    "description": "用户备注",
+                    "type": "string"
+                },
+                "role_id": {
+                    "description": "角色ID",
+                    "type": "string"
+                },
+                "role_name": {
+                    "description": "角色名称",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "用户状态 [1: 启用, 2: 禁用]",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/constant.YesOrNo"
+                        }
+                    ]
+                },
+                "username": {
+                    "description": "用户名",
+                    "type": "string"
                 }
             }
         }

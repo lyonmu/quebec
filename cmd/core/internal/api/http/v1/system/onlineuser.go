@@ -48,7 +48,7 @@ func (b *SystemV1ApiGroup) SystemOnlineUserList(c *gin.Context) {
 // @Router    /v1/system/onlineuser/label [get]
 func (b *SystemV1ApiGroup) SystemOnlineUserLabel(c *gin.Context) {
 
-	resp, err := systemsvc.UserLabel(c.Request.Context())
+	resp, err := systemsvc.OnlineUserLabel(c.Request.Context())
 	if err != nil {
 		err.(*code.Response).Failed(c)
 		return

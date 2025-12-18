@@ -2,6 +2,7 @@ package system
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/lyonmu/quebec/cmd/core/internal/dto/request"
@@ -22,15 +23,19 @@ func (s *SystemSvc) ListOnlineUser(req *request.SystemOnlineUserListReq, ctx con
 		resp     = &response.SystemOnlineUserListResp{}
 	)
 	query := global.EntClient.CoreOnLineUser.Query().Where(coreonlineuser.DeletedAtIsNil())
+
 	if len(req.UserID) > 0 {
 		query = query.Where(coreonlineuser.UserIDEQ(req.UserID))
 	}
+
 	if len(req.AccessIP) > 0 {
 		query = query.Where(coreonlineuser.AccessIPEQ(req.AccessIP))
 	}
+
 	if req.StartTime > 0 {
 		query = query.Where(coreonlineuser.LastOperationTimeGTE(req.StartTime))
 	}
+
 	if req.EndTime > 0 {
 		query = query.Where(coreonlineuser.LastOperationTimeLTE(req.EndTime))
 	}
@@ -44,7 +49,7 @@ func (s *SystemSvc) ListOnlineUser(req *request.SystemOnlineUserListReq, ctx con
 	rows, err := query.Offset(page).Limit(pageSize).
 		WithOnLineFromUser(
 			func(q *ent.CoreUserQuery) {
-				q.Select(coreuser.FieldID, coreuser.FieldNickname).Where(coreuser.DeletedAtIsNil())
+				q.Select(coreuser.FieldID, coreuser.FieldUsername, coreuser.FieldNickname).Where(coreuser.DeletedAtIsNil())
 			},
 		).
 		All(ctx)
@@ -67,7 +72,7 @@ func (s *SystemSvc) ListOnlineUser(req *request.SystemOnlineUserListReq, ctx con
 	return resp, nil
 }
 
-func (s *SystemSvc) UserLabel(ctx context.Context) ([]*response.Options, error) {
+func (s *SystemSvc) OnlineUserLabel(ctx context.Context) ([]*response.Options, error) {
 
 	var (
 		resp = make([]*response.Options, 0)
@@ -76,7 +81,7 @@ func (s *SystemSvc) UserLabel(ctx context.Context) ([]*response.Options, error) 
 	rows, err := global.EntClient.CoreOnLineUser.Query().
 		WithOnLineFromUser(
 			func(q *ent.CoreUserQuery) {
-				q.Select(coreuser.FieldID, coreuser.FieldNickname).Where(coreuser.DeletedAtIsNil())
+				q.Select(coreuser.FieldID, coreuser.FieldUsername, coreuser.FieldNickname).Where(coreuser.DeletedAtIsNil())
 			},
 		).
 		Select(coreonlineuser.FieldID, coreonlineuser.FieldUserID).
@@ -92,7 +97,7 @@ func (s *SystemSvc) UserLabel(ctx context.Context) ([]*response.Options, error) 
 
 		if v.Edges.OnLineFromUser != nil {
 			resp = append(resp, &response.Options{
-				Label: v.Edges.OnLineFromUser.Nickname,
+				Label: fmt.Sprintf("%s(%s)", v.Edges.OnLineFromUser.Nickname, v.Edges.OnLineFromUser.Username),
 				Value: v.UserID,
 			})
 		}

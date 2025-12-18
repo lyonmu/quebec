@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { ApiResponse } from '../types';
+import { ApiResponse } from '../../types';
+import { showErrorToast } from './toastBus';
 
 // Create axios instance
 const http: AxiosInstance = axios.create({
@@ -38,8 +39,22 @@ http.interceptors.response.use(
         return response;
       } else {
         // API returned error code
-        const error = new Error(data.message || 'Request failed');
+        const msg = data.message || 'Request failed';
+
+        // 统一基于后端业务码做处理
+        // 50401 / 50403 是后端在业务层返回的未授权 / 禁止访问
+        if (data.code === 50401) {
+          // 清理本地登录信息并返回登录页
+          localStorage.removeItem('x-quebec-token');
+          localStorage.removeItem('quebec-username');
+          localStorage.removeItem('quebec-role-name');
+          localStorage.removeItem('quebec-nickname');
+          localStorage.removeItem('quebec-current-view');
+        }
+
+        const error = new Error(msg);
         console.error('API error:', data);
+        showErrorToast(msg);
         return Promise.reject(error);
       }
     }
@@ -57,6 +72,10 @@ http.interceptors.response.use(
           console.error('Unauthorized - redirecting to login');
           // Clear token and redirect to login
           localStorage.removeItem('x-quebec-token');
+          localStorage.removeItem('quebec-username');
+          localStorage.removeItem('quebec-role-name');
+          localStorage.removeItem('quebec-nickname');
+          localStorage.removeItem('quebec-current-view');
           window.location.href = '/';
           break;
         case 403:
@@ -71,10 +90,14 @@ http.interceptors.response.use(
         default:
           console.error(`HTTP error ${status}:`, data);
       }
+      const backendMsg = data?.message || `HTTP ${status}`;
+      showErrorToast(backendMsg);
     } else if (error.request) {
       console.error('Network error - no response received');
+      showErrorToast('网络错误，未收到服务器响应');
     } else {
       console.error('Request setup error:', error.message);
+      showErrorToast(error.message || '请求配置错误');
     }
     
     return Promise.reject(error);

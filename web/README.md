@@ -39,24 +39,24 @@
 
 1. **进入前端目录**
 
-```bash
+   ```bash
 cd web
-```
+   ```
 
 2. **安装依赖**
 
-```bash
-bun install
-```
+   ```bash
+   bun install
+   ```
 
 3. **（可选）配置环境变量**
 
 在 `web/` 下创建 `.env.local`：
 
-```env
+   ```env
 # API Base（默认值为 /core/api）
-VITE_API_BASE_URL=/core/api
-```
+   VITE_API_BASE_URL=/core/api
+   ```
 
 说明：
 
@@ -65,9 +65,9 @@ VITE_API_BASE_URL=/core/api
 
 4. **启动开发服务器**
 
-```bash
+   ```bash
 bun run dev
-```
+   ```
 
 默认端口：`3000`，并绑定 `0.0.0.0`（局域网可访问）。
 

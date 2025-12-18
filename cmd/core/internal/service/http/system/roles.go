@@ -22,7 +22,7 @@ func (s *SystemSvc) RolePage(ctx context.Context, req *request.SystemRolePageReq
 		query    = global.EntClient.CoreRole.Query().Where(corerole.DeletedAtIsNil())
 	)
 
-	if len(req.Name) != 0 {
+	if len(req.Name) > 0 {
 		query = query.Where(corerole.NameContains(req.Name))
 	}
 
@@ -63,7 +63,7 @@ func (s *SystemSvc) RoleList(ctx context.Context, req *request.SystemRoleListReq
 		query = global.EntClient.CoreRole.Query().Where(corerole.DeletedAtIsNil())
 	)
 
-	if len(req.Name) != 0 {
+	if len(req.Name) > 0 {
 		query = query.Where(corerole.NameContains(req.Name))
 	}
 
@@ -128,7 +128,7 @@ func (s *SystemSvc) RoleAdd(ctx context.Context, req *request.SystemRoleAddReq) 
 
 	_, cerr := global.EntClient.CoreRole.Create().
 		SetName(req.Name).
-		SetNillableRemark(&req.Remark).
+		SetNillableRemark(req.Remark).
 		Save(ctx)
 
 	if cerr != nil {
@@ -139,9 +139,9 @@ func (s *SystemSvc) RoleAdd(ctx context.Context, req *request.SystemRoleAddReq) 
 	return nil
 }
 
-func (s *SystemSvc) RoleUpdate(ctx context.Context, id string, req *request.SystemRoleAddReq) error {
+func (s *SystemSvc) RoleUpdate(ctx context.Context, id string, req *request.SystemRoleUpdateReq) error {
 
-	exist, err := global.EntClient.CoreRole.Query().Where(corerole.Name(req.Name), corerole.IDNEQ(id), corerole.DeletedAtIsNil()).Exist(ctx)
+	exist, err := global.EntClient.CoreRole.Query().Where(corerole.Name(*req.Name), corerole.IDNEQ(id), corerole.DeletedAtIsNil()).Exist(ctx)
 	if err != nil {
 		global.Logger.Sugar().Errorf("select core_role failed: %s", err)
 		return &code.RoleQueryFailed
@@ -153,8 +153,8 @@ func (s *SystemSvc) RoleUpdate(ctx context.Context, id string, req *request.Syst
 
 	_, uerr := global.EntClient.CoreRole.
 		UpdateOneID(id).
-		SetName(req.Name).
-		SetNillableRemark(&req.Remark).
+		SetNillableName(req.Name).
+		SetNillableRemark(req.Remark).
 		Save(ctx)
 	if uerr != nil {
 		global.Logger.Sugar().Errorf("update core_role failed: %s", uerr)

@@ -34,5 +34,16 @@ func (r *SystemRouter) InitSystemRouter(group *gin.RouterGroup, apiGroup v1.V1Ap
 		systemRouterWithAuth.PUT("role/:id", apiGroup.SystemRoleEdit)
 		systemRouterWithAuth.GET("role/:id", apiGroup.SystemRoleGetById)
 		systemRouterWithAuth.PUT("role/enable/:id", apiGroup.SystemRoleEnable)
+		// 用户管理
+		systemRouterWithAuth.GET("user/page", apiGroup.SystemUserPage)
+		systemRouterWithAuth.GET("user/list", apiGroup.SystemUserList)
+		systemRouterWithAuth.GET("user/label", apiGroup.SystemUserLabel)
+		systemRouterWithAuth.DELETE("user/:id", apiGroup.SystemUserDelete)
+		systemRouterWithAuth.POST("user", apiGroup.SystemUserAdd)
+		systemRouterWithAuth.PUT("user/:id", apiGroup.SystemUserEdit)
+		systemRouterWithAuth.GET("user/:id", apiGroup.SystemUserGetById)
+		systemRouterWithAuth.PUT("user/enable/:id", apiGroup.SystemUserEnable)
+		systemRouterWithAuth.PUT("user/password/:id", apiGroup.SystemUserEditPassword)
+		systemRouterWithAuth.PUT("user/password/self", apiGroup.SystemUserEditPasswordSelf)
 	}
 }

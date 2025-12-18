@@ -42,7 +42,7 @@ func InitUser(client *ent.Client, roles []*ent.CoreRole) error {
 		users, err := client.CoreUser.CreateBulk(
 			client.CoreUser.Create().
 				SetID(fmt.Sprintf("%d", global.Id.GenID())).
-				SetUsername(encrypt.HashWithSHA256String("system")).
+				SetUsername("system").
 				SetPassword(string(systemPassword)).
 				SetNickname("系统管理员").
 				SetStatus(constant.Yes).
@@ -51,7 +51,7 @@ func InitUser(client *ent.Client, roles []*ent.CoreRole) error {
 				SetSystem(constant.Yes),
 			client.CoreUser.Create().
 				SetID(fmt.Sprintf("%d", global.Id.GenID())).
-				SetUsername(encrypt.HashWithSHA256String("operator")).
+				SetUsername("operator").
 				SetPassword(string(operatorPassword)).
 				SetNickname("运维操作员").
 				SetStatus(constant.Yes).
@@ -60,7 +60,7 @@ func InitUser(client *ent.Client, roles []*ent.CoreRole) error {
 				SetSystem(constant.Yes),
 			client.CoreUser.Create().
 				SetID(fmt.Sprintf("%d", global.Id.GenID())).
-				SetUsername(encrypt.HashWithSHA256String("user")).
+				SetUsername("user").
 				SetPassword(string(userPassword)).
 				SetNickname("普通用户").
 				SetStatus(constant.Yes).

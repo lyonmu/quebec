@@ -68,21 +68,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     mdPass.update(password);
     const hashedPassword = mdPass.digest().toHex();
 
-    // Hash username with SHA256
-    const mdUser = forge.md.sha256.create();
-    mdUser.update(username);
-    const hashedUsername = mdUser.digest().toHex();
-
-    console.log('Login attempt:', {
-      hashedUsername,
-      hashedPassword,
-      captchaId: captchaData.id,
-      captchaCode,
-    });
-
     try {
       const loginResponse = await loginService.login({
-        username: hashedUsername,
+        username: username,
         password: hashedPassword,
         captcha: captchaCode,
         captcha_id: captchaData.id
@@ -101,6 +89,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         if (loginResponse.data.role_name) {
           localStorage.setItem('quebec-role-name', loginResponse.data.role_name);
         }
+
+        if (loginResponse.data.nickname) {
+          localStorage.setItem('quebec-nickname', loginResponse.data.nickname);
+        }
+
+        
         onLogin();
       } else {
         setError(loginResponse.message || 'Login failed');

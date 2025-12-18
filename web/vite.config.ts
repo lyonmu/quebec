@@ -3,7 +3,7 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
 const targetDict = {
-  local: "http://192.168.8.45:59024",
+  local: "http://192.168.8.99:59024",
 };
 
 const proxyConfig = {

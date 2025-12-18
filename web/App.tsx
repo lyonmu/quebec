@@ -9,14 +9,16 @@ import NodeList from './components/proxy/NodeList';
 
 import Login from './components/auth/Login';
 import NotificationDropdown from './components/layout/NotificationDropdown';
+import GlobalToast from './components/common/GlobalToast';
 import UserManager from './components/system/UserManager';
 import RoleManager from './components/system/RoleManager';
 import AuditLogs from './components/system/AuditLogs';
 import OnlineUsers from './components/system/OnlineUsers';
+import ErrorBoundary from './components/common/ErrorBoundary';
 import { ViewState } from './types';
 import { Languages, Sun, Moon, Users, Settings } from 'lucide-react';
-import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
-import { ThemeProvider, useTheme } from './contexts/ThemeContext';
+import { useLanguage } from './contexts/LanguageContext';
+import { useTheme } from './contexts/ThemeContext';
 
 import { loginService } from './services/system/loginService';
 
@@ -37,13 +39,8 @@ const EnvoyNexusApp: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   
   // 获取用户名
-  const [username, setUsername] = useState(() => {
-    return localStorage.getItem('quebec-username') || 'Admin';
-  });
-  
-  // 获取角色名称
-  const [roleName, setRoleName] = useState(() => {
-    return localStorage.getItem('quebec-role-name') || t('header.superAdmin');
+  const userInfo = useState(() => {
+    return JSON.parse(localStorage.getItem('quebec-user-info') || '{}');
   });
 
   const toggleLanguage = () => {
@@ -77,6 +74,7 @@ const EnvoyNexusApp: React.FC = () => {
         localStorage.removeItem('x-quebec-token');
         localStorage.removeItem('quebec-username');
         localStorage.removeItem('quebec-role-name');
+        localStorage.removeItem('quebec-nickname');
         localStorage.removeItem('quebec-current-view');
         setIsAuthenticated(false);
       } else {
@@ -149,16 +147,7 @@ const EnvoyNexusApp: React.FC = () => {
         </div>
         <Login onLogin={() => {
           setIsAuthenticated(true);
-          // 刷新用户名
-          const savedUsername = localStorage.getItem('quebec-username');
-          if (savedUsername) {
-            setUsername(savedUsername);
-          }
-          // 刷新角色名称
-          const savedRoleName = localStorage.getItem('quebec-role-name');
-          if (savedRoleName) {
-            setRoleName(savedRoleName);
-          }
+          localStorage.setItem('quebec-user-info', JSON.stringify(userInfo));
         }} />
       </>
     );
@@ -202,11 +191,11 @@ const EnvoyNexusApp: React.FC = () => {
               <div className="h-8 w-[1px] bg-slate-200 dark:bg-slate-800"></div>
               <button className="flex items-center gap-3 pl-2">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white shadow-md">
-                    {getUserInitials(username)}
+                    {getUserInitials(localStorage.getItem('quebec-role-name') || '')}
                   </div>
                   <div className="hidden md:block text-left">
-                    <p className="text-sm font-medium text-slate-800 dark:text-white leading-none">{username}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">{roleName}</p>
+                    <p className="text-sm font-medium text-slate-800 dark:text-white leading-none">{localStorage.getItem('quebec-nickname') || ''}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">{localStorage.getItem('quebec-username') || ''}</p>
                   </div>
               </button>
             </div>
@@ -225,13 +214,12 @@ const EnvoyNexusApp: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <LanguageProvider>
-      <ThemeProvider>
-        <HashRouter>
-          <EnvoyNexusApp />
-        </HashRouter>
-      </ThemeProvider>
-    </LanguageProvider>
+    <ErrorBoundary>
+      <HashRouter>
+        <EnvoyNexusApp />
+        <GlobalToast />
+      </HashRouter>
+    </ErrorBoundary>
   );
 };
 

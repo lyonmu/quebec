@@ -14,12 +14,14 @@ type CaptchaResponse struct {
 
 type SystemInfoResponse struct {
 	Username string `json:"username"`  // 用户名
+	Nickname string `json:"nickname"`  // 用户昵称
 	Token    string `json:"token"`     // token
 	RoleName string `json:"role_name"` // 角色名称
 }
 
 type SystemOnlineUserResp struct {
 	ID                   string               `json:"id"`                               // ID
+	Username             string               `json:"username"`                         // 用户名
 	Nickname             string               `json:"nickname"`                         // 用户昵称
 	AccessIP             string               `json:"access_ip"`                        // 访问IP
 	LastOperationTime    int64                `json:"last_operation_time"`              // 最后操作时间
@@ -45,6 +47,7 @@ func (r *SystemOnlineUserResp) LoadDb(e *ent.CoreOnLineUser) {
 	r.BrowserEngineVersion = e.BrowserEngineVersion
 
 	if e.Edges.OnLineFromUser != nil {
+		r.Username = e.Edges.OnLineFromUser.Username
 		r.Nickname = e.Edges.OnLineFromUser.Nickname
 	}
 }
@@ -73,6 +76,48 @@ func (r *SystemRoleResp) LoadDb(e *ent.CoreRole) {
 type SystemRoleListResp struct {
 	Total    int               `json:"total,omitempty"`     // 总条数
 	Items    []*SystemRoleResp `json:"items,omitempty"`     // 角色列表
+	Page     int               `json:"page,omitempty"`      // 页码
+	PageSize int               `json:"page_size,omitempty"` // 每页条数
+}
+
+type SystemUserResp struct {
+	ID                 string               `json:"id,omitempty"`                   // 用户ID
+	Username           string               `json:"username,omitempty"`             // 用户名
+	Nickname           string               `json:"nickname,omitempty"`             // 用户昵称
+	Email              string               `json:"email,omitempty"`                // 用户邮箱
+	Status             constant.YesOrNo     `json:"status,omitempty"`               // 用户状态 [1: 启用, 2: 禁用]
+	RoleID             string               `json:"role_id,omitempty"`              // 角色ID
+	RoleName           string               `json:"role_name,omitempty"`            // 角色名称
+	LastPasswordChange int64                `json:"last_password_change,omitempty"` // 最后密码修改时间
+	LastOperationTime  int64                `json:"last_operation_time,omitempty"`  // 最后操作时间
+	OperationType      common.OperationType `json:"operation_type,omitempty"`       // 操作类型
+	Remark             string               `json:"remark,omitempty"`               // 用户备注
+}
+
+func (r *SystemUserResp) LoadDb(e *ent.CoreUser) {
+	r.ID = e.ID
+	r.Username = e.Username
+	r.Nickname = e.Nickname
+	r.Email = e.Email
+	r.Status = e.Status
+	r.LastPasswordChange = e.LastPasswordChange
+	r.Remark = e.Remark
+
+	if e.Edges.UserFromRole != nil {
+		r.RoleName = e.Edges.UserFromRole.Name
+		r.RoleID = e.Edges.UserFromRole.ID
+	}
+	if e.Edges.OnLineToUser != nil {
+		if len(e.Edges.OnLineToUser) > 0 {
+			r.LastOperationTime = e.Edges.OnLineToUser[0].LastOperationTime
+			r.OperationType = e.Edges.OnLineToUser[0].OperationType
+		}
+	}
+}
+
+type SystemUserListResp struct {
+	Total    int               `json:"total,omitempty"`     // 总条数
+	Items    []*SystemUserResp `json:"items,omitempty"`     // 用户列表
 	Page     int               `json:"page,omitempty"`      // 页码
 	PageSize int               `json:"page_size,omitempty"` // 每页条数
 }

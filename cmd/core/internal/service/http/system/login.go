@@ -119,7 +119,8 @@ func (s *SystemSvc) Login(req *request.SystemLoginRequest, ua *useragent.UserAge
 
 	global.Logger.Sugar().Infof("用户 %s 登录成功", u.Username)
 
-	resp.Username = u.Nickname
+	resp.Username = u.Username
+	resp.Nickname = u.Nickname
 	resp.Token = token
 	resp.RoleName = u.Edges.UserFromRole.Name
 

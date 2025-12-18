@@ -159,7 +159,7 @@ func (b *SystemV1ApiGroup) SystemRoleEdit(c *gin.Context) {
 		return
 	}
 
-	var req request.SystemRoleAddReq
+	var req request.SystemRoleUpdateReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		code.InvalidParams.Failed(c)
 		return

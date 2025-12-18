@@ -20,7 +20,12 @@ export const translations = {
       next: "下一页",
       actions: "操作",
       startTime: "开始时间",
-      endTime: "结束时间"
+      endTime: "结束时间",
+      delete: "删除",
+      select: "请选择",
+      edit: "编辑",
+      view: "详情",
+      error: "请求出错"
     },
     dashboard: {
       title: "仪表盘",
@@ -92,6 +97,7 @@ export const translations = {
         role: "角色",
         status: "状态",
         lastLogin: "最后登录",
+        lastPasswordChange: "上次密码修改时间",
         actions: "操作"
       },
       status: {
@@ -106,16 +112,21 @@ export const translations = {
       modal: {
         addTitle: "新增用户",
         editPassTitle: "修改密码",
+        editUserTitle: "编辑用户",
+        detailTitle: "用户详情",
         username: "用户名",
+        nickname: "昵称",
         password: "密码",
         newPassword: "新密码",
         confirmPassword: "确认密码",
+        prePassword: "当前密码",
         role: "角色",
         email: "邮箱",
         cancel: "取消",
         save: "保存",
         update: "更新",
-        passMismatch: "两次输入的密码不一致"
+        passMismatch: "两次输入的密码不一致",
+        roleRequired: "请选择角色"
       },
       actions: {
         disable: "停用",
@@ -139,6 +150,7 @@ export const translations = {
         engine: "引擎名称",
         engineVersion: "引擎版本"
       },
+      confirm_clear: "确定要清除此在线用户吗？该会话将被强制下线。",
       operation_types: {
         login: "登录",
         other: "其他"
@@ -149,6 +161,14 @@ export const translations = {
       subtitle: "定义系统角色及其操作权限。",
       addRole: "新增角色",
       confirmDelete: "确定要删除该角色吗？",
+      modal: {
+        addTitle: "新增角色",
+        editTitle: "编辑角色",
+        name: "角色名称",
+        remark: "备注",
+        cancel: "取消",
+        save: "保存"
+      },
       table: {
         name: "角色名称",
         users: "关联用户数",
@@ -241,7 +261,12 @@ export const translations = {
       next: "Next",
       actions: "Actions",
       startTime: "Start Time",
-      endTime: "End Time"
+      endTime: "End Time",
+      delete: "Delete",
+      select: "Select",
+      edit: "Edit",
+      view: "View",
+      error: "Request error"
     },
     dashboard: {
       title: "Dashboard",
@@ -313,6 +338,7 @@ export const translations = {
         role: "Role",
         status: "Status",
         lastLogin: "Last Login",
+        lastPasswordChange: "Last Password Change",
         actions: "Actions"
       },
       status: {
@@ -327,16 +353,21 @@ export const translations = {
       modal: {
         addTitle: "Add New User",
         editPassTitle: "Change Password",
+        editUserTitle: "Edit User",
+        detailTitle: "User Details",
         username: "Username",
+        nickname: "Nickname",
         password: "Password",
         newPassword: "New Password",
         confirmPassword: "Confirm Password",
+        prePassword: "Current Password",
         role: "Role",
         email: "Email",
         cancel: "Cancel",
         save: "Save",
         update: "Update",
-        passMismatch: "Passwords do not match"
+        passMismatch: "Passwords do not match",
+        roleRequired: "Please select a role"
       },
       actions: {
         disable: "Disable",
@@ -360,6 +391,7 @@ export const translations = {
         engine: "Engine Name",
         engineVersion: "Engine Version"
       },
+      confirm_clear: "Are you sure you want to clear this online user? The session will be terminated.",
       operation_types: {
         login: "LOGIN",
         other: "OTHER"
@@ -370,6 +402,14 @@ export const translations = {
       subtitle: "Define system roles and their permissions.",
       addRole: "Add Role",
       confirmDelete: "Are you sure you want to delete this role?",
+      modal: {
+        addTitle: "Add Role",
+        editTitle: "Edit Role",
+        name: "Role Name",
+        remark: "Remark",
+        cancel: "Cancel",
+        save: "Save"
+      },
       table: {
         name: "Role Name",
         users: "Assigned Users",

@@ -67,6 +67,71 @@ definitions:
     required:
     - name
     type: object
+  request.SystemUserAddReq:
+    properties:
+      email:
+        description: 用户邮箱
+        type: string
+      nickname:
+        description: 用户昵称
+        type: string
+      password:
+        description: 密码
+        type: string
+      remark:
+        description: 用户备注
+        type: string
+      role_id:
+        description: 角色ID
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/constant.YesOrNo'
+        description: '用户状态 [1: 启用, 2: 禁用]'
+      username:
+        description: 用户名
+        type: string
+    required:
+    - email
+    - nickname
+    - password
+    - role_id
+    - username
+    type: object
+  request.SystemUserEditPasswordReq:
+    properties:
+      confirm_password:
+        description: 确认密码
+        type: string
+      new_password:
+        description: 新密码
+        type: string
+      pre_password:
+        description: 旧密码
+        type: string
+    required:
+    - confirm_password
+    - new_password
+    - pre_password
+    type: object
+  request.SystemUserUpdateReq:
+    properties:
+      email:
+        description: 用户邮箱
+        type: string
+      nickname:
+        description: 用户昵称
+        type: string
+      remark:
+        description: 用户备注
+        type: string
+      role_id:
+        description: 角色ID
+        type: string
+      username:
+        description: 用户名
+        type: string
+    type: object
   response.CaptchaResponse:
     properties:
       id:
@@ -98,6 +163,9 @@ definitions:
     type: object
   response.SystemInfoResponse:
     properties:
+      nickname:
+        description: 用户昵称
+        type: string
       role_name:
         description: 角色名称
         type: string
@@ -161,6 +229,9 @@ definitions:
       platform:
         description: 操作平台
         type: string
+      username:
+        description: 用户名
+        type: string
     type: object
   response.SystemRoleListResp:
     properties:
@@ -194,6 +265,61 @@ definitions:
         allOf:
         - $ref: '#/definitions/constant.YesOrNo'
         description: '角色状态 [1: 启用, 2: 禁用]'
+    type: object
+  response.SystemUserListResp:
+    properties:
+      items:
+        description: 用户列表
+        items:
+          $ref: '#/definitions/response.SystemUserResp'
+        type: array
+      page:
+        description: 页码
+        type: integer
+      page_size:
+        description: 每页条数
+        type: integer
+      total:
+        description: 总条数
+        type: integer
+    type: object
+  response.SystemUserResp:
+    properties:
+      email:
+        description: 用户邮箱
+        type: string
+      id:
+        description: 用户ID
+        type: string
+      last_operation_time:
+        description: 最后操作时间
+        type: integer
+      last_password_change:
+        description: 最后密码修改时间
+        type: integer
+      nickname:
+        description: 用户昵称
+        type: string
+      operation_type:
+        allOf:
+        - $ref: '#/definitions/common.OperationType'
+        description: 操作类型
+      remark:
+        description: 用户备注
+        type: string
+      role_id:
+        description: 角色ID
+        type: string
+      role_name:
+        description: 角色名称
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/constant.YesOrNo'
+        description: '用户状态 [1: 启用, 2: 禁用]'
+      username:
+        description: 用户名
+        type: string
     type: object
 host: http://localhost:59024
 info:
@@ -639,6 +765,347 @@ paths:
                   type: string
               type: object
       summary: 角色分页列表
+      tags:
+      - 系统管理
+  /v1/system/user:
+    post:
+      description: 添加用户信息
+      parameters:
+      - description: 用户信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.SystemUserAddReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 50000,success
+          schema:
+            allOf:
+            - $ref: '#/definitions/code.Response'
+            - properties:
+                code:
+                  type: number
+                message:
+                  type: string
+              type: object
+      summary: 添加用户信息
+      tags:
+      - 系统管理
+  /v1/system/user/{id}:
+    delete:
+      description: 删除用户
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 50000,success
+          schema:
+            allOf:
+            - $ref: '#/definitions/code.Response'
+            - properties:
+                code:
+                  type: number
+                message:
+                  type: string
+              type: object
+      summary: 删除用户
+      tags:
+      - 系统管理
+    get:
+      description: 获取用户详情
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 50000,success
+          schema:
+            allOf:
+            - $ref: '#/definitions/code.Response'
+            - properties:
+                code:
+                  type: number
+                data:
+                  $ref: '#/definitions/response.SystemUserResp'
+                message:
+                  type: string
+              type: object
+      summary: 获取用户详情
+      tags:
+      - 系统管理
+    put:
+      description: 编辑用户信息
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 用户信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.SystemUserUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 50000,success
+          schema:
+            allOf:
+            - $ref: '#/definitions/code.Response'
+            - properties:
+                code:
+                  type: number
+                message:
+                  type: string
+              type: object
+      summary: 编辑用户信息
+      tags:
+      - 系统管理
+  /v1/system/user/enable/{id}:
+    put:
+      description: 启停用户状态
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: '状态 [1: 启用, 2: 禁用]'
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.EnableReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 50000,success
+          schema:
+            allOf:
+            - $ref: '#/definitions/code.Response'
+            - properties:
+                code:
+                  type: number
+                message:
+                  type: string
+              type: object
+      summary: 启停用户
+      tags:
+      - 系统管理
+  /v1/system/user/label:
+    get:
+      description: 获取用户标签
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 50000,success
+          schema:
+            allOf:
+            - $ref: '#/definitions/code.Response'
+            - properties:
+                code:
+                  type: number
+                data:
+                  items:
+                    $ref: '#/definitions/response.Options'
+                  type: array
+                message:
+                  type: string
+              type: object
+      summary: 用户标签
+      tags:
+      - 系统管理
+  /v1/system/user/list:
+    get:
+      description: 获取全部用户列表
+      parameters:
+      - description: 用户邮箱
+        in: query
+        name: email
+        type: string
+      - description: 用户昵称
+        in: query
+        name: nickname
+        type: string
+      - description: 角色ID
+        in: query
+        name: role_id
+        type: string
+      - description: '用户状态 [1: 启用, 2: 禁用]'
+        enum:
+        - 1
+        - 2
+        format: int32
+        in: query
+        name: status
+        type: integer
+        x-enum-varnames:
+        - "Yes"
+        - "No"
+      - description: 用户名
+        in: query
+        name: username
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 50000,success
+          schema:
+            allOf:
+            - $ref: '#/definitions/code.Response'
+            - properties:
+                code:
+                  type: number
+                data:
+                  $ref: '#/definitions/response.SystemUserListResp'
+                message:
+                  type: string
+              type: object
+      summary: 全部用户列表
+      tags:
+      - 系统管理
+  /v1/system/user/page:
+    get:
+      description: 获取用户分页列表
+      parameters:
+      - description: 用户邮箱
+        in: query
+        name: email
+        type: string
+      - description: 用户昵称
+        in: query
+        name: nickname
+        type: string
+      - default: 1
+        description: 页码
+        in: query
+        minimum: 1
+        name: page
+        required: true
+        type: integer
+      - default: 10
+        description: 每页条数
+        in: query
+        maximum: 1000
+        minimum: 10
+        name: page_size
+        required: true
+        type: integer
+      - description: 角色ID
+        in: query
+        name: role_id
+        type: string
+      - description: '用户状态 [1: 启用, 2: 禁用]'
+        enum:
+        - 1
+        - 2
+        format: int32
+        in: query
+        name: status
+        type: integer
+        x-enum-varnames:
+        - "Yes"
+        - "No"
+      - description: 用户名名称
+        in: query
+        name: username
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 50000,success
+          schema:
+            allOf:
+            - $ref: '#/definitions/code.Response'
+            - properties:
+                code:
+                  type: number
+                data:
+                  $ref: '#/definitions/response.SystemUserListResp'
+                message:
+                  type: string
+              type: object
+      summary: 用户分页列表
+      tags:
+      - 系统管理
+  /v1/system/user/password/{id}:
+    put:
+      description: 修改用户密码
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 用户密码信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.SystemUserEditPasswordReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 50000,success
+          schema:
+            allOf:
+            - $ref: '#/definitions/code.Response'
+            - properties:
+                code:
+                  type: number
+                message:
+                  type: string
+              type: object
+      summary: 修改用户密码
+      tags:
+      - 系统管理
+  /v1/system/user/password/self:
+    put:
+      description: 修改自己的密码
+      parameters:
+      - description: 用户密码信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.SystemUserEditPasswordReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 50000,success
+          schema:
+            allOf:
+            - $ref: '#/definitions/code.Response'
+            - properties:
+                code:
+                  type: number
+                message:
+                  type: string
+              type: object
+      summary: 修改自己的密码
       tags:
       - 系统管理
 schemes:

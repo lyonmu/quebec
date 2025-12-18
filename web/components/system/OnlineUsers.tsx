@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { Search, Monitor, Smartphone, Trash2, RefreshCw } from 'lucide-react';
+import { Search, Monitor, Smartphone, Trash2, RefreshCw, Eye } from 'lucide-react';
 import { onlineuserService } from '../../services/system/onlineuserService';
 import { OnlineUser, OnlineUserLabel } from '../../types';
 import DateTimePicker from '../common/DateTimePicker';
 import { OPERATION_TYPE_MAP, DEFAULT_OPERATION_TYPE } from '../../services/base/translations';
+import ConfirmDialog from '../common/ConfirmDialog';
 
 const OnlineUsers: React.FC = () => {
   const { t, language } = useLanguage();
@@ -18,6 +19,11 @@ const OnlineUsers: React.FC = () => {
   const [pageSize] = useState(10);
   const [total, setTotal] = useState(0);
   const [labels, setLabels] = useState<OnlineUserLabel[]>([]);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmUser, setConfirmUser] = useState<OnlineUser | null>(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailUser, setDetailUser] = useState<OnlineUser | null>(null);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -68,17 +74,25 @@ const OnlineUsers: React.FC = () => {
     }
   };
 
-  const handleClearUser = async (id: string) => {
-    if (!window.confirm(t('online_users.confirm_clear') || 'Are you sure you want to clear this user?')) {
-      return;
-    }
+  const handleRequestClearUser = (user: OnlineUser) => {
+    setConfirmUser(user);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmClearUser = async () => {
+    if (!confirmUser) return;
+    setConfirmLoading(true);
     try {
-      const response = await onlineuserService.clearOnlineUser(id);
+      const response = await onlineuserService.clearOnlineUser(confirmUser.id);
       if (response.code === 50000) {
         fetchUsers(); // Refresh list
       }
     } catch (error) {
       console.error('Failed to clear user:', error);
+    } finally {
+      setConfirmLoading(false);
+      setConfirmOpen(false);
+      setConfirmUser(null);
     }
   };
 
@@ -217,7 +231,7 @@ const OnlineUsers: React.FC = () => {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-medium text-xs">
-                          {user.nickname ? user.nickname.substring(0, 2).toUpperCase() : 'UN'}
+                          {user.username ? user.username.substring(0, 2).toUpperCase() : 'UN'}
                         </div>
                         <span className="font-medium text-slate-900 dark:text-white">{user.nickname || 'Unknown'}</span>
                       </div>
@@ -255,13 +269,25 @@ const OnlineUsers: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-right">
-                      <button 
-                        onClick={() => handleClearUser(user.id)}
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 p-2 rounded-lg transition-colors"
-                        title={t('common.delete')}
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => {
+                            setDetailUser(user);
+                            setDetailOpen(true);
+                          }}
+                          className="text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:text-slate-400 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 p-2 rounded-lg transition-colors"
+                          title={t('common.view') || 'View'}
+                        >
+                          <Eye size={16} />
+                        </button>
+                        <button 
+                          onClick={() => handleRequestClearUser(user)}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 p-2 rounded-lg transition-colors"
+                          title={t('common.delete')}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -295,6 +321,87 @@ const OnlineUsers: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title={t('online_users.title')}
+        description={
+          confirmUser
+            ? `${confirmUser.nickname || confirmUser.username || confirmUser.id} - ${t('online_users.confirm_clear')}`
+            : t('online_users.confirm_clear')
+        }
+        confirmText={t('common.delete')}
+        cancelText={t('users.modal.cancel')}
+        loading={confirmLoading}
+        onCancel={() => {
+          if (confirmLoading) return;
+          setConfirmOpen(false);
+          setConfirmUser(null);
+        }}
+        onConfirm={handleConfirmClearUser}
+      />
+
+      {/* Detail Modal */}
+      {detailOpen && detailUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/80">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-50">
+                  {detailUser.nickname || detailUser.username || 'User'}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  {detailUser.username} · {detailUser.access_ip}
+                </p>
+              </div>
+              <button
+                onClick={() => setDetailOpen(false)}
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors text-xs"
+              >
+                {t('users.modal.cancel')}
+              </button>
+            </div>
+            <div className="px-6 py-4 grid grid-cols-2 gap-3 text-xs text-slate-700 dark:text-slate-200">
+              <div>
+                <div className="text-slate-400 mb-1">{t('online_users.table.ip')}</div>
+                <div className="font-mono">{detailUser.access_ip}</div>
+              </div>
+              <div>
+                <div className="text-slate-400 mb-1">{t('online_users.table.lastTime')}</div>
+                <div>{formatTime(detailUser.last_operation_time)}</div>
+              </div>
+              <div>
+                <div className="text-slate-400 mb-1">{t('online_users.table.os')}</div>
+                <div>{detailUser.os}</div>
+              </div>
+              <div>
+                <div className="text-slate-400 mb-1">{t('online_users.table.platform')}</div>
+                <div>{detailUser.platform}</div>
+              </div>
+              <div>
+                <div className="text-slate-400 mb-1">{t('online_users.table.browser')}</div>
+                <div>{detailUser.browser_name} {detailUser.browser_version}</div>
+              </div>
+              <div>
+                <div className="text-slate-400 mb-1">{t('online_users.table.engine')}</div>
+                <div>{detailUser.browser_engine_name} {detailUser.browser_engine_version}</div>
+              </div>
+              <div className="col-span-2">
+                <div className="text-slate-400 mb-1">{t('online_users.table.type')}</div>
+                <div>{getOperationType(detailUser.operation_type)}</div>
+              </div>
+            </div>
+            <div className="px-6 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 flex justify-end">
+              <button
+                onClick={() => setDetailOpen(false)}
+                className="px-4 py-1.5 text-xs font-medium rounded-full border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              >
+                {t('users.modal.cancel')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

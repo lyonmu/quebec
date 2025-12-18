@@ -407,7 +407,7 @@ var (
 		{Name: "username", Type: field.TypeString, Unique: true, Nullable: true, Comment: "用户名"},
 		{Name: "password", Type: field.TypeString, Nullable: true, Comment: "密码", SchemaType: map[string]string{"mysql": "text", "postgres": "text", "sqlite3": "text"}},
 		{Name: "email", Type: field.TypeString, Nullable: true, Comment: "邮箱"},
-		{Name: "nickname", Type: field.TypeString, Nullable: true, Comment: "昵称", SchemaType: map[string]string{"mysql": "text", "postgres": "text", "sqlite3": "text"}},
+		{Name: "nickname", Type: field.TypeString, Nullable: true, Comment: "昵称"},
 		{Name: "status", Type: field.TypeInt8, Nullable: true, Comment: "用户状态 [1: 启用, 2: 禁用]", Default: 1},
 		{Name: "remark", Type: field.TypeString, Nullable: true, Comment: "用户备注", SchemaType: map[string]string{"mysql": "text", "postgres": "text", "sqlite3": "text"}},
 		{Name: "last_password_change", Type: field.TypeInt64, Nullable: true, Comment: "最后密码修改时间戳"},
@@ -453,6 +453,11 @@ var (
 				Name:    "coreuser_username",
 				Unique:  false,
 				Columns: []*schema.Column{QuebecCoreUserColumns[4]},
+			},
+			{
+				Name:    "coreuser_nickname",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUserColumns[7]},
 			},
 			{
 				Name:    "coreuser_email",

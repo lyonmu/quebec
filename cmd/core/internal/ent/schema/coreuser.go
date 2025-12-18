@@ -27,7 +27,7 @@ func (CoreUser) Fields() []ent.Field {
 		field.String("username").Unique().Optional().Comment("用户名"),
 		field.String("password").SchemaType(map[string]string{dialect.MySQL: "text", dialect.SQLite: "text", dialect.Postgres: "text"}).Optional().Comment("密码"),
 		field.String("email").Optional().Comment("邮箱"),
-		field.String("nickname").SchemaType(map[string]string{dialect.MySQL: "text", dialect.SQLite: "text", dialect.Postgres: "text"}).Optional().Comment("昵称"),
+		field.String("nickname").Optional().Comment("昵称"),
 		field.Int8("status").Optional().GoType(constant.YesOrNo(1)).Optional().Comment("用户状态 [1: 启用, 2: 禁用]").Default(int8(constant.Yes)),
 		field.String("role_id").Optional().Comment("角色ID"),
 		field.String("remark").SchemaType(map[string]string{dialect.MySQL: "text", dialect.SQLite: "text", dialect.Postgres: "text"}).Optional().Comment("用户备注"),
@@ -58,6 +58,7 @@ func (CoreUser) Indexes() []ent.Index {
 	// 时间戳字段的索引由 TimeMixin 提供
 	return []ent.Index{
 		index.Fields("username"),
+		index.Fields("nickname"),
 		index.Fields("email"),
 		index.Fields("status"),
 		index.Fields("role_id"),
