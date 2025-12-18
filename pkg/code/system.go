@@ -6,6 +6,7 @@ var (
 	UserNotExists          = Response{Code: 51002, Message: "用户不存在"}
 	UserPasswordError      = Response{Code: 51003, Message: "密码错误"}
 	InvalidCaptcha         = Response{Code: 51004, Message: "无效的验证码"}
+	CaptchaTooFrequent     = Response{Code: 51023, Message: "验证码请求过于频繁，请稍后再试"}
 	// 角色相关
 	RoleNotExists      = Response{Code: 51005, Message: "角色不存在"}
 	RoleDisabled       = Response{Code: 51006, Message: "该角色被禁用"}

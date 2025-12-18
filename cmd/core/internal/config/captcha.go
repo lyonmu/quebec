@@ -14,9 +14,11 @@ type Captcha struct {
 	Length int `name:"length" env:"CAPTCHA_LENGTH" default:"4" help:"验证码长度" mapstructure:"length" yaml:"length" json:"length"`
 	Width  int `name:"width" env:"CAPTCHA_WIDTH" default:"240" help:"验证码宽度" mapstructure:"width" yaml:"width" json:"width"`
 	Height int `name:"height" env:"CAPTCHA_HEIGHT" default:"80" help:"验证码高度" mapstructure:"height" yaml:"height" json:"height"`
-	Cache  int `name:"cache" env:"CAPTCHA_CACHE" default:"300" help:"验证码缓存时间" mapstructure:"cache" yaml:"cache" json:"cache"`
+	Cache  int `name:"cache" env:"CAPTCHA_CACHE" default:"60" help:"验证码缓存时间" mapstructure:"cache" yaml:"cache" json:"cache"`
+	// 新增限流配置
+	RateLimit  int `name:"rate_limit" env:"CAPTCHA_RATE_LIMIT" default:"5" help:"验证码请求限流次数" mapstructure:"rate_limit" yaml:"rate_limit" json:"rate_limit"`
+	RateWindow int `name:"rate_window" env:"CAPTCHA_RATE_WINDOW" default:"60" help:"验证码请求限流窗口时间（秒）" mapstructure:"rate_window" yaml:"rate_window" json:"rate_window"`
 }
-
 type CaptchaWithRedis struct {
 	Captcha
 	Redis redis.UniversalClient

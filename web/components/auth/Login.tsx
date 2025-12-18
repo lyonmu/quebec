@@ -33,7 +33,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         setError(response.message || 'Failed to load captcha');
       }
     } catch (err) {
-      setError('Failed to load captcha. Please try again.');
       console.error('Captcha error:', err);
     } finally {
       setCaptchaLoading(false);

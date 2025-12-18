@@ -1,10 +1,4 @@
-<div align="center">
-  <img width="120" height="120" alt="Quebec Logo" src="./public/quebec.png" />
-  <h1>Quebec</h1>
-  <p><strong>高性能网关控制平面仪表板（前端 Web）</strong></p>
-</div>
-
----
+# quebec
 
 本目录（`web/`）是 **Quebec Dashboard** 的前端项目，基于 React + Vite 构建，用于管理 Envoy Gateway 控制平面能力（节点/代理/系统管理等）。
 
@@ -40,7 +34,7 @@
 1. **进入前端目录**
 
    ```bash
-cd web
+   cd web
    ```
 
 2. **安装依赖**
@@ -51,28 +45,28 @@ cd web
 
 3. **（可选）配置环境变量**
 
-在 `web/` 下创建 `.env.local`：
+   在 `web/` 下创建 `.env.local`：
 
    ```env
-# API Base（默认值为 /core/api）
+   # API Base（默认值为 /core/api）
    VITE_API_BASE_URL=/core/api
    ```
 
-说明：
+   说明：
 
-- 默认使用相对路径 `/core/api`，配合 Vite 代理转发到后端（推荐开发方式）。
-- 也可以配置为绝对地址（例如 `http://127.0.0.1:59024/core/api`），此时可不依赖代理（可能涉及 CORS）。
+   - 默认使用相对路径 `/core/api`，配合 Vite 代理转发到后端（推荐开发方式）。
+   - 也可以配置为绝对地址（例如 `http://127.0.0.1:59024/core/api`），此时可不依赖代理（可能涉及 CORS）。
 
 4. **启动开发服务器**
 
    ```bash
-bun run dev
+   bun run dev
    ```
 
-默认端口：`3000`，并绑定 `0.0.0.0`（局域网可访问）。
+   默认端口：`3000`，并绑定 `0.0.0.0`（局域网可访问）。
 
-> 代理：开发环境会把 `/core/api` 转发到 `vite.config.ts` 里配置的后端目标（默认 `http://127.0.0.1:59024`）。  
-> 如需修改后端地址，编辑 `web/vite.config.ts` 的 `targetDict.local`。
+   > 代理：开发环境会把 `/core/api` 转发到 `vite.config.ts` 里配置的后端目标（默认 `http://127.0.0.1:59024`）。  
+   > 如需修改后端地址，编辑 `web/vite.config.ts` 的 `targetDict.local`。
 
 ## 常用命令（Scripts）
 
@@ -97,22 +91,22 @@ bun run dev
 
 ## 项目结构
 
-```
-web/
-├── components/                 # 页面/模块组件
-│   ├── auth/                   # 登录
-│   ├── dashboard/              # 仪表板
-│   ├── layout/                 # 布局组件（Sidebar/通知等）
-│   ├── proxy/                  # 代理与节点
-│   └── system/                 # 系统管理（用户/角色/证书/日志/在线用户）
-├── contexts/                   # React Context（主题/语言）
-├── services/                   # API 请求封装与业务服务
-│   ├── base/                   # http client / mock / i18n
-│   └── system/                 # system 相关服务
-├── types/                      # TypeScript 类型
-├── public/                     # 静态资源
-├── App.tsx                     # App 根组件
-├── index.tsx                   # 入口
-├── vite.config.ts              # Vite/代理/构建配置
-└── package.json                # 依赖与脚本
-```
+   ``` bash
+      web/
+      ├── components/                 # 页面/模块组件
+      │   ├── auth/                   # 登录
+      │   ├── dashboard/              # 仪表板
+      │   ├── layout/                 # 布局组件（Sidebar/通知等）
+      │   ├── proxy/                  # 代理与节点
+      │   └── system/                 # 系统管理（用户/角色/证书/日志/在线用户）
+      ├── contexts/                   # React Context（主题/语言）
+      ├── services/                   # API 请求封装与业务服务
+      │   ├── base/                   # http client / mock / i18n
+      │   └── system/                 # system 相关服务
+      ├── types/                      # TypeScript 类型
+      ├── public/                     # 静态资源
+      ├── App.tsx                     # App 根组件
+      ├── index.tsx                   # 入口
+      ├── vite.config.ts              # Vite/代理/构建配置
+      └── package.json                # 依赖与脚本
+   ```

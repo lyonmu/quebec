@@ -12,7 +12,6 @@ type CoreConfig struct {
 	Captcha Captcha `embed:"" prefix:"captcha." mapstructure:"captcha" json:"captcha" yaml:"captcha"`
 	Jwt     Jwt     `embed:"" prefix:"jwt." mapstructure:"jwt" json:"jwt" yaml:"jwt"`
 }
-
 type Config struct {
 	Version bool               `short:"v" long:"version" help:"版本信息" default:"false" mapstructure:"version" json:"version" yaml:"version"`
 	Log     log.LogConfig      `embed:"" prefix:"log." mapstructure:"log" json:"log" yaml:"log"`
