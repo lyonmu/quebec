@@ -71,3 +71,5 @@ certs/
 AGENTS.md
 openspec/
 .cursor/
+.claude/
+CLAUDE.md

@@ -167,7 +167,8 @@ export const translations = {
         name: "角色名称",
         remark: "备注",
         cancel: "取消",
-        save: "保存"
+        save: "保存",
+        menuPermission: "菜单权限"
       },
       table: {
         name: "角色名称",
@@ -179,7 +180,52 @@ export const translations = {
         all: "完全控制",
         read_write: "读写权限",
         read_only: "只读权限"
+      },
+      actions: {
+        menuPermission: "菜单权限"
       }
+    },
+    menus: {
+      title: "菜单管理",
+      subtitle: "管理系统菜单结构和权限分配。",
+      addMenu: "新增菜单",
+      confirmDelete: "确定要删除该菜单吗？",
+      modal: {
+        addTitle: "新增菜单",
+        editTitle: "编辑菜单",
+        name: "菜单名称",
+        type: "菜单类型",
+        type_directory: "目录",
+        type_menu: "菜单",
+        type_button: "按钮",
+        apiPath: "API路径",
+        apiMethod: "API方法",
+        order: "排序",
+        parent: "父级菜单",
+        component: "组件路径",
+        status: "状态",
+        remark: "备注",
+        cancel: "取消",
+        save: "保存"
+      },
+      table: {
+        name: "菜单名称",
+        type: "类型",
+        api: "API路径",
+        order: "排序",
+        status: "状态",
+        actions: "操作"
+      },
+      type: {
+        directory: "目录",
+        menu: "菜单",
+        button: "按钮"
+      },
+      status: {
+        enabled: "启用",
+        disabled: "禁用"
+      },
+      confirmDelete: "确定要删除该菜单吗？删除后，子菜单也将被删除。"
     },
     logs: {
       title: "操作日志",
@@ -209,6 +255,7 @@ export const translations = {
       system_users: "用户管理",
       system_online_users: "在线用户",
       system_roles: "角色管理",
+      system_menus: "菜单管理",
       system_logs: "操作日志",
       controlPlane: "控制平面",
       healthy: "健康",
@@ -408,7 +455,8 @@ export const translations = {
         name: "Role Name",
         remark: "Remark",
         cancel: "Cancel",
-        save: "Save"
+        save: "Save",
+        menuPermission: "Menu Permission"
       },
       table: {
         name: "Role Name",
@@ -420,7 +468,52 @@ export const translations = {
         all: "Full Control",
         read_write: "Read & Write",
         read_only: "Read Only"
+      },
+      actions: {
+        menuPermission: "Menu Permission"
       }
+    },
+    menus: {
+      title: "Menu Management",
+      subtitle: "Manage system menu structure and permission allocation.",
+      addMenu: "Add Menu",
+      confirmDelete: "Are you sure you want to delete this menu?",
+      modal: {
+        addTitle: "Add Menu",
+        editTitle: "Edit Menu",
+        name: "Menu Name",
+        type: "Menu Type",
+        type_directory: "Directory",
+        type_menu: "Menu",
+        type_button: "Button",
+        apiPath: "API Path",
+        apiMethod: "API Method",
+        order: "Order",
+        parent: "Parent Menu",
+        component: "Component Path",
+        status: "Status",
+        remark: "Remark",
+        cancel: "Cancel",
+        save: "Save"
+      },
+      table: {
+        name: "Menu Name",
+        type: "Type",
+        api: "API Path",
+        order: "Order",
+        status: "Status",
+        actions: "Actions"
+      },
+      type: {
+        directory: "Directory",
+        menu: "Menu",
+        button: "Button"
+      },
+      status: {
+        enabled: "Enabled",
+        disabled: "Disabled"
+      },
+      confirmDelete: "Are you sure you want to delete this menu? Child menus will also be deleted."
     },
     logs: {
       title: "Operation Logs",
@@ -450,6 +543,7 @@ export const translations = {
       system_users: "User Management",
       system_online_users: "Online Users",
       system_roles: "Role Management",
+      system_menus: "Menu Management",
       system_logs: "Operation Logs",
       controlPlane: "Control Plane",
       healthy: "Healthy",

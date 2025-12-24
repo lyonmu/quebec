@@ -34,6 +34,21 @@ func (r *SystemRouter) InitSystemRouter(group *gin.RouterGroup, apiGroup v1.V1Ap
 		systemRouterWithAuth.PUT("role/:id", apiGroup.SystemRoleEdit)
 		systemRouterWithAuth.GET("role/:id", apiGroup.SystemRoleGetById)
 		systemRouterWithAuth.PUT("role/enable/:id", apiGroup.SystemRoleEnable)
+		// 角色菜单绑定
+		systemRouterWithAuth.GET("role/:id/menus", apiGroup.SystemRoleMenus)
+		systemRouterWithAuth.PUT("role/:id/menus", apiGroup.SystemRoleBindMenus)
+		systemRouterWithAuth.POST("role/:role_id/menu/:menu_id", apiGroup.SystemRoleAddMenu)
+		systemRouterWithAuth.DELETE("role/:role_id/menu/:menu_id", apiGroup.SystemRoleRemoveMenu)
+		// 菜单管理
+		systemRouterWithAuth.GET("menu/page", apiGroup.SystemMenuPage)
+		systemRouterWithAuth.GET("menu/list", apiGroup.SystemMenuList)
+		systemRouterWithAuth.GET("menu/tree", apiGroup.SystemMenuTree)
+		systemRouterWithAuth.GET("menu/label", apiGroup.SystemMenuLabel)
+		systemRouterWithAuth.DELETE("menu/:id", apiGroup.SystemMenuDelete)
+		systemRouterWithAuth.POST("menu", apiGroup.SystemMenuAdd)
+		systemRouterWithAuth.PUT("menu/:id", apiGroup.SystemMenuEdit)
+		systemRouterWithAuth.GET("menu/:id", apiGroup.SystemMenuGetById)
+		systemRouterWithAuth.PUT("menu/enable/:id", apiGroup.SystemMenuEnable)
 		// 用户管理
 		systemRouterWithAuth.GET("user/page", apiGroup.SystemUserPage)
 		systemRouterWithAuth.GET("user/list", apiGroup.SystemUserList)

@@ -28,4 +28,16 @@ var (
 	UserEnableFailed       = Response{Code: 51020, Message: "用户启停失败"}
 	PasswordIncorrect      = Response{Code: 51021, Message: "密码不正确"}
 	UserPasswordEditFailed = Response{Code: 51022, Message: "修改密码失败"}
+
+	// 菜单相关
+	MenuNotExists      = Response{Code: 51024, Message: "菜单不存在"}
+	MenuAddFailed      = Response{Code: 51025, Message: "菜单添加失败"}
+	MenuDelFailed      = Response{Code: 51026, Message: "菜单删除失败"}
+	MenuEditFailed     = Response{Code: 51027, Message: "菜单编辑失败"}
+	MenuQueryFailed    = Response{Code: 51028, Message: "菜单查询失败"}
+	MenuNameDuplicate  = Response{Code: 51029, Message: "菜单名称重复"}
+	MenuEnableFailed   = Response{Code: 51030, Message: "菜单启停失败"}
+
+	// 角色菜单绑定相关
+	RoleMenuBindFailed = Response{Code: 51031, Message: "角色菜单绑定失败"}
 )

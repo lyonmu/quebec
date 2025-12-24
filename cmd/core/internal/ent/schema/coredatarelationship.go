@@ -31,8 +31,8 @@ func (CoreDataRelationship) Fields() []ent.Field {
 // Edges of the CoreDataRelationship.
 func (CoreDataRelationship) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("data_relationship_from_menu", CoreMenu.Type).Ref("menu_to_data_relationship").Field("menu_id").Unique(),
-		edge.From("data_relationship_from_role", CoreRole.Type).Ref("role_to_data_relationship").Field("role_id").Unique(),
+		edge.From("data_relationship_from_menu", CoreMenu.Type).Ref("menu_to_data_relationship").Field("menu_id"),
+		edge.From("data_relationship_from_role", CoreRole.Type).Ref("role_to_data_relationship").Field("role_id"),
 	}
 }
 
