@@ -21,6 +21,9 @@ type CoreMenu func(*sql.Selector)
 // CoreOnLineUser is the predicate function for coreonlineuser builders.
 type CoreOnLineUser func(*sql.Selector)
 
+// CoreOperationLog is the predicate function for coreoperationlog builders.
+type CoreOperationLog func(*sql.Selector)
+
 // CoreRole is the predicate function for corerole builders.
 type CoreRole func(*sql.Selector)
 

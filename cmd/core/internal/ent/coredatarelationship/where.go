@@ -441,21 +441,21 @@ func RoleIDContainsFold(v string) predicate.CoreDataRelationship {
 	return predicate.CoreDataRelationship(sql.FieldContainsFold(FieldRoleID, v))
 }
 
-// HasDataRelationshipFromMenu applies the HasEdge predicate on the "data_relationship_from_menu" edge.
-func HasDataRelationshipFromMenu() predicate.CoreDataRelationship {
+// HasMenu applies the HasEdge predicate on the "menu" edge.
+func HasMenu() predicate.CoreDataRelationship {
 	return predicate.CoreDataRelationship(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, DataRelationshipFromMenuTable, DataRelationshipFromMenuColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, MenuTable, MenuPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasDataRelationshipFromMenuWith applies the HasEdge predicate on the "data_relationship_from_menu" edge with a given conditions (other predicates).
-func HasDataRelationshipFromMenuWith(preds ...predicate.CoreMenu) predicate.CoreDataRelationship {
+// HasMenuWith applies the HasEdge predicate on the "menu" edge with a given conditions (other predicates).
+func HasMenuWith(preds ...predicate.CoreMenu) predicate.CoreDataRelationship {
 	return predicate.CoreDataRelationship(func(s *sql.Selector) {
-		step := newDataRelationshipFromMenuStep()
+		step := newMenuStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -464,21 +464,21 @@ func HasDataRelationshipFromMenuWith(preds ...predicate.CoreMenu) predicate.Core
 	})
 }
 
-// HasDataRelationshipFromRole applies the HasEdge predicate on the "data_relationship_from_role" edge.
-func HasDataRelationshipFromRole() predicate.CoreDataRelationship {
+// HasRole applies the HasEdge predicate on the "role" edge.
+func HasRole() predicate.CoreDataRelationship {
 	return predicate.CoreDataRelationship(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, DataRelationshipFromRoleTable, DataRelationshipFromRoleColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, RoleTable, RolePrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasDataRelationshipFromRoleWith applies the HasEdge predicate on the "data_relationship_from_role" edge with a given conditions (other predicates).
-func HasDataRelationshipFromRoleWith(preds ...predicate.CoreRole) predicate.CoreDataRelationship {
+// HasRoleWith applies the HasEdge predicate on the "role" edge with a given conditions (other predicates).
+func HasRoleWith(preds ...predicate.CoreRole) predicate.CoreDataRelationship {
 	return predicate.CoreDataRelationship(func(s *sql.Selector) {
-		step := newDataRelationshipFromRoleStep()
+		step := newRoleStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

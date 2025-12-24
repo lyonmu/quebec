@@ -278,19 +278,19 @@ func (_u *CoreMenuUpdate) SetMenuFromParent(v *CoreMenu) *CoreMenuUpdate {
 	return _u.SetMenuFromParentID(v.ID)
 }
 
-// AddMenuToDataRelationshipIDs adds the "menu_to_data_relationship" edge to the CoreDataRelationship entity by IDs.
-func (_u *CoreMenuUpdate) AddMenuToDataRelationshipIDs(ids ...string) *CoreMenuUpdate {
-	_u.mutation.AddMenuToDataRelationshipIDs(ids...)
+// AddDataRelationshipIDs adds the "data_relationships" edge to the CoreDataRelationship entity by IDs.
+func (_u *CoreMenuUpdate) AddDataRelationshipIDs(ids ...string) *CoreMenuUpdate {
+	_u.mutation.AddDataRelationshipIDs(ids...)
 	return _u
 }
 
-// AddMenuToDataRelationship adds the "menu_to_data_relationship" edges to the CoreDataRelationship entity.
-func (_u *CoreMenuUpdate) AddMenuToDataRelationship(v ...*CoreDataRelationship) *CoreMenuUpdate {
+// AddDataRelationships adds the "data_relationships" edges to the CoreDataRelationship entity.
+func (_u *CoreMenuUpdate) AddDataRelationships(v ...*CoreDataRelationship) *CoreMenuUpdate {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddMenuToDataRelationshipIDs(ids...)
+	return _u.AddDataRelationshipIDs(ids...)
 }
 
 // AddMenuToChildIDs adds the "menu_to_children" edge to the CoreMenu entity by IDs.
@@ -319,25 +319,25 @@ func (_u *CoreMenuUpdate) ClearMenuFromParent() *CoreMenuUpdate {
 	return _u
 }
 
-// ClearMenuToDataRelationship clears all "menu_to_data_relationship" edges to the CoreDataRelationship entity.
-func (_u *CoreMenuUpdate) ClearMenuToDataRelationship() *CoreMenuUpdate {
-	_u.mutation.ClearMenuToDataRelationship()
+// ClearDataRelationships clears all "data_relationships" edges to the CoreDataRelationship entity.
+func (_u *CoreMenuUpdate) ClearDataRelationships() *CoreMenuUpdate {
+	_u.mutation.ClearDataRelationships()
 	return _u
 }
 
-// RemoveMenuToDataRelationshipIDs removes the "menu_to_data_relationship" edge to CoreDataRelationship entities by IDs.
-func (_u *CoreMenuUpdate) RemoveMenuToDataRelationshipIDs(ids ...string) *CoreMenuUpdate {
-	_u.mutation.RemoveMenuToDataRelationshipIDs(ids...)
+// RemoveDataRelationshipIDs removes the "data_relationships" edge to CoreDataRelationship entities by IDs.
+func (_u *CoreMenuUpdate) RemoveDataRelationshipIDs(ids ...string) *CoreMenuUpdate {
+	_u.mutation.RemoveDataRelationshipIDs(ids...)
 	return _u
 }
 
-// RemoveMenuToDataRelationship removes "menu_to_data_relationship" edges to CoreDataRelationship entities.
-func (_u *CoreMenuUpdate) RemoveMenuToDataRelationship(v ...*CoreDataRelationship) *CoreMenuUpdate {
+// RemoveDataRelationships removes "data_relationships" edges to CoreDataRelationship entities.
+func (_u *CoreMenuUpdate) RemoveDataRelationships(v ...*CoreDataRelationship) *CoreMenuUpdate {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveMenuToDataRelationshipIDs(ids...)
+	return _u.RemoveDataRelationshipIDs(ids...)
 }
 
 // ClearMenuToChildren clears all "menu_to_children" edges to the CoreMenu entity.
@@ -513,12 +513,12 @@ func (_u *CoreMenuUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.MenuToDataRelationshipCleared() {
+	if _u.mutation.DataRelationshipsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   coremenu.MenuToDataRelationshipTable,
-			Columns: []string{coremenu.MenuToDataRelationshipColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   coremenu.DataRelationshipsTable,
+			Columns: coremenu.DataRelationshipsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(coredatarelationship.FieldID, field.TypeString),
@@ -526,12 +526,12 @@ func (_u *CoreMenuUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedMenuToDataRelationshipIDs(); len(nodes) > 0 && !_u.mutation.MenuToDataRelationshipCleared() {
+	if nodes := _u.mutation.RemovedDataRelationshipsIDs(); len(nodes) > 0 && !_u.mutation.DataRelationshipsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   coremenu.MenuToDataRelationshipTable,
-			Columns: []string{coremenu.MenuToDataRelationshipColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   coremenu.DataRelationshipsTable,
+			Columns: coremenu.DataRelationshipsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(coredatarelationship.FieldID, field.TypeString),
@@ -542,12 +542,12 @@ func (_u *CoreMenuUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.MenuToDataRelationshipIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.DataRelationshipsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   coremenu.MenuToDataRelationshipTable,
-			Columns: []string{coremenu.MenuToDataRelationshipColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   coremenu.DataRelationshipsTable,
+			Columns: coremenu.DataRelationshipsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(coredatarelationship.FieldID, field.TypeString),
@@ -871,19 +871,19 @@ func (_u *CoreMenuUpdateOne) SetMenuFromParent(v *CoreMenu) *CoreMenuUpdateOne {
 	return _u.SetMenuFromParentID(v.ID)
 }
 
-// AddMenuToDataRelationshipIDs adds the "menu_to_data_relationship" edge to the CoreDataRelationship entity by IDs.
-func (_u *CoreMenuUpdateOne) AddMenuToDataRelationshipIDs(ids ...string) *CoreMenuUpdateOne {
-	_u.mutation.AddMenuToDataRelationshipIDs(ids...)
+// AddDataRelationshipIDs adds the "data_relationships" edge to the CoreDataRelationship entity by IDs.
+func (_u *CoreMenuUpdateOne) AddDataRelationshipIDs(ids ...string) *CoreMenuUpdateOne {
+	_u.mutation.AddDataRelationshipIDs(ids...)
 	return _u
 }
 
-// AddMenuToDataRelationship adds the "menu_to_data_relationship" edges to the CoreDataRelationship entity.
-func (_u *CoreMenuUpdateOne) AddMenuToDataRelationship(v ...*CoreDataRelationship) *CoreMenuUpdateOne {
+// AddDataRelationships adds the "data_relationships" edges to the CoreDataRelationship entity.
+func (_u *CoreMenuUpdateOne) AddDataRelationships(v ...*CoreDataRelationship) *CoreMenuUpdateOne {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddMenuToDataRelationshipIDs(ids...)
+	return _u.AddDataRelationshipIDs(ids...)
 }
 
 // AddMenuToChildIDs adds the "menu_to_children" edge to the CoreMenu entity by IDs.
@@ -912,25 +912,25 @@ func (_u *CoreMenuUpdateOne) ClearMenuFromParent() *CoreMenuUpdateOne {
 	return _u
 }
 
-// ClearMenuToDataRelationship clears all "menu_to_data_relationship" edges to the CoreDataRelationship entity.
-func (_u *CoreMenuUpdateOne) ClearMenuToDataRelationship() *CoreMenuUpdateOne {
-	_u.mutation.ClearMenuToDataRelationship()
+// ClearDataRelationships clears all "data_relationships" edges to the CoreDataRelationship entity.
+func (_u *CoreMenuUpdateOne) ClearDataRelationships() *CoreMenuUpdateOne {
+	_u.mutation.ClearDataRelationships()
 	return _u
 }
 
-// RemoveMenuToDataRelationshipIDs removes the "menu_to_data_relationship" edge to CoreDataRelationship entities by IDs.
-func (_u *CoreMenuUpdateOne) RemoveMenuToDataRelationshipIDs(ids ...string) *CoreMenuUpdateOne {
-	_u.mutation.RemoveMenuToDataRelationshipIDs(ids...)
+// RemoveDataRelationshipIDs removes the "data_relationships" edge to CoreDataRelationship entities by IDs.
+func (_u *CoreMenuUpdateOne) RemoveDataRelationshipIDs(ids ...string) *CoreMenuUpdateOne {
+	_u.mutation.RemoveDataRelationshipIDs(ids...)
 	return _u
 }
 
-// RemoveMenuToDataRelationship removes "menu_to_data_relationship" edges to CoreDataRelationship entities.
-func (_u *CoreMenuUpdateOne) RemoveMenuToDataRelationship(v ...*CoreDataRelationship) *CoreMenuUpdateOne {
+// RemoveDataRelationships removes "data_relationships" edges to CoreDataRelationship entities.
+func (_u *CoreMenuUpdateOne) RemoveDataRelationships(v ...*CoreDataRelationship) *CoreMenuUpdateOne {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveMenuToDataRelationshipIDs(ids...)
+	return _u.RemoveDataRelationshipIDs(ids...)
 }
 
 // ClearMenuToChildren clears all "menu_to_children" edges to the CoreMenu entity.
@@ -1136,12 +1136,12 @@ func (_u *CoreMenuUpdateOne) sqlSave(ctx context.Context) (_node *CoreMenu, err 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.MenuToDataRelationshipCleared() {
+	if _u.mutation.DataRelationshipsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   coremenu.MenuToDataRelationshipTable,
-			Columns: []string{coremenu.MenuToDataRelationshipColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   coremenu.DataRelationshipsTable,
+			Columns: coremenu.DataRelationshipsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(coredatarelationship.FieldID, field.TypeString),
@@ -1149,12 +1149,12 @@ func (_u *CoreMenuUpdateOne) sqlSave(ctx context.Context) (_node *CoreMenu, err 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedMenuToDataRelationshipIDs(); len(nodes) > 0 && !_u.mutation.MenuToDataRelationshipCleared() {
+	if nodes := _u.mutation.RemovedDataRelationshipsIDs(); len(nodes) > 0 && !_u.mutation.DataRelationshipsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   coremenu.MenuToDataRelationshipTable,
-			Columns: []string{coremenu.MenuToDataRelationshipColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   coremenu.DataRelationshipsTable,
+			Columns: coremenu.DataRelationshipsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(coredatarelationship.FieldID, field.TypeString),
@@ -1165,12 +1165,12 @@ func (_u *CoreMenuUpdateOne) sqlSave(ctx context.Context) (_node *CoreMenu, err 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.MenuToDataRelationshipIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.DataRelationshipsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   coremenu.MenuToDataRelationshipTable,
-			Columns: []string{coremenu.MenuToDataRelationshipColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   coremenu.DataRelationshipsTable,
+			Columns: coremenu.DataRelationshipsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(coredatarelationship.FieldID, field.TypeString),

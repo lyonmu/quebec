@@ -167,19 +167,19 @@ func (_u *CoreRoleUpdate) AddRoleToUser(v ...*CoreUser) *CoreRoleUpdate {
 	return _u.AddRoleToUserIDs(ids...)
 }
 
-// AddRoleToDataRelationshipIDs adds the "role_to_data_relationship" edge to the CoreDataRelationship entity by IDs.
-func (_u *CoreRoleUpdate) AddRoleToDataRelationshipIDs(ids ...string) *CoreRoleUpdate {
-	_u.mutation.AddRoleToDataRelationshipIDs(ids...)
+// AddDataRelationshipIDs adds the "data_relationships" edge to the CoreDataRelationship entity by IDs.
+func (_u *CoreRoleUpdate) AddDataRelationshipIDs(ids ...string) *CoreRoleUpdate {
+	_u.mutation.AddDataRelationshipIDs(ids...)
 	return _u
 }
 
-// AddRoleToDataRelationship adds the "role_to_data_relationship" edges to the CoreDataRelationship entity.
-func (_u *CoreRoleUpdate) AddRoleToDataRelationship(v ...*CoreDataRelationship) *CoreRoleUpdate {
+// AddDataRelationships adds the "data_relationships" edges to the CoreDataRelationship entity.
+func (_u *CoreRoleUpdate) AddDataRelationships(v ...*CoreDataRelationship) *CoreRoleUpdate {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddRoleToDataRelationshipIDs(ids...)
+	return _u.AddDataRelationshipIDs(ids...)
 }
 
 // Mutation returns the CoreRoleMutation object of the builder.
@@ -208,25 +208,25 @@ func (_u *CoreRoleUpdate) RemoveRoleToUser(v ...*CoreUser) *CoreRoleUpdate {
 	return _u.RemoveRoleToUserIDs(ids...)
 }
 
-// ClearRoleToDataRelationship clears all "role_to_data_relationship" edges to the CoreDataRelationship entity.
-func (_u *CoreRoleUpdate) ClearRoleToDataRelationship() *CoreRoleUpdate {
-	_u.mutation.ClearRoleToDataRelationship()
+// ClearDataRelationships clears all "data_relationships" edges to the CoreDataRelationship entity.
+func (_u *CoreRoleUpdate) ClearDataRelationships() *CoreRoleUpdate {
+	_u.mutation.ClearDataRelationships()
 	return _u
 }
 
-// RemoveRoleToDataRelationshipIDs removes the "role_to_data_relationship" edge to CoreDataRelationship entities by IDs.
-func (_u *CoreRoleUpdate) RemoveRoleToDataRelationshipIDs(ids ...string) *CoreRoleUpdate {
-	_u.mutation.RemoveRoleToDataRelationshipIDs(ids...)
+// RemoveDataRelationshipIDs removes the "data_relationships" edge to CoreDataRelationship entities by IDs.
+func (_u *CoreRoleUpdate) RemoveDataRelationshipIDs(ids ...string) *CoreRoleUpdate {
+	_u.mutation.RemoveDataRelationshipIDs(ids...)
 	return _u
 }
 
-// RemoveRoleToDataRelationship removes "role_to_data_relationship" edges to CoreDataRelationship entities.
-func (_u *CoreRoleUpdate) RemoveRoleToDataRelationship(v ...*CoreDataRelationship) *CoreRoleUpdate {
+// RemoveDataRelationships removes "data_relationships" edges to CoreDataRelationship entities.
+func (_u *CoreRoleUpdate) RemoveDataRelationships(v ...*CoreDataRelationship) *CoreRoleUpdate {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveRoleToDataRelationshipIDs(ids...)
+	return _u.RemoveDataRelationshipIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -370,12 +370,12 @@ func (_u *CoreRoleUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.RoleToDataRelationshipCleared() {
+	if _u.mutation.DataRelationshipsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   corerole.RoleToDataRelationshipTable,
-			Columns: []string{corerole.RoleToDataRelationshipColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   corerole.DataRelationshipsTable,
+			Columns: corerole.DataRelationshipsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(coredatarelationship.FieldID, field.TypeString),
@@ -383,12 +383,12 @@ func (_u *CoreRoleUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedRoleToDataRelationshipIDs(); len(nodes) > 0 && !_u.mutation.RoleToDataRelationshipCleared() {
+	if nodes := _u.mutation.RemovedDataRelationshipsIDs(); len(nodes) > 0 && !_u.mutation.DataRelationshipsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   corerole.RoleToDataRelationshipTable,
-			Columns: []string{corerole.RoleToDataRelationshipColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   corerole.DataRelationshipsTable,
+			Columns: corerole.DataRelationshipsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(coredatarelationship.FieldID, field.TypeString),
@@ -399,12 +399,12 @@ func (_u *CoreRoleUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RoleToDataRelationshipIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.DataRelationshipsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   corerole.RoleToDataRelationshipTable,
-			Columns: []string{corerole.RoleToDataRelationshipColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   corerole.DataRelationshipsTable,
+			Columns: corerole.DataRelationshipsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(coredatarelationship.FieldID, field.TypeString),
@@ -572,19 +572,19 @@ func (_u *CoreRoleUpdateOne) AddRoleToUser(v ...*CoreUser) *CoreRoleUpdateOne {
 	return _u.AddRoleToUserIDs(ids...)
 }
 
-// AddRoleToDataRelationshipIDs adds the "role_to_data_relationship" edge to the CoreDataRelationship entity by IDs.
-func (_u *CoreRoleUpdateOne) AddRoleToDataRelationshipIDs(ids ...string) *CoreRoleUpdateOne {
-	_u.mutation.AddRoleToDataRelationshipIDs(ids...)
+// AddDataRelationshipIDs adds the "data_relationships" edge to the CoreDataRelationship entity by IDs.
+func (_u *CoreRoleUpdateOne) AddDataRelationshipIDs(ids ...string) *CoreRoleUpdateOne {
+	_u.mutation.AddDataRelationshipIDs(ids...)
 	return _u
 }
 
-// AddRoleToDataRelationship adds the "role_to_data_relationship" edges to the CoreDataRelationship entity.
-func (_u *CoreRoleUpdateOne) AddRoleToDataRelationship(v ...*CoreDataRelationship) *CoreRoleUpdateOne {
+// AddDataRelationships adds the "data_relationships" edges to the CoreDataRelationship entity.
+func (_u *CoreRoleUpdateOne) AddDataRelationships(v ...*CoreDataRelationship) *CoreRoleUpdateOne {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddRoleToDataRelationshipIDs(ids...)
+	return _u.AddDataRelationshipIDs(ids...)
 }
 
 // Mutation returns the CoreRoleMutation object of the builder.
@@ -613,25 +613,25 @@ func (_u *CoreRoleUpdateOne) RemoveRoleToUser(v ...*CoreUser) *CoreRoleUpdateOne
 	return _u.RemoveRoleToUserIDs(ids...)
 }
 
-// ClearRoleToDataRelationship clears all "role_to_data_relationship" edges to the CoreDataRelationship entity.
-func (_u *CoreRoleUpdateOne) ClearRoleToDataRelationship() *CoreRoleUpdateOne {
-	_u.mutation.ClearRoleToDataRelationship()
+// ClearDataRelationships clears all "data_relationships" edges to the CoreDataRelationship entity.
+func (_u *CoreRoleUpdateOne) ClearDataRelationships() *CoreRoleUpdateOne {
+	_u.mutation.ClearDataRelationships()
 	return _u
 }
 
-// RemoveRoleToDataRelationshipIDs removes the "role_to_data_relationship" edge to CoreDataRelationship entities by IDs.
-func (_u *CoreRoleUpdateOne) RemoveRoleToDataRelationshipIDs(ids ...string) *CoreRoleUpdateOne {
-	_u.mutation.RemoveRoleToDataRelationshipIDs(ids...)
+// RemoveDataRelationshipIDs removes the "data_relationships" edge to CoreDataRelationship entities by IDs.
+func (_u *CoreRoleUpdateOne) RemoveDataRelationshipIDs(ids ...string) *CoreRoleUpdateOne {
+	_u.mutation.RemoveDataRelationshipIDs(ids...)
 	return _u
 }
 
-// RemoveRoleToDataRelationship removes "role_to_data_relationship" edges to CoreDataRelationship entities.
-func (_u *CoreRoleUpdateOne) RemoveRoleToDataRelationship(v ...*CoreDataRelationship) *CoreRoleUpdateOne {
+// RemoveDataRelationships removes "data_relationships" edges to CoreDataRelationship entities.
+func (_u *CoreRoleUpdateOne) RemoveDataRelationships(v ...*CoreDataRelationship) *CoreRoleUpdateOne {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveRoleToDataRelationshipIDs(ids...)
+	return _u.RemoveDataRelationshipIDs(ids...)
 }
 
 // Where appends a list predicates to the CoreRoleUpdate builder.
@@ -805,12 +805,12 @@ func (_u *CoreRoleUpdateOne) sqlSave(ctx context.Context) (_node *CoreRole, err 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.RoleToDataRelationshipCleared() {
+	if _u.mutation.DataRelationshipsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   corerole.RoleToDataRelationshipTable,
-			Columns: []string{corerole.RoleToDataRelationshipColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   corerole.DataRelationshipsTable,
+			Columns: corerole.DataRelationshipsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(coredatarelationship.FieldID, field.TypeString),
@@ -818,12 +818,12 @@ func (_u *CoreRoleUpdateOne) sqlSave(ctx context.Context) (_node *CoreRole, err 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedRoleToDataRelationshipIDs(); len(nodes) > 0 && !_u.mutation.RoleToDataRelationshipCleared() {
+	if nodes := _u.mutation.RemovedDataRelationshipsIDs(); len(nodes) > 0 && !_u.mutation.DataRelationshipsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   corerole.RoleToDataRelationshipTable,
-			Columns: []string{corerole.RoleToDataRelationshipColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   corerole.DataRelationshipsTable,
+			Columns: corerole.DataRelationshipsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(coredatarelationship.FieldID, field.TypeString),
@@ -834,12 +834,12 @@ func (_u *CoreRoleUpdateOne) sqlSave(ctx context.Context) (_node *CoreRole, err 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RoleToDataRelationshipIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.DataRelationshipsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   corerole.RoleToDataRelationshipTable,
-			Columns: []string{corerole.RoleToDataRelationshipColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   corerole.DataRelationshipsTable,
+			Columns: corerole.DataRelationshipsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(coredatarelationship.FieldID, field.TypeString),

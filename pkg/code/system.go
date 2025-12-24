@@ -40,4 +40,8 @@ var (
 
 	// 角色菜单绑定相关
 	RoleMenuBindFailed = Response{Code: 51031, Message: "角色菜单绑定失败"}
+
+	// 操作日志相关
+	LogCreateFailed = Response{Code: 51032, Message: "创建操作日志失败"}
+	LogQueryFailed  = Response{Code: 51033, Message: "查询操作日志失败"}
 )

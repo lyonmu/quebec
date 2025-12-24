@@ -60,10 +60,11 @@ type SystemOnlineUserListResp struct {
 }
 
 type SystemRoleResp struct {
-	ID     string           `json:"id,omitempty"`     // 角色ID
-	Name   string           `json:"name,omitempty"`   // 角色名称
-	Remark string           `json:"remark,omitempty"` // 角色备注
-	Status constant.YesOrNo `json:"status,omitempty"` // 角色状态 [1: 启用, 2: 禁用]
+	ID         string           `json:"id,omitempty"`          // 角色ID
+	Name       string           `json:"name,omitempty"`        // 角色名称
+	Remark     string           `json:"remark,omitempty"`      // 角色备注
+	Status     constant.YesOrNo `json:"status,omitempty"`      // 角色状态 [1: 启用, 2: 禁用]
+	UsersCount int              `json:"users_count,omitempty"` // 用户数量
 }
 
 func (r *SystemRoleResp) LoadDb(e *ent.CoreRole) {
@@ -120,4 +121,44 @@ type SystemUserListResp struct {
 	Items    []*SystemUserResp `json:"items,omitempty"`     // 用户列表
 	Page     int               `json:"page,omitempty"`      // 页码
 	PageSize int               `json:"page_size,omitempty"` // 每页条数
+}
+
+type SystemOperationLogResp struct {
+	ID                   string               `json:"id"`                               // ID
+	Username             string               `json:"username"`                         // 用户名
+	Nickname             string               `json:"nickname"`                         // 用户昵称
+	AccessIP             string               `json:"access_ip"`                        // 访问IP
+	OperationTime        int64                `json:"operation_time"`                   // 操作时间
+	OperationType        common.OperationType `json:"operation_type"`                   // 操作类型
+	Os                   string               `json:"os,omitempty"`                     // 操作系统
+	Platform             string               `json:"platform,omitempty"`               // 操作平台
+	BrowserName          string               `json:"browser_name,omitempty"`           // 浏览器名称
+	BrowserVersion       string               `json:"browser_version,omitempty"`        // 浏览器版本
+	BrowserEngineName    string               `json:"browser_engine_name,omitempty"`    // 浏览器引擎名称
+	BrowserEngineVersion string               `json:"browser_engine_version,omitempty"` // 浏览器引擎版本
+}
+
+func (r *SystemOperationLogResp) LoadDb(e *ent.CoreOperationLog) {
+	r.ID = e.UserID
+	r.AccessIP = e.AccessIP
+	r.OperationTime = e.OperationTime
+	r.OperationType = e.OperationType
+	r.Os = e.Os
+	r.Platform = e.Platform
+	r.BrowserName = e.BrowserName
+	r.BrowserVersion = e.BrowserVersion
+	r.BrowserEngineName = e.BrowserEngineName
+	r.BrowserEngineVersion = e.BrowserEngineVersion
+
+	if e.Edges.OperationLogFromUser != nil {
+		r.Username = e.Edges.OperationLogFromUser.Username
+		r.Nickname = e.Edges.OperationLogFromUser.Nickname
+	}
+}
+
+type SystemOperationLogListResp struct {
+	Total    int                       `json:"total,omitempty"`     // 总条数
+	Items    []*SystemOperationLogResp `json:"items,omitempty"`     // 操作日志列表
+	Page     int                       `json:"page,omitempty"`      // 页码
+	PageSize int                       `json:"page_size,omitempty"` // 每页条数
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/lyonmu/quebec/cmd/core/internal/dto/request"
 	"github.com/lyonmu/quebec/cmd/core/internal/dto/response"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
 	"github.com/lyonmu/quebec/pkg/code"
@@ -45,6 +46,13 @@ func (s *SystemSvc) RolePage(ctx context.Context, req *request.SystemRolePageReq
 	for _, row := range rows {
 		item := response.SystemRoleResp{}
 		item.LoadDb(row)
+		// 统计该角色的用户数量
+		count, err := row.QueryRoleToUser().Where(coreuser.DeletedAtIsNil()).Count(ctx)
+		if err != nil {
+			global.Logger.Sugar().Errorf("count role users failed: %s", err)
+		} else {
+			item.UsersCount = count
+		}
 		items = append(items, &item)
 	}
 
@@ -80,6 +88,13 @@ func (s *SystemSvc) RoleList(ctx context.Context, req *request.SystemRoleListReq
 	for _, row := range rows {
 		item := response.SystemRoleResp{}
 		item.LoadDb(row)
+		// 统计该角色的用户数量
+		count, err := row.QueryRoleToUser().Where(coreuser.DeletedAtIsNil()).Count(ctx)
+		if err != nil {
+			global.Logger.Sugar().Errorf("count role users failed: %s", err)
+		} else {
+			item.UsersCount = count
+		}
 		items = append(items, &item)
 	}
 

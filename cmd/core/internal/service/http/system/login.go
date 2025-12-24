@@ -18,7 +18,7 @@ import (
 	"github.com/mssola/useragent"
 )
 
-func (s *SystemSvc) Login(req *request.SystemLoginRequest, ua *useragent.UserAgent, access_ip string, ctx context.Context) (*response.SystemInfoResponse, error) {
+func (s *SystemSvc) Login(req *request.SystemLoginRequest, ua *useragent.UserAgent, uaStr, access_ip string, ctx context.Context) (*response.SystemInfoResponse, error) {
 	var (
 		resp response.SystemInfoResponse
 	)
@@ -75,14 +75,27 @@ func (s *SystemSvc) Login(req *request.SystemLoginRequest, ua *useragent.UserAge
 	browserName, browserVersion := ua.Browser()
 	browserEngineName, browserEngineVersion := ua.Engine()
 
-	exists, err := global.EntClient.CoreOnLineUser.Query().Where(coreonlineuser.UserIDEQ(u.ID), coreonlineuser.DeletedAtIsNil()).Exist(ctx)
-	if err != nil {
-		global.Logger.Sugar().Errorf("用户 %s 登录查询在线用户失败: %v", req.Username, err)
+	tx, terr := global.EntClient.Tx(ctx)
+	if terr != nil {
+		global.Logger.Sugar().Errorf("Failed to start transaction: %v", terr)
+		return nil, &code.Failed
+	}
+
+	defer func() {
+		if terr != nil {
+			global.Logger.Sugar().Errorf("Transaction rolled back due to error: %v", terr)
+			_ = tx.Rollback()
+		}
+	}()
+
+	exists, terr := tx.CoreOnLineUser.Query().Where(coreonlineuser.UserIDEQ(u.ID), coreonlineuser.DeletedAtIsNil()).Exist(ctx)
+	if terr != nil {
+		global.Logger.Sugar().Errorf("用户 %s 登录查询在线用户失败: %v", req.Username, terr)
 		return nil, &code.Failed
 	}
 
 	if exists {
-		_, uerr := global.EntClient.CoreOnLineUser.Update().
+		_, terr = tx.CoreOnLineUser.Update().
 			Where(coreonlineuser.UserIDEQ(u.ID), coreonlineuser.DeletedAtIsNil()).
 			SetAccessIP(access_ip).
 			SetLastOperationTime(time.Now().Unix()).
@@ -94,12 +107,12 @@ func (s *SystemSvc) Login(req *request.SystemLoginRequest, ua *useragent.UserAge
 			SetBrowserEngineName(browserEngineName).
 			SetBrowserEngineVersion(browserEngineVersion).
 			Save(ctx)
-		if uerr != nil {
-			global.Logger.Sugar().Errorf("用户 %s 登录更新在线用户失败: %v", req.Username, uerr)
+		if terr != nil {
+			global.Logger.Sugar().Errorf("用户 %s 登录更新在线用户失败: %v", req.Username, terr)
 			return nil, &code.Failed
 		}
 	} else {
-		_, oerr := global.EntClient.CoreOnLineUser.Create().
+		_, terr = tx.CoreOnLineUser.Create().
 			SetUserID(u.ID).
 			SetAccessIP(access_ip).
 			SetLastOperationTime(time.Now().Unix()).
@@ -111,10 +124,31 @@ func (s *SystemSvc) Login(req *request.SystemLoginRequest, ua *useragent.UserAge
 			SetBrowserEngineName(browserEngineName).
 			SetBrowserEngineVersion(browserEngineVersion).
 			Save(ctx)
-		if oerr != nil {
-			global.Logger.Sugar().Errorf("用户 %s 登录记录在线用户失败: %v", req.Username, oerr)
+		if terr != nil {
+			global.Logger.Sugar().Errorf("用户 %s 登录记录在线用户失败: %v", req.Username, terr)
 			return nil, &code.Failed
 		}
+	}
+
+	if _, terr = tx.CoreOperationLog.Create().
+		SetUserID(u.ID).
+		SetAccessIP(access_ip).
+		SetOperationTime(time.Now().Unix()).
+		SetOperationType(common.OperationLogin).
+		SetOs(ua.OS()).
+		SetPlatform(ua.Platform()).
+		SetBrowserName(browserName).
+		SetBrowserVersion(browserVersion).
+		SetBrowserEngineName(browserEngineName).
+		SetBrowserEngineVersion(browserEngineVersion).
+		Save(ctx); terr != nil {
+		global.Logger.Sugar().Errorf("Failed to create operation log: %v", terr)
+		return nil, &code.Failed
+	}
+
+	if terr = tx.Commit(); terr != nil {
+		global.Logger.Sugar().Errorf("Failed to commit transaction: %v", terr)
+		return nil, &code.Failed
 	}
 
 	global.Logger.Sugar().Infof("用户 %s 登录成功", u.Username)

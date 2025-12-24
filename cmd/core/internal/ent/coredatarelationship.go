@@ -11,8 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/lyonmu/quebec/cmd/core/internal/common"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coredatarelationship"
-	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
-	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 )
 
 // 数据关系信息表
@@ -41,35 +39,31 @@ type CoreDataRelationship struct {
 
 // CoreDataRelationshipEdges holds the relations/edges for other nodes in the graph.
 type CoreDataRelationshipEdges struct {
-	// DataRelationshipFromMenu holds the value of the data_relationship_from_menu edge.
-	DataRelationshipFromMenu *CoreMenu `json:"data_relationship_from_menu,omitempty"`
-	// DataRelationshipFromRole holds the value of the data_relationship_from_role edge.
-	DataRelationshipFromRole *CoreRole `json:"data_relationship_from_role,omitempty"`
+	// Menu holds the value of the menu edge.
+	Menu []*CoreMenu `json:"menu,omitempty"`
+	// Role holds the value of the role edge.
+	Role []*CoreRole `json:"role,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
 }
 
-// DataRelationshipFromMenuOrErr returns the DataRelationshipFromMenu value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e CoreDataRelationshipEdges) DataRelationshipFromMenuOrErr() (*CoreMenu, error) {
-	if e.DataRelationshipFromMenu != nil {
-		return e.DataRelationshipFromMenu, nil
-	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: coremenu.Label}
+// MenuOrErr returns the Menu value or an error if the edge
+// was not loaded in eager-loading.
+func (e CoreDataRelationshipEdges) MenuOrErr() ([]*CoreMenu, error) {
+	if e.loadedTypes[0] {
+		return e.Menu, nil
 	}
-	return nil, &NotLoadedError{edge: "data_relationship_from_menu"}
+	return nil, &NotLoadedError{edge: "menu"}
 }
 
-// DataRelationshipFromRoleOrErr returns the DataRelationshipFromRole value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e CoreDataRelationshipEdges) DataRelationshipFromRoleOrErr() (*CoreRole, error) {
-	if e.DataRelationshipFromRole != nil {
-		return e.DataRelationshipFromRole, nil
-	} else if e.loadedTypes[1] {
-		return nil, &NotFoundError{label: corerole.Label}
+// RoleOrErr returns the Role value or an error if the edge
+// was not loaded in eager-loading.
+func (e CoreDataRelationshipEdges) RoleOrErr() ([]*CoreRole, error) {
+	if e.loadedTypes[1] {
+		return e.Role, nil
 	}
-	return nil, &NotLoadedError{edge: "data_relationship_from_role"}
+	return nil, &NotLoadedError{edge: "role"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -154,14 +148,14 @@ func (_m *CoreDataRelationship) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryDataRelationshipFromMenu queries the "data_relationship_from_menu" edge of the CoreDataRelationship entity.
-func (_m *CoreDataRelationship) QueryDataRelationshipFromMenu() *CoreMenuQuery {
-	return NewCoreDataRelationshipClient(_m.config).QueryDataRelationshipFromMenu(_m)
+// QueryMenu queries the "menu" edge of the CoreDataRelationship entity.
+func (_m *CoreDataRelationship) QueryMenu() *CoreMenuQuery {
+	return NewCoreDataRelationshipClient(_m.config).QueryMenu(_m)
 }
 
-// QueryDataRelationshipFromRole queries the "data_relationship_from_role" edge of the CoreDataRelationship entity.
-func (_m *CoreDataRelationship) QueryDataRelationshipFromRole() *CoreRoleQuery {
-	return NewCoreDataRelationshipClient(_m.config).QueryDataRelationshipFromRole(_m)
+// QueryRole queries the "role" edge of the CoreDataRelationship entity.
+func (_m *CoreDataRelationship) QueryRole() *CoreRoleQuery {
+	return NewCoreDataRelationshipClient(_m.config).QueryRole(_m)
 }
 
 // Update returns a builder for updating this CoreDataRelationship.

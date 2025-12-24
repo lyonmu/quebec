@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreonlineuser"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreoperationlog"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/predicate"
@@ -21,13 +22,14 @@ import (
 // CoreUserQuery is the builder for querying CoreUser entities.
 type CoreUserQuery struct {
 	config
-	ctx              *QueryContext
-	order            []coreuser.OrderOption
-	inters           []Interceptor
-	predicates       []predicate.CoreUser
-	withUserFromRole *CoreRoleQuery
-	withOnLineToUser *CoreOnLineUserQuery
-	modifiers        []func(*sql.Selector)
+	ctx                    *QueryContext
+	order                  []coreuser.OrderOption
+	inters                 []Interceptor
+	predicates             []predicate.CoreUser
+	withUserFromRole       *CoreRoleQuery
+	withOnLineToUser       *CoreOnLineUserQuery
+	withOperationLogToUser *CoreOperationLogQuery
+	modifiers              []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -101,6 +103,28 @@ func (_q *CoreUserQuery) QueryOnLineToUser() *CoreOnLineUserQuery {
 			sqlgraph.From(coreuser.Table, coreuser.FieldID, selector),
 			sqlgraph.To(coreonlineuser.Table, coreonlineuser.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, coreuser.OnLineToUserTable, coreuser.OnLineToUserColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryOperationLogToUser chains the current query on the "operation_log_to_user" edge.
+func (_q *CoreUserQuery) QueryOperationLogToUser() *CoreOperationLogQuery {
+	query := (&CoreOperationLogClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(coreuser.Table, coreuser.FieldID, selector),
+			sqlgraph.To(coreoperationlog.Table, coreoperationlog.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, coreuser.OperationLogToUserTable, coreuser.OperationLogToUserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -295,13 +319,14 @@ func (_q *CoreUserQuery) Clone() *CoreUserQuery {
 		return nil
 	}
 	return &CoreUserQuery{
-		config:           _q.config,
-		ctx:              _q.ctx.Clone(),
-		order:            append([]coreuser.OrderOption{}, _q.order...),
-		inters:           append([]Interceptor{}, _q.inters...),
-		predicates:       append([]predicate.CoreUser{}, _q.predicates...),
-		withUserFromRole: _q.withUserFromRole.Clone(),
-		withOnLineToUser: _q.withOnLineToUser.Clone(),
+		config:                 _q.config,
+		ctx:                    _q.ctx.Clone(),
+		order:                  append([]coreuser.OrderOption{}, _q.order...),
+		inters:                 append([]Interceptor{}, _q.inters...),
+		predicates:             append([]predicate.CoreUser{}, _q.predicates...),
+		withUserFromRole:       _q.withUserFromRole.Clone(),
+		withOnLineToUser:       _q.withOnLineToUser.Clone(),
+		withOperationLogToUser: _q.withOperationLogToUser.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -328,6 +353,17 @@ func (_q *CoreUserQuery) WithOnLineToUser(opts ...func(*CoreOnLineUserQuery)) *C
 		opt(query)
 	}
 	_q.withOnLineToUser = query
+	return _q
+}
+
+// WithOperationLogToUser tells the query-builder to eager-load the nodes that are connected to
+// the "operation_log_to_user" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *CoreUserQuery) WithOperationLogToUser(opts ...func(*CoreOperationLogQuery)) *CoreUserQuery {
+	query := (&CoreOperationLogClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withOperationLogToUser = query
 	return _q
 }
 
@@ -409,9 +445,10 @@ func (_q *CoreUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Cor
 	var (
 		nodes       = []*CoreUser{}
 		_spec       = _q.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			_q.withUserFromRole != nil,
 			_q.withOnLineToUser != nil,
+			_q.withOperationLogToUser != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -445,6 +482,15 @@ func (_q *CoreUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Cor
 		if err := _q.loadOnLineToUser(ctx, query, nodes,
 			func(n *CoreUser) { n.Edges.OnLineToUser = []*CoreOnLineUser{} },
 			func(n *CoreUser, e *CoreOnLineUser) { n.Edges.OnLineToUser = append(n.Edges.OnLineToUser, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withOperationLogToUser; query != nil {
+		if err := _q.loadOperationLogToUser(ctx, query, nodes,
+			func(n *CoreUser) { n.Edges.OperationLogToUser = []*CoreOperationLog{} },
+			func(n *CoreUser, e *CoreOperationLog) {
+				n.Edges.OperationLogToUser = append(n.Edges.OperationLogToUser, e)
+			}); err != nil {
 			return nil, err
 		}
 	}
@@ -495,6 +541,36 @@ func (_q *CoreUserQuery) loadOnLineToUser(ctx context.Context, query *CoreOnLine
 	}
 	query.Where(predicate.CoreOnLineUser(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(coreuser.OnLineToUserColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *CoreUserQuery) loadOperationLogToUser(ctx context.Context, query *CoreOperationLogQuery, nodes []*CoreUser, init func(*CoreUser), assign func(*CoreUser, *CoreOperationLog)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*CoreUser)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(coreoperationlog.FieldUserID)
+	}
+	query.Where(predicate.CoreOperationLog(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(coreuser.OperationLogToUserColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

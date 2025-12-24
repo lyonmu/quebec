@@ -32,8 +32,8 @@ const (
 	FieldSystem = "system"
 	// EdgeRoleToUser holds the string denoting the role_to_user edge name in mutations.
 	EdgeRoleToUser = "role_to_user"
-	// EdgeRoleToDataRelationship holds the string denoting the role_to_data_relationship edge name in mutations.
-	EdgeRoleToDataRelationship = "role_to_data_relationship"
+	// EdgeDataRelationships holds the string denoting the data_relationships edge name in mutations.
+	EdgeDataRelationships = "data_relationships"
 	// Table holds the table name of the corerole in the database.
 	Table = "quebec_core_role"
 	// RoleToUserTable is the table that holds the role_to_user relation/edge.
@@ -43,13 +43,11 @@ const (
 	RoleToUserInverseTable = "quebec_core_user"
 	// RoleToUserColumn is the table column denoting the role_to_user relation/edge.
 	RoleToUserColumn = "role_id"
-	// RoleToDataRelationshipTable is the table that holds the role_to_data_relationship relation/edge.
-	RoleToDataRelationshipTable = "quebec_core_data_relationship"
-	// RoleToDataRelationshipInverseTable is the table name for the CoreDataRelationship entity.
+	// DataRelationshipsTable is the table that holds the data_relationships relation/edge. The primary key declared below.
+	DataRelationshipsTable = "core_data_relationship_role"
+	// DataRelationshipsInverseTable is the table name for the CoreDataRelationship entity.
 	// It exists in this package in order to avoid circular dependency with the "coredatarelationship" package.
-	RoleToDataRelationshipInverseTable = "quebec_core_data_relationship"
-	// RoleToDataRelationshipColumn is the table column denoting the role_to_data_relationship relation/edge.
-	RoleToDataRelationshipColumn = "role_id"
+	DataRelationshipsInverseTable = "quebec_core_data_relationship"
 )
 
 // Columns holds all SQL columns for corerole fields.
@@ -63,6 +61,12 @@ var Columns = []string{
 	FieldStatus,
 	FieldSystem,
 }
+
+var (
+	// DataRelationshipsPrimaryKey and DataRelationshipsColumn2 are the table columns denoting the
+	// primary key for the data_relationships relation (M2M).
+	DataRelationshipsPrimaryKey = []string{"core_data_relationship_id", "core_role_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -154,17 +158,17 @@ func ByRoleToUser(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByRoleToDataRelationshipCount orders the results by role_to_data_relationship count.
-func ByRoleToDataRelationshipCount(opts ...sql.OrderTermOption) OrderOption {
+// ByDataRelationshipsCount orders the results by data_relationships count.
+func ByDataRelationshipsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newRoleToDataRelationshipStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newDataRelationshipsStep(), opts...)
 	}
 }
 
-// ByRoleToDataRelationship orders the results by role_to_data_relationship terms.
-func ByRoleToDataRelationship(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByDataRelationships orders the results by data_relationships terms.
+func ByDataRelationships(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newRoleToDataRelationshipStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newDataRelationshipsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newRoleToUserStep() *sqlgraph.Step {
@@ -174,10 +178,10 @@ func newRoleToUserStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, RoleToUserTable, RoleToUserColumn),
 	)
 }
-func newRoleToDataRelationshipStep() *sqlgraph.Step {
+func newDataRelationshipsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(RoleToDataRelationshipInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, RoleToDataRelationshipTable, RoleToDataRelationshipColumn),
+		sqlgraph.To(DataRelationshipsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, DataRelationshipsTable, DataRelationshipsPrimaryKey...),
 	)
 }

@@ -145,6 +145,511 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/system/menu": {
+            "post": {
+                "description": "添加菜单",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "添加菜单",
+                "parameters": [
+                    {
+                        "description": "菜单信息",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.SystemMenuAddReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/system/menu/enable/{id}": {
+            "put": {
+                "description": "启停菜单状态",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "启停菜单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "状态 [1: 启用, 2: 禁用]",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.EnableReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/system/menu/label": {
+            "get": {
+                "description": "获取菜单标签",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "菜单标签",
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.Options"
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/system/menu/list": {
+            "get": {
+                "description": "获取全部菜单列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "全部菜单列表",
+                "parameters": [
+                    {
+                        "enum": [
+                            1,
+                            2,
+                            3
+                        ],
+                        "type": "integer",
+                        "format": "int32",
+                        "x-enum-varnames": [
+                            "MenuTypeDirectory",
+                            "MenuTypeMenu",
+                            "MenuTypeButton"
+                        ],
+                        "description": "菜单类型",
+                        "name": "menu_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "菜单名称",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            1,
+                            2
+                        ],
+                        "type": "integer",
+                        "format": "int32",
+                        "x-enum-varnames": [
+                            "Yes",
+                            "No"
+                        ],
+                        "description": "菜单状态",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.SystemMenuResp"
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/system/menu/page": {
+            "get": {
+                "description": "获取菜单分页列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "菜单分页列表",
+                "parameters": [
+                    {
+                        "enum": [
+                            1,
+                            2,
+                            3
+                        ],
+                        "type": "integer",
+                        "format": "int32",
+                        "x-enum-varnames": [
+                            "MenuTypeDirectory",
+                            "MenuTypeMenu",
+                            "MenuTypeButton"
+                        ],
+                        "description": "菜单类型 [1: 目录, 2: 菜单, 3: 按钮]",
+                        "name": "menu_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "菜单名称",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "maximum": 1000,
+                        "minimum": 10,
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页条数",
+                        "name": "page_size",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "父菜单ID",
+                        "name": "parent_id",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            1,
+                            2
+                        ],
+                        "type": "integer",
+                        "format": "int32",
+                        "x-enum-varnames": [
+                            "Yes",
+                            "No"
+                        ],
+                        "description": "菜单状态 [1: 启用, 2: 禁用]",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "data": {
+                                            "$ref": "#/definitions/response.SystemMenuListResp"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/system/menu/tree": {
+            "get": {
+                "description": "获取菜单树形列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "菜单树形列表",
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.SystemMenuTreeResp"
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/system/menu/{id}": {
+            "get": {
+                "description": "获取菜单详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "获取菜单详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "data": {
+                                            "$ref": "#/definitions/response.SystemMenuResp"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "编辑菜单",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "编辑菜单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "菜单信息",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.SystemMenuUpdateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "删除菜单",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "删除菜单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/v1/system/onlineuser/clearance/{id}": {
             "delete": {
                 "description": "清除在线用户",
@@ -301,6 +806,183 @@ const docTemplate = `{
                                         },
                                         "data": {
                                             "$ref": "#/definitions/response.SystemOnlineUserListResp"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/system/operation-log/page": {
+            "get": {
+                "description": "获取操作日志分页列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "操作日志分页列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "访问IP",
+                        "name": "access_ip",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "结束时间",
+                        "name": "end_time",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12,
+                            13,
+                            14,
+                            15,
+                            16,
+                            17,
+                            18,
+                            19,
+                            20
+                        ],
+                        "type": "integer",
+                        "x-enum-comments": {
+                            "OperationLogClear": "清理操作日志",
+                            "OperationLogExport": "导出操作日志",
+                            "OperationLogQuery": "查询操作日志",
+                            "OperationLogin": "登录操作",
+                            "OperationLogout": "登出操作",
+                            "OperationMenuCreate": "创建菜单",
+                            "OperationMenuDelete": "删除菜单",
+                            "OperationMenuEnable": "启用/禁用菜单",
+                            "OperationMenuUpdate": "更新菜单",
+                            "OperationOnlineUserClearance": "踢出在线用户",
+                            "OperationPasswordChange": "修改密码",
+                            "OperationRoleBindMenus": "角色绑定菜单",
+                            "OperationRoleCreate": "创建角色",
+                            "OperationRoleDelete": "删除角色",
+                            "OperationRoleEnable": "启用/禁用角色",
+                            "OperationRoleUpdate": "更新角色",
+                            "OperationUserCreate": "创建用户",
+                            "OperationUserDelete": "删除用户",
+                            "OperationUserEnable": "启用/禁用用户",
+                            "OperationUserUpdate": "更新用户"
+                        },
+                        "x-enum-descriptions": [
+                            "登录操作",
+                            "登出操作",
+                            "创建用户",
+                            "更新用户",
+                            "删除用户",
+                            "创建角色",
+                            "更新角色",
+                            "删除角色",
+                            "创建菜单",
+                            "更新菜单",
+                            "删除菜单",
+                            "踢出在线用户",
+                            "查询操作日志",
+                            "导出操作日志",
+                            "清理操作日志",
+                            "修改密码",
+                            "启用/禁用用户",
+                            "启用/禁用角色",
+                            "启用/禁用菜单",
+                            "角色绑定菜单"
+                        ],
+                        "x-enum-varnames": [
+                            "OperationLogin",
+                            "OperationLogout",
+                            "OperationUserCreate",
+                            "OperationUserUpdate",
+                            "OperationUserDelete",
+                            "OperationRoleCreate",
+                            "OperationRoleUpdate",
+                            "OperationRoleDelete",
+                            "OperationMenuCreate",
+                            "OperationMenuUpdate",
+                            "OperationMenuDelete",
+                            "OperationOnlineUserClearance",
+                            "OperationLogQuery",
+                            "OperationLogExport",
+                            "OperationLogClear",
+                            "OperationPasswordChange",
+                            "OperationUserEnable",
+                            "OperationRoleEnable",
+                            "OperationMenuEnable",
+                            "OperationRoleBindMenus"
+                        ],
+                        "description": "操作类型",
+                        "name": "operation_type",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "maximum": 1000,
+                        "minimum": 10,
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页条数",
+                        "name": "page_size",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "开始时间",
+                        "name": "start_time",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "data": {
+                                            "$ref": "#/definitions/response.SystemOperationLogListResp"
                                         },
                                         "message": {
                                             "type": "string"
@@ -705,6 +1387,221 @@ const docTemplate = `{
                         "type": "string",
                         "description": "ID",
                         "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/system/role/{id}/menus": {
+            "get": {
+                "description": "获取角色绑定的菜单列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "获取角色菜单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.SystemRoleMenuResp"
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "为角色绑定菜单",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "绑定角色菜单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "菜单ID列表",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.SystemRoleMenuBindReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/system/role/{role_id}/menu/{menu_id}": {
+            "post": {
+                "description": "为角色添加单个菜单",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "添加菜单到角色",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "菜单ID",
+                        "name": "menu_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "角色ID",
+                        "name": "role_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "50000,success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/code.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "number"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "从角色移除单个菜单",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理"
+                ],
+                "summary": "从角色移除菜单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "菜单ID",
+                        "name": "menu_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "角色ID",
+                        "name": "role_id",
                         "in": "path",
                         "required": true
                     }
@@ -1306,13 +2203,109 @@ const docTemplate = `{
                 }
             }
         },
+        "common.MenuType": {
+            "type": "integer",
+            "format": "int32",
+            "enum": [
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "MenuTypeDirectory",
+                "MenuTypeMenu",
+                "MenuTypeButton"
+            ]
+        },
         "common.OperationType": {
             "type": "integer",
             "enum": [
-                1
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17,
+                18,
+                19,
+                20
+            ],
+            "x-enum-comments": {
+                "OperationLogClear": "清理操作日志",
+                "OperationLogExport": "导出操作日志",
+                "OperationLogQuery": "查询操作日志",
+                "OperationLogin": "登录操作",
+                "OperationLogout": "登出操作",
+                "OperationMenuCreate": "创建菜单",
+                "OperationMenuDelete": "删除菜单",
+                "OperationMenuEnable": "启用/禁用菜单",
+                "OperationMenuUpdate": "更新菜单",
+                "OperationOnlineUserClearance": "踢出在线用户",
+                "OperationPasswordChange": "修改密码",
+                "OperationRoleBindMenus": "角色绑定菜单",
+                "OperationRoleCreate": "创建角色",
+                "OperationRoleDelete": "删除角色",
+                "OperationRoleEnable": "启用/禁用角色",
+                "OperationRoleUpdate": "更新角色",
+                "OperationUserCreate": "创建用户",
+                "OperationUserDelete": "删除用户",
+                "OperationUserEnable": "启用/禁用用户",
+                "OperationUserUpdate": "更新用户"
+            },
+            "x-enum-descriptions": [
+                "登录操作",
+                "登出操作",
+                "创建用户",
+                "更新用户",
+                "删除用户",
+                "创建角色",
+                "更新角色",
+                "删除角色",
+                "创建菜单",
+                "更新菜单",
+                "删除菜单",
+                "踢出在线用户",
+                "查询操作日志",
+                "导出操作日志",
+                "清理操作日志",
+                "修改密码",
+                "启用/禁用用户",
+                "启用/禁用角色",
+                "启用/禁用菜单",
+                "角色绑定菜单"
             ],
             "x-enum-varnames": [
-                "OperationLogin"
+                "OperationLogin",
+                "OperationLogout",
+                "OperationUserCreate",
+                "OperationUserUpdate",
+                "OperationUserDelete",
+                "OperationRoleCreate",
+                "OperationRoleUpdate",
+                "OperationRoleDelete",
+                "OperationMenuCreate",
+                "OperationMenuUpdate",
+                "OperationMenuDelete",
+                "OperationOnlineUserClearance",
+                "OperationLogQuery",
+                "OperationLogExport",
+                "OperationLogClear",
+                "OperationPasswordChange",
+                "OperationUserEnable",
+                "OperationRoleEnable",
+                "OperationMenuEnable",
+                "OperationRoleBindMenus"
             ]
         },
         "constant.YesOrNo": {
@@ -1372,6 +2365,107 @@ const docTemplate = `{
                 }
             }
         },
+        "request.SystemMenuAddReq": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "api_path": {
+                    "description": "菜单API路径",
+                    "type": "string"
+                },
+                "api_path_method": {
+                    "description": "菜单API方法",
+                    "type": "string"
+                },
+                "component": {
+                    "description": "菜单组件",
+                    "type": "string"
+                },
+                "menu_type": {
+                    "description": "菜单类型 [1: 目录, 2: 菜单, 3: 按钮]",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/common.MenuType"
+                        }
+                    ]
+                },
+                "name": {
+                    "description": "菜单名称",
+                    "type": "string"
+                },
+                "order": {
+                    "description": "菜单排序",
+                    "type": "integer"
+                },
+                "parent_id": {
+                    "description": "父菜单ID",
+                    "type": "string"
+                },
+                "remark": {
+                    "description": "菜单备注",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "菜单状态 [1: 启用, 2: 禁用]",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/constant.YesOrNo"
+                        }
+                    ]
+                }
+            }
+        },
+        "request.SystemMenuUpdateReq": {
+            "type": "object",
+            "properties": {
+                "api_path": {
+                    "description": "菜单API路径",
+                    "type": "string"
+                },
+                "api_path_method": {
+                    "description": "菜单API方法",
+                    "type": "string"
+                },
+                "component": {
+                    "description": "菜单组件",
+                    "type": "string"
+                },
+                "menu_type": {
+                    "description": "菜单类型",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/common.MenuType"
+                        }
+                    ]
+                },
+                "name": {
+                    "description": "菜单名称",
+                    "type": "string"
+                },
+                "order": {
+                    "description": "菜单排序",
+                    "type": "integer"
+                },
+                "parent_id": {
+                    "description": "父菜单ID",
+                    "type": "string"
+                },
+                "remark": {
+                    "description": "菜单备注",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "菜单状态",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/constant.YesOrNo"
+                        }
+                    ]
+                }
+            }
+        },
         "request.SystemRoleAddReq": {
             "type": "object",
             "required": [
@@ -1385,6 +2479,21 @@ const docTemplate = `{
                 "remark": {
                     "description": "角色备注",
                     "type": "string"
+                }
+            }
+        },
+        "request.SystemRoleMenuBindReq": {
+            "type": "object",
+            "required": [
+                "menu_ids"
+            ],
+            "properties": {
+                "menu_ids": {
+                    "description": "菜单ID列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -1540,6 +2649,139 @@ const docTemplate = `{
                 }
             }
         },
+        "response.SystemMenuListResp": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "description": "菜单列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.SystemMenuResp"
+                    }
+                },
+                "page": {
+                    "description": "页码",
+                    "type": "integer"
+                },
+                "page_size": {
+                    "description": "每页条数",
+                    "type": "integer"
+                },
+                "total": {
+                    "description": "总条数",
+                    "type": "integer"
+                }
+            }
+        },
+        "response.SystemMenuResp": {
+            "type": "object",
+            "properties": {
+                "api_path": {
+                    "description": "菜单API路径",
+                    "type": "string"
+                },
+                "api_path_method": {
+                    "description": "菜单API方法",
+                    "type": "string"
+                },
+                "component": {
+                    "description": "菜单组件",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "菜单ID",
+                    "type": "string"
+                },
+                "menu_type": {
+                    "description": "菜单类型 [1: 目录, 2: 菜单, 3: 按钮]",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/common.MenuType"
+                        }
+                    ]
+                },
+                "name": {
+                    "description": "菜单名称",
+                    "type": "string"
+                },
+                "order": {
+                    "description": "菜单排序",
+                    "type": "integer"
+                },
+                "parent_id": {
+                    "description": "父菜单ID",
+                    "type": "string"
+                },
+                "parent_name": {
+                    "description": "父菜单名称",
+                    "type": "string"
+                },
+                "remark": {
+                    "description": "菜单备注",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "菜单状态 [1: 启用, 2: 禁用]",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/constant.YesOrNo"
+                        }
+                    ]
+                }
+            }
+        },
+        "response.SystemMenuTreeResp": {
+            "type": "object",
+            "properties": {
+                "api_path": {
+                    "description": "菜单API路径",
+                    "type": "string"
+                },
+                "api_path_method": {
+                    "description": "菜单API方法",
+                    "type": "string"
+                },
+                "children": {
+                    "description": "子菜单",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.SystemMenuTreeResp"
+                    }
+                },
+                "component": {
+                    "description": "菜单组件",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "菜单ID",
+                    "type": "string"
+                },
+                "menu_type": {
+                    "description": "菜单类型",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/common.MenuType"
+                        }
+                    ]
+                },
+                "name": {
+                    "description": "菜单名称",
+                    "type": "string"
+                },
+                "order": {
+                    "description": "菜单排序",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "菜单状态",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/constant.YesOrNo"
+                        }
+                    ]
+                }
+            }
+        },
         "response.SystemOnlineUserListResp": {
             "type": "object",
             "properties": {
@@ -1621,6 +2863,87 @@ const docTemplate = `{
                 }
             }
         },
+        "response.SystemOperationLogListResp": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "description": "操作日志列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.SystemOperationLogResp"
+                    }
+                },
+                "page": {
+                    "description": "页码",
+                    "type": "integer"
+                },
+                "page_size": {
+                    "description": "每页条数",
+                    "type": "integer"
+                },
+                "total": {
+                    "description": "总条数",
+                    "type": "integer"
+                }
+            }
+        },
+        "response.SystemOperationLogResp": {
+            "type": "object",
+            "properties": {
+                "access_ip": {
+                    "description": "访问IP",
+                    "type": "string"
+                },
+                "browser_engine_name": {
+                    "description": "浏览器引擎名称",
+                    "type": "string"
+                },
+                "browser_engine_version": {
+                    "description": "浏览器引擎版本",
+                    "type": "string"
+                },
+                "browser_name": {
+                    "description": "浏览器名称",
+                    "type": "string"
+                },
+                "browser_version": {
+                    "description": "浏览器版本",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID",
+                    "type": "string"
+                },
+                "nickname": {
+                    "description": "用户昵称",
+                    "type": "string"
+                },
+                "operation_time": {
+                    "description": "操作时间",
+                    "type": "integer"
+                },
+                "operation_type": {
+                    "description": "操作类型",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/common.OperationType"
+                        }
+                    ]
+                },
+                "os": {
+                    "description": "操作系统",
+                    "type": "string"
+                },
+                "platform": {
+                    "description": "操作平台",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "用户名",
+                    "type": "string"
+                }
+            }
+        },
         "response.SystemRoleListResp": {
             "type": "object",
             "properties": {
@@ -1642,6 +2965,19 @@ const docTemplate = `{
                 "total": {
                     "description": "总条数",
                     "type": "integer"
+                }
+            }
+        },
+        "response.SystemRoleMenuResp": {
+            "type": "object",
+            "properties": {
+                "menu_id": {
+                    "description": "菜单ID",
+                    "type": "string"
+                },
+                "menu_name": {
+                    "description": "菜单名称",
+                    "type": "string"
                 }
             }
         },
@@ -1667,6 +3003,10 @@ const docTemplate = `{
                             "$ref": "#/definitions/constant.YesOrNo"
                         }
                     ]
+                },
+                "users_count": {
+                    "description": "用户数量",
+                    "type": "integer"
                 }
             }
         },

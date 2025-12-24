@@ -17,6 +17,7 @@ import (
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewaynode"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreonlineuser"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreoperationlog"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 )
@@ -84,6 +85,7 @@ func checkColumn(t, c string) error {
 			coregatewaynode.Table:      coregatewaynode.ValidColumn,
 			coremenu.Table:             coremenu.ValidColumn,
 			coreonlineuser.Table:       coreonlineuser.ValidColumn,
+			coreoperationlog.Table:     coreoperationlog.ValidColumn,
 			corerole.Table:             corerole.ValidColumn,
 			coreuser.Table:             coreuser.ValidColumn,
 		})

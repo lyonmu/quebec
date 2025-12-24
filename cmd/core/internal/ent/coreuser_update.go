@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreonlineuser"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreoperationlog"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/predicate"
@@ -293,6 +294,21 @@ func (_u *CoreUserUpdate) AddOnLineToUser(v ...*CoreOnLineUser) *CoreUserUpdate 
 	return _u.AddOnLineToUserIDs(ids...)
 }
 
+// AddOperationLogToUserIDs adds the "operation_log_to_user" edge to the CoreOperationLog entity by IDs.
+func (_u *CoreUserUpdate) AddOperationLogToUserIDs(ids ...string) *CoreUserUpdate {
+	_u.mutation.AddOperationLogToUserIDs(ids...)
+	return _u
+}
+
+// AddOperationLogToUser adds the "operation_log_to_user" edges to the CoreOperationLog entity.
+func (_u *CoreUserUpdate) AddOperationLogToUser(v ...*CoreOperationLog) *CoreUserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddOperationLogToUserIDs(ids...)
+}
+
 // Mutation returns the CoreUserMutation object of the builder.
 func (_u *CoreUserUpdate) Mutation() *CoreUserMutation {
 	return _u.mutation
@@ -323,6 +339,27 @@ func (_u *CoreUserUpdate) RemoveOnLineToUser(v ...*CoreOnLineUser) *CoreUserUpda
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveOnLineToUserIDs(ids...)
+}
+
+// ClearOperationLogToUser clears all "operation_log_to_user" edges to the CoreOperationLog entity.
+func (_u *CoreUserUpdate) ClearOperationLogToUser() *CoreUserUpdate {
+	_u.mutation.ClearOperationLogToUser()
+	return _u
+}
+
+// RemoveOperationLogToUserIDs removes the "operation_log_to_user" edge to CoreOperationLog entities by IDs.
+func (_u *CoreUserUpdate) RemoveOperationLogToUserIDs(ids ...string) *CoreUserUpdate {
+	_u.mutation.RemoveOperationLogToUserIDs(ids...)
+	return _u
+}
+
+// RemoveOperationLogToUser removes "operation_log_to_user" edges to CoreOperationLog entities.
+func (_u *CoreUserUpdate) RemoveOperationLogToUser(v ...*CoreOperationLog) *CoreUserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveOperationLogToUserIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -515,6 +552,51 @@ func (_u *CoreUserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(coreonlineuser.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.OperationLogToUserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   coreuser.OperationLogToUserTable,
+			Columns: []string{coreuser.OperationLogToUserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(coreoperationlog.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedOperationLogToUserIDs(); len(nodes) > 0 && !_u.mutation.OperationLogToUserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   coreuser.OperationLogToUserTable,
+			Columns: []string{coreuser.OperationLogToUserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(coreoperationlog.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.OperationLogToUserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   coreuser.OperationLogToUserTable,
+			Columns: []string{coreuser.OperationLogToUserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(coreoperationlog.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -805,6 +887,21 @@ func (_u *CoreUserUpdateOne) AddOnLineToUser(v ...*CoreOnLineUser) *CoreUserUpda
 	return _u.AddOnLineToUserIDs(ids...)
 }
 
+// AddOperationLogToUserIDs adds the "operation_log_to_user" edge to the CoreOperationLog entity by IDs.
+func (_u *CoreUserUpdateOne) AddOperationLogToUserIDs(ids ...string) *CoreUserUpdateOne {
+	_u.mutation.AddOperationLogToUserIDs(ids...)
+	return _u
+}
+
+// AddOperationLogToUser adds the "operation_log_to_user" edges to the CoreOperationLog entity.
+func (_u *CoreUserUpdateOne) AddOperationLogToUser(v ...*CoreOperationLog) *CoreUserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddOperationLogToUserIDs(ids...)
+}
+
 // Mutation returns the CoreUserMutation object of the builder.
 func (_u *CoreUserUpdateOne) Mutation() *CoreUserMutation {
 	return _u.mutation
@@ -835,6 +932,27 @@ func (_u *CoreUserUpdateOne) RemoveOnLineToUser(v ...*CoreOnLineUser) *CoreUserU
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveOnLineToUserIDs(ids...)
+}
+
+// ClearOperationLogToUser clears all "operation_log_to_user" edges to the CoreOperationLog entity.
+func (_u *CoreUserUpdateOne) ClearOperationLogToUser() *CoreUserUpdateOne {
+	_u.mutation.ClearOperationLogToUser()
+	return _u
+}
+
+// RemoveOperationLogToUserIDs removes the "operation_log_to_user" edge to CoreOperationLog entities by IDs.
+func (_u *CoreUserUpdateOne) RemoveOperationLogToUserIDs(ids ...string) *CoreUserUpdateOne {
+	_u.mutation.RemoveOperationLogToUserIDs(ids...)
+	return _u
+}
+
+// RemoveOperationLogToUser removes "operation_log_to_user" edges to CoreOperationLog entities.
+func (_u *CoreUserUpdateOne) RemoveOperationLogToUser(v ...*CoreOperationLog) *CoreUserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveOperationLogToUserIDs(ids...)
 }
 
 // Where appends a list predicates to the CoreUserUpdate builder.
@@ -1057,6 +1175,51 @@ func (_u *CoreUserUpdateOne) sqlSave(ctx context.Context) (_node *CoreUser, err 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(coreonlineuser.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.OperationLogToUserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   coreuser.OperationLogToUserTable,
+			Columns: []string{coreuser.OperationLogToUserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(coreoperationlog.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedOperationLogToUserIDs(); len(nodes) > 0 && !_u.mutation.OperationLogToUserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   coreuser.OperationLogToUserTable,
+			Columns: []string{coreuser.OperationLogToUserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(coreoperationlog.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.OperationLogToUserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   coreuser.OperationLogToUserTable,
+			Columns: []string{coreuser.OperationLogToUserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(coreoperationlog.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

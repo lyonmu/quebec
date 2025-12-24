@@ -43,8 +43,8 @@ const (
 	FieldRemark = "remark"
 	// EdgeMenuFromParent holds the string denoting the menu_from_parent edge name in mutations.
 	EdgeMenuFromParent = "menu_from_parent"
-	// EdgeMenuToDataRelationship holds the string denoting the menu_to_data_relationship edge name in mutations.
-	EdgeMenuToDataRelationship = "menu_to_data_relationship"
+	// EdgeDataRelationships holds the string denoting the data_relationships edge name in mutations.
+	EdgeDataRelationships = "data_relationships"
 	// EdgeMenuToChildren holds the string denoting the menu_to_children edge name in mutations.
 	EdgeMenuToChildren = "menu_to_children"
 	// Table holds the table name of the coremenu in the database.
@@ -53,13 +53,11 @@ const (
 	MenuFromParentTable = "quebec_core_menu"
 	// MenuFromParentColumn is the table column denoting the menu_from_parent relation/edge.
 	MenuFromParentColumn = "parent_id"
-	// MenuToDataRelationshipTable is the table that holds the menu_to_data_relationship relation/edge.
-	MenuToDataRelationshipTable = "quebec_core_data_relationship"
-	// MenuToDataRelationshipInverseTable is the table name for the CoreDataRelationship entity.
+	// DataRelationshipsTable is the table that holds the data_relationships relation/edge. The primary key declared below.
+	DataRelationshipsTable = "core_data_relationship_menu"
+	// DataRelationshipsInverseTable is the table name for the CoreDataRelationship entity.
 	// It exists in this package in order to avoid circular dependency with the "coredatarelationship" package.
-	MenuToDataRelationshipInverseTable = "quebec_core_data_relationship"
-	// MenuToDataRelationshipColumn is the table column denoting the menu_to_data_relationship relation/edge.
-	MenuToDataRelationshipColumn = "menu_id"
+	DataRelationshipsInverseTable = "quebec_core_data_relationship"
 	// MenuToChildrenTable is the table that holds the menu_to_children relation/edge.
 	MenuToChildrenTable = "quebec_core_menu"
 	// MenuToChildrenColumn is the table column denoting the menu_to_children relation/edge.
@@ -82,6 +80,12 @@ var Columns = []string{
 	FieldComponent,
 	FieldRemark,
 }
+
+var (
+	// DataRelationshipsPrimaryKey and DataRelationshipsColumn2 are the table columns denoting the
+	// primary key for the data_relationships relation (M2M).
+	DataRelationshipsPrimaryKey = []string{"core_data_relationship_id", "core_menu_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -193,17 +197,17 @@ func ByMenuFromParentField(field string, opts ...sql.OrderTermOption) OrderOptio
 	}
 }
 
-// ByMenuToDataRelationshipCount orders the results by menu_to_data_relationship count.
-func ByMenuToDataRelationshipCount(opts ...sql.OrderTermOption) OrderOption {
+// ByDataRelationshipsCount orders the results by data_relationships count.
+func ByDataRelationshipsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newMenuToDataRelationshipStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newDataRelationshipsStep(), opts...)
 	}
 }
 
-// ByMenuToDataRelationship orders the results by menu_to_data_relationship terms.
-func ByMenuToDataRelationship(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByDataRelationships orders the results by data_relationships terms.
+func ByDataRelationships(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newMenuToDataRelationshipStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newDataRelationshipsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -227,11 +231,11 @@ func newMenuFromParentStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2O, true, MenuFromParentTable, MenuFromParentColumn),
 	)
 }
-func newMenuToDataRelationshipStep() *sqlgraph.Step {
+func newDataRelationshipsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(MenuToDataRelationshipInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, MenuToDataRelationshipTable, MenuToDataRelationshipColumn),
+		sqlgraph.To(DataRelationshipsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, DataRelationshipsTable, DataRelationshipsPrimaryKey...),
 	)
 }
 func newMenuToChildrenStep() *sqlgraph.Step {

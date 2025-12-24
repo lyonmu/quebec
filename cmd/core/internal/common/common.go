@@ -23,9 +23,3 @@ const (
 	// 菜单与按钮
 	DataRelationshipTypeManyToMany DataRelationshipType = 3
 )
-
-type OperationType int
-
-const (
-	OperationLogin OperationType = 1
-)

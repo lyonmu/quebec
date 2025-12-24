@@ -153,19 +153,19 @@ func (_c *CoreRoleCreate) AddRoleToUser(v ...*CoreUser) *CoreRoleCreate {
 	return _c.AddRoleToUserIDs(ids...)
 }
 
-// AddRoleToDataRelationshipIDs adds the "role_to_data_relationship" edge to the CoreDataRelationship entity by IDs.
-func (_c *CoreRoleCreate) AddRoleToDataRelationshipIDs(ids ...string) *CoreRoleCreate {
-	_c.mutation.AddRoleToDataRelationshipIDs(ids...)
+// AddDataRelationshipIDs adds the "data_relationships" edge to the CoreDataRelationship entity by IDs.
+func (_c *CoreRoleCreate) AddDataRelationshipIDs(ids ...string) *CoreRoleCreate {
+	_c.mutation.AddDataRelationshipIDs(ids...)
 	return _c
 }
 
-// AddRoleToDataRelationship adds the "role_to_data_relationship" edges to the CoreDataRelationship entity.
-func (_c *CoreRoleCreate) AddRoleToDataRelationship(v ...*CoreDataRelationship) *CoreRoleCreate {
+// AddDataRelationships adds the "data_relationships" edges to the CoreDataRelationship entity.
+func (_c *CoreRoleCreate) AddDataRelationships(v ...*CoreDataRelationship) *CoreRoleCreate {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddRoleToDataRelationshipIDs(ids...)
+	return _c.AddDataRelationshipIDs(ids...)
 }
 
 // Mutation returns the CoreRoleMutation object of the builder.
@@ -330,12 +330,12 @@ func (_c *CoreRoleCreate) createSpec() (*CoreRole, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.RoleToDataRelationshipIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.DataRelationshipsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   corerole.RoleToDataRelationshipTable,
-			Columns: []string{corerole.RoleToDataRelationshipColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   corerole.DataRelationshipsTable,
+			Columns: corerole.DataRelationshipsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(coredatarelationship.FieldID, field.TypeString),

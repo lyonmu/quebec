@@ -319,8 +319,12 @@ func (s *SystemSvc) GetRoleMenus(ctx context.Context, roleID string) ([]*respons
 		resp := &response.SystemRoleMenuResp{
 			MenuID: rel.MenuID,
 		}
-		if rel.Edges.DataRelationshipFromMenu != nil {
-			resp.MenuName = rel.Edges.DataRelationshipFromMenu.Name
+		// 使用 QueryMenu 获取关联的菜单信息
+		menus, err := rel.QueryMenu().All(ctx)
+		if err != nil {
+			global.Logger.Sugar().Errorf("query menu failed: %s", err)
+		} else if len(menus) > 0 {
+			resp.MenuName = menus[0].Name
 		}
 		result = append(result, resp)
 	}

@@ -96,6 +96,7 @@ export interface SystemRoleDetail {
   name: string;
   remark?: string;
   status: YesOrNo;
+  users_count?: number;
 }
 
 // 角色列表响应（对应 response.SystemRoleListResp）

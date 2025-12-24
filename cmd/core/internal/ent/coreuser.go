@@ -56,9 +56,11 @@ type CoreUserEdges struct {
 	UserFromRole *CoreRole `json:"user_from_role,omitempty"`
 	// 用户在线信息
 	OnLineToUser []*CoreOnLineUser `json:"on_line_to_user,omitempty"`
+	// 用户操作日志
+	OperationLogToUser []*CoreOperationLog `json:"operation_log_to_user,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // UserFromRoleOrErr returns the UserFromRole value or an error if the edge
@@ -79,6 +81,15 @@ func (e CoreUserEdges) OnLineToUserOrErr() ([]*CoreOnLineUser, error) {
 		return e.OnLineToUser, nil
 	}
 	return nil, &NotLoadedError{edge: "on_line_to_user"}
+}
+
+// OperationLogToUserOrErr returns the OperationLogToUser value or an error if the edge
+// was not loaded in eager-loading.
+func (e CoreUserEdges) OperationLogToUserOrErr() ([]*CoreOperationLog, error) {
+	if e.loadedTypes[2] {
+		return e.OperationLogToUser, nil
+	}
+	return nil, &NotLoadedError{edge: "operation_log_to_user"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -207,6 +218,11 @@ func (_m *CoreUser) QueryUserFromRole() *CoreRoleQuery {
 // QueryOnLineToUser queries the "on_line_to_user" edge of the CoreUser entity.
 func (_m *CoreUser) QueryOnLineToUser() *CoreOnLineUserQuery {
 	return NewCoreUserClient(_m.config).QueryOnLineToUser(_m)
+}
+
+// QueryOperationLogToUser queries the "operation_log_to_user" edge of the CoreUser entity.
+func (_m *CoreUser) QueryOperationLogToUser() *CoreOperationLogQuery {
+	return NewCoreUserClient(_m.config).QueryOperationLogToUser(_m)
 }
 
 // Update returns a builder for updating this CoreUser.

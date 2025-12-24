@@ -932,6 +932,29 @@ func HasOnLineToUserWith(preds ...predicate.CoreOnLineUser) predicate.CoreUser {
 	})
 }
 
+// HasOperationLogToUser applies the HasEdge predicate on the "operation_log_to_user" edge.
+func HasOperationLogToUser() predicate.CoreUser {
+	return predicate.CoreUser(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, OperationLogToUserTable, OperationLogToUserColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasOperationLogToUserWith applies the HasEdge predicate on the "operation_log_to_user" edge with a given conditions (other predicates).
+func HasOperationLogToUserWith(preds ...predicate.CoreOperationLog) predicate.CoreUser {
+	return predicate.CoreUser(func(s *sql.Selector) {
+		step := newOperationLogToUserStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.CoreUser) predicate.CoreUser {
 	return predicate.CoreUser(sql.AndPredicates(predicates...))

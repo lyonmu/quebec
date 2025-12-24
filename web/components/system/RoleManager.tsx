@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Plus, ShieldCheck, Lock, Eye, Trash2, Play, Ban, X, Check } from 'lucide-react';
+import { Plus, ShieldCheck, Eye, Trash2, Play, Ban, X, Check, Menu as MenuIcon } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { roleService, menuService, roleMenuService } from '../../services/system/menuService';
 import { SystemRoleDetail, YesOrNo, SystemMenuTreeItem } from '../../types';
@@ -39,7 +39,7 @@ const RoleManager: React.FC = () => {
   const mapBackendToView = (r: SystemRoleDetail): RoleView => ({
     id: r.id,
     name: r.name,
-    users: 0,
+    users: r.users_count || 0,
     status: mapYesOrNoToStatus(r.status),
   });
 
@@ -274,22 +274,21 @@ const RoleManager: React.FC = () => {
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
                 <th className="p-4 font-medium">{t('roles.table.name')}</th>
-                <th className="p-4 font-medium">{t('roles.table.users')}</th>
-                <th className="p-4 font-medium">{t('roles.table.permissions')}</th>
                 <th className="p-4 font-medium">{t('users.table.status')}</th>
+                <th className="p-4 font-medium text-center">{t('roles.table.users') || 'Users'}</th>
                 <th className="p-4 font-medium text-right">{t('roles.table.actions')}</th>
               </tr>
             </thead>
             <tbody className="text-sm divide-y divide-slate-200 dark:divide-slate-700">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="p-6 text-center text-slate-500 dark:text-slate-400">
+                  <td colSpan={4} className="p-6 text-center text-slate-500 dark:text-slate-400">
                     {t('common.loading')}
                   </td>
                 </tr>
               ) : roles.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-6 text-center text-slate-500 dark:text-slate-400">
+                  <td colSpan={4} className="p-6 text-center text-slate-500 dark:text-slate-400">
                     {t('common.empty') || 'No roles'}
                   </td>
                 </tr>
@@ -304,9 +303,6 @@ const RoleManager: React.FC = () => {
                         <span className="font-medium text-slate-900 dark:text-white">{role.name}</span>
                       </div>
                     </td>
-                    <td className="p-4 text-slate-600 dark:text-slate-300">
-                      {role.users}
-                    </td>
                     <td className="p-4">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                         role.status === 'ACTIVE' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
@@ -317,53 +313,54 @@ const RoleManager: React.FC = () => {
                         {t(`users.status.${role.status.toLowerCase()}`)}
                       </span>
                     </td>
+                    <td className="p-4 text-center">
+                      <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+                        {role.users}
+                      </span>
+                    </td>
                     <td className="p-4 text-right">
                       <div className="flex justify-end items-center gap-2">
+                        <button
+                          onClick={() => openMenuPermission(role.id)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors"
+                          title={t('roles.actions.menuPermission')}
+                        >
+                          <MenuIcon size={14} />
+                          {t('roles.table.permissions')}
+                        </button>
                         {role.status === 'ACTIVE' ? (
                           <button
                             onClick={() => handleToggleStatus(role)}
-                            className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/20 dark:hover:bg-rose-900/30 border border-rose-100 dark:border-rose-900/50 rounded transition-colors"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-100 dark:hover:bg-rose-900/30 rounded-lg transition-colors"
                             disabled={actionLoading}
                             title={t('users.actions.disable')}
                           >
-                            <Ban size={12} />
-                            {t('users.actions.disable')}
+                            <Ban size={14} />
                           </button>
                         ) : (
                           <button
                             onClick={() => handleToggleStatus(role)}
-                            className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30 border border-emerald-100 dark:border-emerald-900/50 rounded transition-colors"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 rounded-lg transition-colors"
                             disabled={actionLoading}
                             title={t('users.actions.enable')}
                           >
-                            <Play size={12} />
-                            {t('users.actions.enable')}
+                            <Play size={14} />
                           </button>
                         )}
-
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => openMenuPermission(role.id)}
-                            className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-slate-500 hover:text-blue-600 bg-slate-100 hover:bg-blue-50 dark:bg-slate-700 dark:hover:bg-blue-900/20 dark:text-slate-400 dark:hover:text-blue-400 border border-transparent hover:border-blue-100 dark:hover:border-blue-900/50 rounded transition-all"
-                            title={t('roles.actions.menuPermission')}
-                          >
-                            <Lock size={12} />
-                          </button>
-                          <button
-                            onClick={() => openEditModal(role.id)}
-                            className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-slate-500 hover:text-blue-600 bg-slate-100 hover:bg-blue-50 dark:bg-slate-700 dark:hover:bg-blue-900/20 dark:text-slate-400 dark:hover:text-blue-400 border border-transparent hover:border-blue-100 dark:hover:border-blue-900/50 rounded transition-all"
-                            title={t('common.edit')}
-                          >
-                            <Eye size={12} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteRole(role.id)}
-                            className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-slate-500 hover:text-rose-600 bg-slate-100 hover:bg-rose-50 dark:bg-slate-700 dark:hover:bg-rose-900/20 dark:text-slate-400 dark:hover:text-rose-400 border border-transparent hover:border-rose-100 dark:hover:border-rose-900/50 rounded transition-all"
-                            title={t('users.actions.delete')}
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        </div>
+                        <button
+                          onClick={() => openEditModal(role.id)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors"
+                          title={t('common.edit')}
+                        >
+                          <Eye size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteRole(role.id)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 rounded-lg transition-colors"
+                          title={t('users.actions.delete')}
+                        >
+                          <Trash2 size={14} />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -416,7 +413,7 @@ const RoleManager: React.FC = () => {
                   <ShieldCheck size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="text"
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg pl4 py-2-10 pr- text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg pl-4 py-2 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
                     value={form.name}
                     onChange={e => setForm({...form, name: e.target.value})}
                     required

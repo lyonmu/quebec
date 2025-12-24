@@ -910,21 +910,21 @@ func HasMenuFromParentWith(preds ...predicate.CoreMenu) predicate.CoreMenu {
 	})
 }
 
-// HasMenuToDataRelationship applies the HasEdge predicate on the "menu_to_data_relationship" edge.
-func HasMenuToDataRelationship() predicate.CoreMenu {
+// HasDataRelationships applies the HasEdge predicate on the "data_relationships" edge.
+func HasDataRelationships() predicate.CoreMenu {
 	return predicate.CoreMenu(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, MenuToDataRelationshipTable, MenuToDataRelationshipColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, DataRelationshipsTable, DataRelationshipsPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasMenuToDataRelationshipWith applies the HasEdge predicate on the "menu_to_data_relationship" edge with a given conditions (other predicates).
-func HasMenuToDataRelationshipWith(preds ...predicate.CoreDataRelationship) predicate.CoreMenu {
+// HasDataRelationshipsWith applies the HasEdge predicate on the "data_relationships" edge with a given conditions (other predicates).
+func HasDataRelationshipsWith(preds ...predicate.CoreDataRelationship) predicate.CoreMenu {
 	return predicate.CoreMenu(func(s *sql.Selector) {
-		step := newMenuToDataRelationshipStep()
+		step := newDataRelationshipsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

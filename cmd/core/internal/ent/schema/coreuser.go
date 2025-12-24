@@ -42,6 +42,7 @@ func (CoreUser) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("user_from_role", CoreRole.Type).Ref("role_to_user").Field("role_id").Unique().Comment("用户所属角色"),
 		edge.To("on_line_to_user", CoreOnLineUser.Type).Comment("用户在线信息"),
+		edge.To("operation_log_to_user", CoreOperationLog.Type).Comment("用户操作日志"),
 	}
 }
 

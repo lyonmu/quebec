@@ -12,6 +12,7 @@ import NotificationDropdown from './components/layout/NotificationDropdown';
 import GlobalToast from './components/common/GlobalToast';
 import UserManager from './components/system/UserManager';
 import RoleManager from './components/system/RoleManager';
+import MenuManager from './components/system/MenuManager';
 import AuditLogs from './components/system/AuditLogs';
 import OnlineUsers from './components/system/OnlineUsers';
 import ErrorBoundary from './components/common/ErrorBoundary';
@@ -101,6 +102,8 @@ const EnvoyNexusApp: React.FC = () => {
         return <UserManager />;
       case ViewState.SYSTEM_ROLES:
         return <RoleManager />;
+      case ViewState.SYSTEM_MENUS:
+        return <MenuManager />;
       case ViewState.SYSTEM_ONLINE_USERS:
         return <OnlineUsers />;
       case ViewState.SYSTEM_LOGS:
@@ -121,6 +124,7 @@ const EnvoyNexusApp: React.FC = () => {
           [ViewState.SYSTEM_USERS]: 'sidebar.system_users',
           [ViewState.SYSTEM_ONLINE_USERS]: 'sidebar.system_online_users',
           [ViewState.SYSTEM_ROLES]: 'sidebar.system_roles',
+          [ViewState.SYSTEM_MENUS]: 'sidebar.system_menus',
           [ViewState.SYSTEM_LOGS]: 'sidebar.system_logs',
       }
       return t(mapping[view] as any) || view;

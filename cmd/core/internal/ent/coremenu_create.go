@@ -227,19 +227,19 @@ func (_c *CoreMenuCreate) SetMenuFromParent(v *CoreMenu) *CoreMenuCreate {
 	return _c.SetMenuFromParentID(v.ID)
 }
 
-// AddMenuToDataRelationshipIDs adds the "menu_to_data_relationship" edge to the CoreDataRelationship entity by IDs.
-func (_c *CoreMenuCreate) AddMenuToDataRelationshipIDs(ids ...string) *CoreMenuCreate {
-	_c.mutation.AddMenuToDataRelationshipIDs(ids...)
+// AddDataRelationshipIDs adds the "data_relationships" edge to the CoreDataRelationship entity by IDs.
+func (_c *CoreMenuCreate) AddDataRelationshipIDs(ids ...string) *CoreMenuCreate {
+	_c.mutation.AddDataRelationshipIDs(ids...)
 	return _c
 }
 
-// AddMenuToDataRelationship adds the "menu_to_data_relationship" edges to the CoreDataRelationship entity.
-func (_c *CoreMenuCreate) AddMenuToDataRelationship(v ...*CoreDataRelationship) *CoreMenuCreate {
+// AddDataRelationships adds the "data_relationships" edges to the CoreDataRelationship entity.
+func (_c *CoreMenuCreate) AddDataRelationships(v ...*CoreDataRelationship) *CoreMenuCreate {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddMenuToDataRelationshipIDs(ids...)
+	return _c.AddDataRelationshipIDs(ids...)
 }
 
 // AddMenuToChildIDs adds the "menu_to_children" edge to the CoreMenu entity by IDs.
@@ -440,12 +440,12 @@ func (_c *CoreMenuCreate) createSpec() (*CoreMenu, *sqlgraph.CreateSpec) {
 		_node.ParentID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.MenuToDataRelationshipIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.DataRelationshipsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   coremenu.MenuToDataRelationshipTable,
-			Columns: []string{coremenu.MenuToDataRelationshipColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   coremenu.DataRelationshipsTable,
+			Columns: coremenu.DataRelationshipsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(coredatarelationship.FieldID, field.TypeString),

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { LayoutDashboard, Network, Server, Settings, LogOut, ChevronDown, ChevronRight, Users, ShieldCheck, FileKey, Globe, Layers, ScrollText, Monitor } from 'lucide-react';
+import { LayoutDashboard, Network, Server, Settings, LogOut, ChevronDown, ChevronRight, Users, ShieldCheck, FileKey, Globe, Layers, ScrollText, Monitor, Menu as MenuIcon } from 'lucide-react';
 import { ViewState } from '../../types';
 import { useLanguage } from '../../contexts/LanguageContext';
 
@@ -39,13 +39,14 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, onLogout }
         { id: ViewState.CERTS, label: t('sidebar.certs'), icon: FileKey }
       ]
     },
-    { 
-      label: t('sidebar.system'), 
+    {
+      label: t('sidebar.system'),
       icon: Settings,
       children: [
         { id: ViewState.SYSTEM_USERS, label: t('sidebar.system_users'), icon: Users },
         { id: ViewState.SYSTEM_ONLINE_USERS, label: t('sidebar.system_online_users'), icon: Monitor },
         { id: ViewState.SYSTEM_ROLES, label: t('sidebar.system_roles'), icon: ShieldCheck },
+        { id: ViewState.SYSTEM_MENUS, label: t('sidebar.system_menus'), icon: MenuIcon },
         { id: ViewState.SYSTEM_LOGS, label: t('sidebar.system_logs'), icon: ScrollText }
       ]
     },

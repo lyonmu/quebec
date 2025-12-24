@@ -1,6 +1,9 @@
 package request
 
-import "github.com/lyonmu/quebec/pkg/constant"
+import (
+	"github.com/lyonmu/quebec/cmd/core/internal/common"
+	"github.com/lyonmu/quebec/pkg/constant"
+)
 
 type SystemLoginRequest struct {
 	Username  string `json:"username,omitempty" binding:"required" form:"username"`     // 用户名
@@ -80,4 +83,27 @@ type SystemUserEditPasswordReq struct {
 	PrePassword     string `json:"pre_password,omitempty" binding:"required" form:"pre_password"`         // 旧密码
 	NewPassword     string `json:"new_password,omitempty" binding:"required" form:"new_password"`         // 新密码
 	ConfirmPassword string `json:"confirm_password,omitempty" binding:"required" form:"confirm_password"` // 确认密码
+}
+
+type OperationLogReq struct {
+	ID                   string               `json:"id,omitempty"`                     // ID
+	AccessIP             string               `json:"access_ip,omitempty"`              // 访问IP
+	OperationTime        int64                `json:"operation_time,omitempty"`         // 操作时间
+	OperationType        common.OperationType `json:"operation_type,omitempty"`         // 操作类型
+	Os                   string               `json:"os,omitempty"`                     // 操作系统
+	Platform             string               `json:"platform,omitempty"`               // 操作平台
+	BrowserName          string               `json:"browser_name,omitempty"`           // 浏览器名称
+	BrowserVersion       string               `json:"browser_version,omitempty"`        // 浏览器版本
+	BrowserEngineName    string               `json:"browser_engine_name,omitempty"`    // 浏览器引擎名称
+	BrowserEngineVersion string               `json:"browser_engine_version,omitempty"` // 浏览器引擎版本
+}
+
+type OperationLogPageReq struct {
+	ID            string               `json:"id,omitempty"`                                                                                                     // ID
+	AccessIP      string               `json:"access_ip,omitempty"`                                                                                              // 访问IP
+	StartTime     int64                `json:"start_time,omitempty" form:"start_time"`                                                                           // 开始时间
+	EndTime       int64                `json:"end_time,omitempty" form:"end_time"`                                                                               // 结束时间
+	OperationType common.OperationType `json:"operation_type,omitempty"`                                                                                         // 操作类型
+	Page          int                  `json:"page,omitempty" binding:"required,min=1" form:"page" minimum:"1" default:"1"`                                      // 页码
+	PageSize      int                  `json:"page_size,omitempty" binding:"required,min=10,max=1000" form:"page_size" minimum:"10" maximum:"1000" default:"10"` // 每页条数
 }

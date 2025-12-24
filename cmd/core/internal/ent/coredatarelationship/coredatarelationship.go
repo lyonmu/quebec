@@ -27,26 +27,22 @@ const (
 	FieldMenuID = "menu_id"
 	// FieldRoleID holds the string denoting the role_id field in the database.
 	FieldRoleID = "role_id"
-	// EdgeDataRelationshipFromMenu holds the string denoting the data_relationship_from_menu edge name in mutations.
-	EdgeDataRelationshipFromMenu = "data_relationship_from_menu"
-	// EdgeDataRelationshipFromRole holds the string denoting the data_relationship_from_role edge name in mutations.
-	EdgeDataRelationshipFromRole = "data_relationship_from_role"
+	// EdgeMenu holds the string denoting the menu edge name in mutations.
+	EdgeMenu = "menu"
+	// EdgeRole holds the string denoting the role edge name in mutations.
+	EdgeRole = "role"
 	// Table holds the table name of the coredatarelationship in the database.
 	Table = "quebec_core_data_relationship"
-	// DataRelationshipFromMenuTable is the table that holds the data_relationship_from_menu relation/edge.
-	DataRelationshipFromMenuTable = "quebec_core_data_relationship"
-	// DataRelationshipFromMenuInverseTable is the table name for the CoreMenu entity.
+	// MenuTable is the table that holds the menu relation/edge. The primary key declared below.
+	MenuTable = "core_data_relationship_menu"
+	// MenuInverseTable is the table name for the CoreMenu entity.
 	// It exists in this package in order to avoid circular dependency with the "coremenu" package.
-	DataRelationshipFromMenuInverseTable = "quebec_core_menu"
-	// DataRelationshipFromMenuColumn is the table column denoting the data_relationship_from_menu relation/edge.
-	DataRelationshipFromMenuColumn = "menu_id"
-	// DataRelationshipFromRoleTable is the table that holds the data_relationship_from_role relation/edge.
-	DataRelationshipFromRoleTable = "quebec_core_data_relationship"
-	// DataRelationshipFromRoleInverseTable is the table name for the CoreRole entity.
+	MenuInverseTable = "quebec_core_menu"
+	// RoleTable is the table that holds the role relation/edge. The primary key declared below.
+	RoleTable = "core_data_relationship_role"
+	// RoleInverseTable is the table name for the CoreRole entity.
 	// It exists in this package in order to avoid circular dependency with the "corerole" package.
-	DataRelationshipFromRoleInverseTable = "quebec_core_role"
-	// DataRelationshipFromRoleColumn is the table column denoting the data_relationship_from_role relation/edge.
-	DataRelationshipFromRoleColumn = "role_id"
+	RoleInverseTable = "quebec_core_role"
 )
 
 // Columns holds all SQL columns for coredatarelationship fields.
@@ -59,6 +55,15 @@ var Columns = []string{
 	FieldMenuID,
 	FieldRoleID,
 }
+
+var (
+	// MenuPrimaryKey and MenuColumn2 are the table columns denoting the
+	// primary key for the menu relation (M2M).
+	MenuPrimaryKey = []string{"core_data_relationship_id", "core_menu_id"}
+	// RolePrimaryKey and RoleColumn2 are the table columns denoting the
+	// primary key for the role relation (M2M).
+	RolePrimaryKey = []string{"core_data_relationship_id", "core_role_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -127,30 +132,44 @@ func ByRoleID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRoleID, opts...).ToFunc()
 }
 
-// ByDataRelationshipFromMenuField orders the results by data_relationship_from_menu field.
-func ByDataRelationshipFromMenuField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByMenuCount orders the results by menu count.
+func ByMenuCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newDataRelationshipFromMenuStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborsCount(s, newMenuStep(), opts...)
 	}
 }
 
-// ByDataRelationshipFromRoleField orders the results by data_relationship_from_role field.
-func ByDataRelationshipFromRoleField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByMenu orders the results by menu terms.
+func ByMenu(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newDataRelationshipFromRoleStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newMenuStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newDataRelationshipFromMenuStep() *sqlgraph.Step {
+
+// ByRoleCount orders the results by role count.
+func ByRoleCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newRoleStep(), opts...)
+	}
+}
+
+// ByRole orders the results by role terms.
+func ByRole(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRoleStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newMenuStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(DataRelationshipFromMenuInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, DataRelationshipFromMenuTable, DataRelationshipFromMenuColumn),
+		sqlgraph.To(MenuInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, MenuTable, MenuPrimaryKey...),
 	)
 }
-func newDataRelationshipFromRoleStep() *sqlgraph.Step {
+func newRoleStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(DataRelationshipFromRoleInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, DataRelationshipFromRoleTable, DataRelationshipFromRoleColumn),
+		sqlgraph.To(RoleInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, RoleTable, RolePrimaryKey...),
 	)
 }

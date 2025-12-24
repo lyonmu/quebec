@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreonlineuser"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreoperationlog"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/pkg/constant"
@@ -242,6 +243,21 @@ func (_c *CoreUserCreate) AddOnLineToUser(v ...*CoreOnLineUser) *CoreUserCreate 
 	return _c.AddOnLineToUserIDs(ids...)
 }
 
+// AddOperationLogToUserIDs adds the "operation_log_to_user" edge to the CoreOperationLog entity by IDs.
+func (_c *CoreUserCreate) AddOperationLogToUserIDs(ids ...string) *CoreUserCreate {
+	_c.mutation.AddOperationLogToUserIDs(ids...)
+	return _c
+}
+
+// AddOperationLogToUser adds the "operation_log_to_user" edges to the CoreOperationLog entity.
+func (_c *CoreUserCreate) AddOperationLogToUser(v ...*CoreOperationLog) *CoreUserCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddOperationLogToUserIDs(ids...)
+}
+
 // Mutation returns the CoreUserMutation object of the builder.
 func (_c *CoreUserCreate) Mutation() *CoreUserMutation {
 	return _c.mutation
@@ -437,6 +453,22 @@ func (_c *CoreUserCreate) createSpec() (*CoreUser, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(coreonlineuser.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.OperationLogToUserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   coreuser.OperationLogToUserTable,
+			Columns: []string{coreuser.OperationLogToUserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(coreoperationlog.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

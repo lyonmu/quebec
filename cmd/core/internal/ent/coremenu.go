@@ -54,8 +54,8 @@ type CoreMenu struct {
 type CoreMenuEdges struct {
 	// MenuFromParent holds the value of the menu_from_parent edge.
 	MenuFromParent *CoreMenu `json:"menu_from_parent,omitempty"`
-	// MenuToDataRelationship holds the value of the menu_to_data_relationship edge.
-	MenuToDataRelationship []*CoreDataRelationship `json:"menu_to_data_relationship,omitempty"`
+	// DataRelationships holds the value of the data_relationships edge.
+	DataRelationships []*CoreDataRelationship `json:"data_relationships,omitempty"`
 	// MenuToChildren holds the value of the menu_to_children edge.
 	MenuToChildren []*CoreMenu `json:"menu_to_children,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -74,13 +74,13 @@ func (e CoreMenuEdges) MenuFromParentOrErr() (*CoreMenu, error) {
 	return nil, &NotLoadedError{edge: "menu_from_parent"}
 }
 
-// MenuToDataRelationshipOrErr returns the MenuToDataRelationship value or an error if the edge
+// DataRelationshipsOrErr returns the DataRelationships value or an error if the edge
 // was not loaded in eager-loading.
-func (e CoreMenuEdges) MenuToDataRelationshipOrErr() ([]*CoreDataRelationship, error) {
+func (e CoreMenuEdges) DataRelationshipsOrErr() ([]*CoreDataRelationship, error) {
 	if e.loadedTypes[1] {
-		return e.MenuToDataRelationship, nil
+		return e.DataRelationships, nil
 	}
-	return nil, &NotLoadedError{edge: "menu_to_data_relationship"}
+	return nil, &NotLoadedError{edge: "data_relationships"}
 }
 
 // MenuToChildrenOrErr returns the MenuToChildren value or an error if the edge
@@ -215,9 +215,9 @@ func (_m *CoreMenu) QueryMenuFromParent() *CoreMenuQuery {
 	return NewCoreMenuClient(_m.config).QueryMenuFromParent(_m)
 }
 
-// QueryMenuToDataRelationship queries the "menu_to_data_relationship" edge of the CoreMenu entity.
-func (_m *CoreMenu) QueryMenuToDataRelationship() *CoreDataRelationshipQuery {
-	return NewCoreMenuClient(_m.config).QueryMenuToDataRelationship(_m)
+// QueryDataRelationships queries the "data_relationships" edge of the CoreMenu entity.
+func (_m *CoreMenu) QueryDataRelationships() *CoreDataRelationshipQuery {
+	return NewCoreMenuClient(_m.config).QueryDataRelationships(_m)
 }
 
 // QueryMenuToChildren queries the "menu_to_children" edge of the CoreMenu entity.

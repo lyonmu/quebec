@@ -20,14 +20,14 @@ import (
 // CoreMenuQuery is the builder for querying CoreMenu entities.
 type CoreMenuQuery struct {
 	config
-	ctx                        *QueryContext
-	order                      []coremenu.OrderOption
-	inters                     []Interceptor
-	predicates                 []predicate.CoreMenu
-	withMenuFromParent         *CoreMenuQuery
-	withMenuToDataRelationship *CoreDataRelationshipQuery
-	withMenuToChildren         *CoreMenuQuery
-	modifiers                  []func(*sql.Selector)
+	ctx                   *QueryContext
+	order                 []coremenu.OrderOption
+	inters                []Interceptor
+	predicates            []predicate.CoreMenu
+	withMenuFromParent    *CoreMenuQuery
+	withDataRelationships *CoreDataRelationshipQuery
+	withMenuToChildren    *CoreMenuQuery
+	modifiers             []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -86,8 +86,8 @@ func (_q *CoreMenuQuery) QueryMenuFromParent() *CoreMenuQuery {
 	return query
 }
 
-// QueryMenuToDataRelationship chains the current query on the "menu_to_data_relationship" edge.
-func (_q *CoreMenuQuery) QueryMenuToDataRelationship() *CoreDataRelationshipQuery {
+// QueryDataRelationships chains the current query on the "data_relationships" edge.
+func (_q *CoreMenuQuery) QueryDataRelationships() *CoreDataRelationshipQuery {
 	query := (&CoreDataRelationshipClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
@@ -100,7 +100,7 @@ func (_q *CoreMenuQuery) QueryMenuToDataRelationship() *CoreDataRelationshipQuer
 		step := sqlgraph.NewStep(
 			sqlgraph.From(coremenu.Table, coremenu.FieldID, selector),
 			sqlgraph.To(coredatarelationship.Table, coredatarelationship.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, coremenu.MenuToDataRelationshipTable, coremenu.MenuToDataRelationshipColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, coremenu.DataRelationshipsTable, coremenu.DataRelationshipsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -317,14 +317,14 @@ func (_q *CoreMenuQuery) Clone() *CoreMenuQuery {
 		return nil
 	}
 	return &CoreMenuQuery{
-		config:                     _q.config,
-		ctx:                        _q.ctx.Clone(),
-		order:                      append([]coremenu.OrderOption{}, _q.order...),
-		inters:                     append([]Interceptor{}, _q.inters...),
-		predicates:                 append([]predicate.CoreMenu{}, _q.predicates...),
-		withMenuFromParent:         _q.withMenuFromParent.Clone(),
-		withMenuToDataRelationship: _q.withMenuToDataRelationship.Clone(),
-		withMenuToChildren:         _q.withMenuToChildren.Clone(),
+		config:                _q.config,
+		ctx:                   _q.ctx.Clone(),
+		order:                 append([]coremenu.OrderOption{}, _q.order...),
+		inters:                append([]Interceptor{}, _q.inters...),
+		predicates:            append([]predicate.CoreMenu{}, _q.predicates...),
+		withMenuFromParent:    _q.withMenuFromParent.Clone(),
+		withDataRelationships: _q.withDataRelationships.Clone(),
+		withMenuToChildren:    _q.withMenuToChildren.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -343,14 +343,14 @@ func (_q *CoreMenuQuery) WithMenuFromParent(opts ...func(*CoreMenuQuery)) *CoreM
 	return _q
 }
 
-// WithMenuToDataRelationship tells the query-builder to eager-load the nodes that are connected to
-// the "menu_to_data_relationship" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *CoreMenuQuery) WithMenuToDataRelationship(opts ...func(*CoreDataRelationshipQuery)) *CoreMenuQuery {
+// WithDataRelationships tells the query-builder to eager-load the nodes that are connected to
+// the "data_relationships" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *CoreMenuQuery) WithDataRelationships(opts ...func(*CoreDataRelationshipQuery)) *CoreMenuQuery {
 	query := (&CoreDataRelationshipClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withMenuToDataRelationship = query
+	_q.withDataRelationships = query
 	return _q
 }
 
@@ -445,7 +445,7 @@ func (_q *CoreMenuQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Cor
 		_spec       = _q.querySpec()
 		loadedTypes = [3]bool{
 			_q.withMenuFromParent != nil,
-			_q.withMenuToDataRelationship != nil,
+			_q.withDataRelationships != nil,
 			_q.withMenuToChildren != nil,
 		}
 	)
@@ -476,11 +476,11 @@ func (_q *CoreMenuQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Cor
 			return nil, err
 		}
 	}
-	if query := _q.withMenuToDataRelationship; query != nil {
-		if err := _q.loadMenuToDataRelationship(ctx, query, nodes,
-			func(n *CoreMenu) { n.Edges.MenuToDataRelationship = []*CoreDataRelationship{} },
+	if query := _q.withDataRelationships; query != nil {
+		if err := _q.loadDataRelationships(ctx, query, nodes,
+			func(n *CoreMenu) { n.Edges.DataRelationships = []*CoreDataRelationship{} },
 			func(n *CoreMenu, e *CoreDataRelationship) {
-				n.Edges.MenuToDataRelationship = append(n.Edges.MenuToDataRelationship, e)
+				n.Edges.DataRelationships = append(n.Edges.DataRelationships, e)
 			}); err != nil {
 			return nil, err
 		}
@@ -524,33 +524,64 @@ func (_q *CoreMenuQuery) loadMenuFromParent(ctx context.Context, query *CoreMenu
 	}
 	return nil
 }
-func (_q *CoreMenuQuery) loadMenuToDataRelationship(ctx context.Context, query *CoreDataRelationshipQuery, nodes []*CoreMenu, init func(*CoreMenu), assign func(*CoreMenu, *CoreDataRelationship)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[string]*CoreMenu)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
+func (_q *CoreMenuQuery) loadDataRelationships(ctx context.Context, query *CoreDataRelationshipQuery, nodes []*CoreMenu, init func(*CoreMenu), assign func(*CoreMenu, *CoreDataRelationship)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[string]*CoreMenu)
+	nids := make(map[string]map[*CoreMenu]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
 		if init != nil {
-			init(nodes[i])
+			init(node)
 		}
 	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(coredatarelationship.FieldMenuID)
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(coremenu.DataRelationshipsTable)
+		s.Join(joinT).On(s.C(coredatarelationship.FieldID), joinT.C(coremenu.DataRelationshipsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(coremenu.DataRelationshipsPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(coremenu.DataRelationshipsPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
 	}
-	query.Where(predicate.CoreDataRelationship(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(coremenu.MenuToDataRelationshipColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullString)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := values[0].(*sql.NullString).String
+				inValue := values[1].(*sql.NullString).String
+				if nids[inValue] == nil {
+					nids[inValue] = map[*CoreMenu]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*CoreDataRelationship](ctx, query, qr, query.inters)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.MenuID
-		node, ok := nodeids[fk]
+		nodes, ok := nids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "menu_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected "data_relationships" node returned %v`, n.ID)
 		}
-		assign(node, n)
+		for kn := range nodes {
+			assign(kn, n)
+		}
 	}
 	return nil
 }

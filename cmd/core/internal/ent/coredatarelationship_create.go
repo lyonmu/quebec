@@ -124,42 +124,34 @@ func (_c *CoreDataRelationshipCreate) SetNillableID(v *string) *CoreDataRelation
 	return _c
 }
 
-// SetDataRelationshipFromMenuID sets the "data_relationship_from_menu" edge to the CoreMenu entity by ID.
-func (_c *CoreDataRelationshipCreate) SetDataRelationshipFromMenuID(id string) *CoreDataRelationshipCreate {
-	_c.mutation.SetDataRelationshipFromMenuID(id)
+// AddMenuIDs adds the "menu" edge to the CoreMenu entity by IDs.
+func (_c *CoreDataRelationshipCreate) AddMenuIDs(ids ...string) *CoreDataRelationshipCreate {
+	_c.mutation.AddMenuIDs(ids...)
 	return _c
 }
 
-// SetNillableDataRelationshipFromMenuID sets the "data_relationship_from_menu" edge to the CoreMenu entity by ID if the given value is not nil.
-func (_c *CoreDataRelationshipCreate) SetNillableDataRelationshipFromMenuID(id *string) *CoreDataRelationshipCreate {
-	if id != nil {
-		_c = _c.SetDataRelationshipFromMenuID(*id)
+// AddMenu adds the "menu" edges to the CoreMenu entity.
+func (_c *CoreDataRelationshipCreate) AddMenu(v ...*CoreMenu) *CoreDataRelationshipCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
+	return _c.AddMenuIDs(ids...)
+}
+
+// AddRoleIDs adds the "role" edge to the CoreRole entity by IDs.
+func (_c *CoreDataRelationshipCreate) AddRoleIDs(ids ...string) *CoreDataRelationshipCreate {
+	_c.mutation.AddRoleIDs(ids...)
 	return _c
 }
 
-// SetDataRelationshipFromMenu sets the "data_relationship_from_menu" edge to the CoreMenu entity.
-func (_c *CoreDataRelationshipCreate) SetDataRelationshipFromMenu(v *CoreMenu) *CoreDataRelationshipCreate {
-	return _c.SetDataRelationshipFromMenuID(v.ID)
-}
-
-// SetDataRelationshipFromRoleID sets the "data_relationship_from_role" edge to the CoreRole entity by ID.
-func (_c *CoreDataRelationshipCreate) SetDataRelationshipFromRoleID(id string) *CoreDataRelationshipCreate {
-	_c.mutation.SetDataRelationshipFromRoleID(id)
-	return _c
-}
-
-// SetNillableDataRelationshipFromRoleID sets the "data_relationship_from_role" edge to the CoreRole entity by ID if the given value is not nil.
-func (_c *CoreDataRelationshipCreate) SetNillableDataRelationshipFromRoleID(id *string) *CoreDataRelationshipCreate {
-	if id != nil {
-		_c = _c.SetDataRelationshipFromRoleID(*id)
+// AddRole adds the "role" edges to the CoreRole entity.
+func (_c *CoreDataRelationshipCreate) AddRole(v ...*CoreRole) *CoreDataRelationshipCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return _c
-}
-
-// SetDataRelationshipFromRole sets the "data_relationship_from_role" edge to the CoreRole entity.
-func (_c *CoreDataRelationshipCreate) SetDataRelationshipFromRole(v *CoreRole) *CoreDataRelationshipCreate {
-	return _c.SetDataRelationshipFromRoleID(v.ID)
+	return _c.AddRoleIDs(ids...)
 }
 
 // Mutation returns the CoreDataRelationshipMutation object of the builder.
@@ -288,12 +280,20 @@ func (_c *CoreDataRelationshipCreate) createSpec() (*CoreDataRelationship, *sqlg
 		_spec.SetField(coredatarelationship.FieldDataRelationshipType, field.TypeInt8, value)
 		_node.DataRelationshipType = value
 	}
-	if nodes := _c.mutation.DataRelationshipFromMenuIDs(); len(nodes) > 0 {
+	if value, ok := _c.mutation.MenuID(); ok {
+		_spec.SetField(coredatarelationship.FieldMenuID, field.TypeString, value)
+		_node.MenuID = value
+	}
+	if value, ok := _c.mutation.RoleID(); ok {
+		_spec.SetField(coredatarelationship.FieldRoleID, field.TypeString, value)
+		_node.RoleID = value
+	}
+	if nodes := _c.mutation.MenuIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   coredatarelationship.DataRelationshipFromMenuTable,
-			Columns: []string{coredatarelationship.DataRelationshipFromMenuColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   coredatarelationship.MenuTable,
+			Columns: coredatarelationship.MenuPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(coremenu.FieldID, field.TypeString),
@@ -302,15 +302,14 @@ func (_c *CoreDataRelationshipCreate) createSpec() (*CoreDataRelationship, *sqlg
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.MenuID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.DataRelationshipFromRoleIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.RoleIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   coredatarelationship.DataRelationshipFromRoleTable,
-			Columns: []string{coredatarelationship.DataRelationshipFromRoleColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   coredatarelationship.RoleTable,
+			Columns: coredatarelationship.RolePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(corerole.FieldID, field.TypeString),
@@ -319,7 +318,6 @@ func (_c *CoreDataRelationshipCreate) createSpec() (*CoreDataRelationship, *sqlg
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.RoleID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

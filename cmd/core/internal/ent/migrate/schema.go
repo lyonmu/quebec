@@ -16,8 +16,8 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
 		{Name: "data_relationship_type", Type: field.TypeInt8, Nullable: true, Comment: "数据关系类型"},
-		{Name: "menu_id", Type: field.TypeString, Nullable: true, Size: 64, Comment: "菜单ID"},
-		{Name: "role_id", Type: field.TypeString, Nullable: true, Size: 64, Comment: "角色ID"},
+		{Name: "menu_id", Type: field.TypeString, Nullable: true, Comment: "菜单ID"},
+		{Name: "role_id", Type: field.TypeString, Nullable: true, Comment: "角色ID"},
 	}
 	// QuebecCoreDataRelationshipTable holds the schema information for the "quebec_core_data_relationship" table.
 	QuebecCoreDataRelationshipTable = &schema.Table{
@@ -25,20 +25,6 @@ var (
 		Comment:    "数据关系信息表",
 		Columns:    QuebecCoreDataRelationshipColumns,
 		PrimaryKey: []*schema.Column{QuebecCoreDataRelationshipColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "quebec_core_data_relationship_quebec_core_menu_menu_to_data_relationship",
-				Columns:    []*schema.Column{QuebecCoreDataRelationshipColumns[5]},
-				RefColumns: []*schema.Column{QuebecCoreMenuColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "quebec_core_data_relationship_quebec_core_role_role_to_data_relationship",
-				Columns:    []*schema.Column{QuebecCoreDataRelationshipColumns[6]},
-				RefColumns: []*schema.Column{QuebecCoreRoleColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "coredatarelationship_created_at",
@@ -348,6 +334,70 @@ var (
 			},
 		},
 	}
+	// QuebecOperationLogColumns holds the columns for the "quebec_operation_log" table.
+	QuebecOperationLogColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 64, Comment: "主键ID"},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "access_ip", Type: field.TypeString, Nullable: true, Comment: "访问IP"},
+		{Name: "operation_time", Type: field.TypeInt64, Nullable: true, Comment: "操作时间"},
+		{Name: "operation_type", Type: field.TypeInt, Nullable: true, Comment: "操作类型 [1: 登陆]"},
+		{Name: "os", Type: field.TypeString, Nullable: true, Comment: "操作系统"},
+		{Name: "platform", Type: field.TypeString, Nullable: true, Comment: "操作平台"},
+		{Name: "browser_name", Type: field.TypeString, Nullable: true, Comment: "浏览器名称"},
+		{Name: "browser_version", Type: field.TypeString, Nullable: true, Comment: "浏览器版本"},
+		{Name: "browser_engine_name", Type: field.TypeString, Nullable: true, Comment: "浏览器引擎名称"},
+		{Name: "browser_engine_version", Type: field.TypeString, Nullable: true, Comment: "浏览器引擎版本"},
+		{Name: "user_id", Type: field.TypeString, Nullable: true, Size: 64, Comment: "用户ID"},
+	}
+	// QuebecOperationLogTable holds the schema information for the "quebec_operation_log" table.
+	QuebecOperationLogTable = &schema.Table{
+		Name:       "quebec_operation_log",
+		Comment:    "操作日志表",
+		Columns:    QuebecOperationLogColumns,
+		PrimaryKey: []*schema.Column{QuebecOperationLogColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "quebec_operation_log_quebec_core_user_operation_log_to_user",
+				Columns:    []*schema.Column{QuebecOperationLogColumns[13]},
+				RefColumns: []*schema.Column{QuebecCoreUserColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "coreoperationlog_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecOperationLogColumns[1]},
+			},
+			{
+				Name:    "coreoperationlog_updated_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecOperationLogColumns[2]},
+			},
+			{
+				Name:    "coreoperationlog_deleted_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecOperationLogColumns[3]},
+			},
+			{
+				Name:    "coreoperationlog_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecOperationLogColumns[0]},
+			},
+			{
+				Name:    "coreoperationlog_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecOperationLogColumns[13]},
+			},
+			{
+				Name:    "coreoperationlog_operation_type",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecOperationLogColumns[6]},
+			},
+		},
+	}
 	// QuebecCoreRoleColumns holds the columns for the "quebec_core_role" table.
 	QuebecCoreRoleColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 64, Comment: "主键ID"},
@@ -481,6 +531,56 @@ var (
 			},
 		},
 	}
+	// CoreDataRelationshipMenuColumns holds the columns for the "core_data_relationship_menu" table.
+	CoreDataRelationshipMenuColumns = []*schema.Column{
+		{Name: "core_data_relationship_id", Type: field.TypeString, Size: 64},
+		{Name: "core_menu_id", Type: field.TypeString, Size: 64},
+	}
+	// CoreDataRelationshipMenuTable holds the schema information for the "core_data_relationship_menu" table.
+	CoreDataRelationshipMenuTable = &schema.Table{
+		Name:       "core_data_relationship_menu",
+		Columns:    CoreDataRelationshipMenuColumns,
+		PrimaryKey: []*schema.Column{CoreDataRelationshipMenuColumns[0], CoreDataRelationshipMenuColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "core_data_relationship_menu_core_data_relationship_id",
+				Columns:    []*schema.Column{CoreDataRelationshipMenuColumns[0]},
+				RefColumns: []*schema.Column{QuebecCoreDataRelationshipColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "core_data_relationship_menu_core_menu_id",
+				Columns:    []*schema.Column{CoreDataRelationshipMenuColumns[1]},
+				RefColumns: []*schema.Column{QuebecCoreMenuColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// CoreDataRelationshipRoleColumns holds the columns for the "core_data_relationship_role" table.
+	CoreDataRelationshipRoleColumns = []*schema.Column{
+		{Name: "core_data_relationship_id", Type: field.TypeString, Size: 64},
+		{Name: "core_role_id", Type: field.TypeString, Size: 64},
+	}
+	// CoreDataRelationshipRoleTable holds the schema information for the "core_data_relationship_role" table.
+	CoreDataRelationshipRoleTable = &schema.Table{
+		Name:       "core_data_relationship_role",
+		Columns:    CoreDataRelationshipRoleColumns,
+		PrimaryKey: []*schema.Column{CoreDataRelationshipRoleColumns[0], CoreDataRelationshipRoleColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "core_data_relationship_role_core_data_relationship_id",
+				Columns:    []*schema.Column{CoreDataRelationshipRoleColumns[0]},
+				RefColumns: []*schema.Column{QuebecCoreDataRelationshipColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "core_data_relationship_role_core_role_id",
+				Columns:    []*schema.Column{CoreDataRelationshipRoleColumns[1]},
+				RefColumns: []*schema.Column{QuebecCoreRoleColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		QuebecCoreDataRelationshipTable,
@@ -488,14 +588,15 @@ var (
 		QuebecCoreGatewayNodeTable,
 		QuebecCoreMenuTable,
 		QuebecCoreOnLineUserTable,
+		QuebecOperationLogTable,
 		QuebecCoreRoleTable,
 		QuebecCoreUserTable,
+		CoreDataRelationshipMenuTable,
+		CoreDataRelationshipRoleTable,
 	}
 )
 
 func init() {
-	QuebecCoreDataRelationshipTable.ForeignKeys[0].RefTable = QuebecCoreMenuTable
-	QuebecCoreDataRelationshipTable.ForeignKeys[1].RefTable = QuebecCoreRoleTable
 	QuebecCoreDataRelationshipTable.Annotation = &entsql.Annotation{
 		Table:     "quebec_core_data_relationship",
 		Charset:   "utf8mb4",
@@ -524,6 +625,12 @@ func init() {
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_general_ci",
 	}
+	QuebecOperationLogTable.ForeignKeys[0].RefTable = QuebecCoreUserTable
+	QuebecOperationLogTable.Annotation = &entsql.Annotation{
+		Table:     "quebec_operation_log",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_general_ci",
+	}
 	QuebecCoreRoleTable.Annotation = &entsql.Annotation{
 		Table:     "quebec_core_role",
 		Charset:   "utf8mb4",
@@ -535,4 +642,8 @@ func init() {
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_general_ci",
 	}
+	CoreDataRelationshipMenuTable.ForeignKeys[0].RefTable = QuebecCoreDataRelationshipTable
+	CoreDataRelationshipMenuTable.ForeignKeys[1].RefTable = QuebecCoreMenuTable
+	CoreDataRelationshipRoleTable.ForeignKeys[0].RefTable = QuebecCoreDataRelationshipTable
+	CoreDataRelationshipRoleTable.ForeignKeys[1].RefTable = QuebecCoreRoleTable
 }

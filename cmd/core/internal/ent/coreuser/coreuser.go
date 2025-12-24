@@ -44,6 +44,8 @@ const (
 	EdgeUserFromRole = "user_from_role"
 	// EdgeOnLineToUser holds the string denoting the on_line_to_user edge name in mutations.
 	EdgeOnLineToUser = "on_line_to_user"
+	// EdgeOperationLogToUser holds the string denoting the operation_log_to_user edge name in mutations.
+	EdgeOperationLogToUser = "operation_log_to_user"
 	// Table holds the table name of the coreuser in the database.
 	Table = "quebec_core_user"
 	// UserFromRoleTable is the table that holds the user_from_role relation/edge.
@@ -60,6 +62,13 @@ const (
 	OnLineToUserInverseTable = "quebec_core_on_line_user"
 	// OnLineToUserColumn is the table column denoting the on_line_to_user relation/edge.
 	OnLineToUserColumn = "user_id"
+	// OperationLogToUserTable is the table that holds the operation_log_to_user relation/edge.
+	OperationLogToUserTable = "quebec_operation_log"
+	// OperationLogToUserInverseTable is the table name for the CoreOperationLog entity.
+	// It exists in this package in order to avoid circular dependency with the "coreoperationlog" package.
+	OperationLogToUserInverseTable = "quebec_operation_log"
+	// OperationLogToUserColumn is the table column denoting the operation_log_to_user relation/edge.
+	OperationLogToUserColumn = "user_id"
 )
 
 // Columns holds all SQL columns for coreuser fields.
@@ -202,6 +211,20 @@ func ByOnLineToUser(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newOnLineToUserStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByOperationLogToUserCount orders the results by operation_log_to_user count.
+func ByOperationLogToUserCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newOperationLogToUserStep(), opts...)
+	}
+}
+
+// ByOperationLogToUser orders the results by operation_log_to_user terms.
+func ByOperationLogToUser(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newOperationLogToUserStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newUserFromRoleStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -214,5 +237,12 @@ func newOnLineToUserStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(OnLineToUserInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, OnLineToUserTable, OnLineToUserColumn),
+	)
+}
+func newOperationLogToUserStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(OperationLogToUserInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, OperationLogToUserTable, OperationLogToUserColumn),
 	)
 }

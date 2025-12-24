@@ -125,42 +125,34 @@ func (_u *CoreDataRelationshipUpdate) ClearRoleID() *CoreDataRelationshipUpdate 
 	return _u
 }
 
-// SetDataRelationshipFromMenuID sets the "data_relationship_from_menu" edge to the CoreMenu entity by ID.
-func (_u *CoreDataRelationshipUpdate) SetDataRelationshipFromMenuID(id string) *CoreDataRelationshipUpdate {
-	_u.mutation.SetDataRelationshipFromMenuID(id)
+// AddMenuIDs adds the "menu" edge to the CoreMenu entity by IDs.
+func (_u *CoreDataRelationshipUpdate) AddMenuIDs(ids ...string) *CoreDataRelationshipUpdate {
+	_u.mutation.AddMenuIDs(ids...)
 	return _u
 }
 
-// SetNillableDataRelationshipFromMenuID sets the "data_relationship_from_menu" edge to the CoreMenu entity by ID if the given value is not nil.
-func (_u *CoreDataRelationshipUpdate) SetNillableDataRelationshipFromMenuID(id *string) *CoreDataRelationshipUpdate {
-	if id != nil {
-		_u = _u.SetDataRelationshipFromMenuID(*id)
+// AddMenu adds the "menu" edges to the CoreMenu entity.
+func (_u *CoreDataRelationshipUpdate) AddMenu(v ...*CoreMenu) *CoreDataRelationshipUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
+	return _u.AddMenuIDs(ids...)
+}
+
+// AddRoleIDs adds the "role" edge to the CoreRole entity by IDs.
+func (_u *CoreDataRelationshipUpdate) AddRoleIDs(ids ...string) *CoreDataRelationshipUpdate {
+	_u.mutation.AddRoleIDs(ids...)
 	return _u
 }
 
-// SetDataRelationshipFromMenu sets the "data_relationship_from_menu" edge to the CoreMenu entity.
-func (_u *CoreDataRelationshipUpdate) SetDataRelationshipFromMenu(v *CoreMenu) *CoreDataRelationshipUpdate {
-	return _u.SetDataRelationshipFromMenuID(v.ID)
-}
-
-// SetDataRelationshipFromRoleID sets the "data_relationship_from_role" edge to the CoreRole entity by ID.
-func (_u *CoreDataRelationshipUpdate) SetDataRelationshipFromRoleID(id string) *CoreDataRelationshipUpdate {
-	_u.mutation.SetDataRelationshipFromRoleID(id)
-	return _u
-}
-
-// SetNillableDataRelationshipFromRoleID sets the "data_relationship_from_role" edge to the CoreRole entity by ID if the given value is not nil.
-func (_u *CoreDataRelationshipUpdate) SetNillableDataRelationshipFromRoleID(id *string) *CoreDataRelationshipUpdate {
-	if id != nil {
-		_u = _u.SetDataRelationshipFromRoleID(*id)
+// AddRole adds the "role" edges to the CoreRole entity.
+func (_u *CoreDataRelationshipUpdate) AddRole(v ...*CoreRole) *CoreDataRelationshipUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return _u
-}
-
-// SetDataRelationshipFromRole sets the "data_relationship_from_role" edge to the CoreRole entity.
-func (_u *CoreDataRelationshipUpdate) SetDataRelationshipFromRole(v *CoreRole) *CoreDataRelationshipUpdate {
-	return _u.SetDataRelationshipFromRoleID(v.ID)
+	return _u.AddRoleIDs(ids...)
 }
 
 // Mutation returns the CoreDataRelationshipMutation object of the builder.
@@ -168,16 +160,46 @@ func (_u *CoreDataRelationshipUpdate) Mutation() *CoreDataRelationshipMutation {
 	return _u.mutation
 }
 
-// ClearDataRelationshipFromMenu clears the "data_relationship_from_menu" edge to the CoreMenu entity.
-func (_u *CoreDataRelationshipUpdate) ClearDataRelationshipFromMenu() *CoreDataRelationshipUpdate {
-	_u.mutation.ClearDataRelationshipFromMenu()
+// ClearMenu clears all "menu" edges to the CoreMenu entity.
+func (_u *CoreDataRelationshipUpdate) ClearMenu() *CoreDataRelationshipUpdate {
+	_u.mutation.ClearMenu()
 	return _u
 }
 
-// ClearDataRelationshipFromRole clears the "data_relationship_from_role" edge to the CoreRole entity.
-func (_u *CoreDataRelationshipUpdate) ClearDataRelationshipFromRole() *CoreDataRelationshipUpdate {
-	_u.mutation.ClearDataRelationshipFromRole()
+// RemoveMenuIDs removes the "menu" edge to CoreMenu entities by IDs.
+func (_u *CoreDataRelationshipUpdate) RemoveMenuIDs(ids ...string) *CoreDataRelationshipUpdate {
+	_u.mutation.RemoveMenuIDs(ids...)
 	return _u
+}
+
+// RemoveMenu removes "menu" edges to CoreMenu entities.
+func (_u *CoreDataRelationshipUpdate) RemoveMenu(v ...*CoreMenu) *CoreDataRelationshipUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveMenuIDs(ids...)
+}
+
+// ClearRole clears all "role" edges to the CoreRole entity.
+func (_u *CoreDataRelationshipUpdate) ClearRole() *CoreDataRelationshipUpdate {
+	_u.mutation.ClearRole()
+	return _u
+}
+
+// RemoveRoleIDs removes the "role" edge to CoreRole entities by IDs.
+func (_u *CoreDataRelationshipUpdate) RemoveRoleIDs(ids ...string) *CoreDataRelationshipUpdate {
+	_u.mutation.RemoveRoleIDs(ids...)
+	return _u
+}
+
+// RemoveRole removes "role" edges to CoreRole entities.
+func (_u *CoreDataRelationshipUpdate) RemoveRole(v ...*CoreRole) *CoreDataRelationshipUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveRoleIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -255,12 +277,24 @@ func (_u *CoreDataRelationshipUpdate) sqlSave(ctx context.Context) (_node int, e
 	if _u.mutation.DataRelationshipTypeCleared() {
 		_spec.ClearField(coredatarelationship.FieldDataRelationshipType, field.TypeInt8)
 	}
-	if _u.mutation.DataRelationshipFromMenuCleared() {
+	if value, ok := _u.mutation.MenuID(); ok {
+		_spec.SetField(coredatarelationship.FieldMenuID, field.TypeString, value)
+	}
+	if _u.mutation.MenuIDCleared() {
+		_spec.ClearField(coredatarelationship.FieldMenuID, field.TypeString)
+	}
+	if value, ok := _u.mutation.RoleID(); ok {
+		_spec.SetField(coredatarelationship.FieldRoleID, field.TypeString, value)
+	}
+	if _u.mutation.RoleIDCleared() {
+		_spec.ClearField(coredatarelationship.FieldRoleID, field.TypeString)
+	}
+	if _u.mutation.MenuCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   coredatarelationship.DataRelationshipFromMenuTable,
-			Columns: []string{coredatarelationship.DataRelationshipFromMenuColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   coredatarelationship.MenuTable,
+			Columns: coredatarelationship.MenuPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(coremenu.FieldID, field.TypeString),
@@ -268,12 +302,28 @@ func (_u *CoreDataRelationshipUpdate) sqlSave(ctx context.Context) (_node int, e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.DataRelationshipFromMenuIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedMenuIDs(); len(nodes) > 0 && !_u.mutation.MenuCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   coredatarelationship.DataRelationshipFromMenuTable,
-			Columns: []string{coredatarelationship.DataRelationshipFromMenuColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   coredatarelationship.MenuTable,
+			Columns: coredatarelationship.MenuPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(coremenu.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.MenuIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   coredatarelationship.MenuTable,
+			Columns: coredatarelationship.MenuPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(coremenu.FieldID, field.TypeString),
@@ -284,12 +334,12 @@ func (_u *CoreDataRelationshipUpdate) sqlSave(ctx context.Context) (_node int, e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.DataRelationshipFromRoleCleared() {
+	if _u.mutation.RoleCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   coredatarelationship.DataRelationshipFromRoleTable,
-			Columns: []string{coredatarelationship.DataRelationshipFromRoleColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   coredatarelationship.RoleTable,
+			Columns: coredatarelationship.RolePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(corerole.FieldID, field.TypeString),
@@ -297,12 +347,28 @@ func (_u *CoreDataRelationshipUpdate) sqlSave(ctx context.Context) (_node int, e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.DataRelationshipFromRoleIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedRoleIDs(); len(nodes) > 0 && !_u.mutation.RoleCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   coredatarelationship.DataRelationshipFromRoleTable,
-			Columns: []string{coredatarelationship.DataRelationshipFromRoleColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   coredatarelationship.RoleTable,
+			Columns: coredatarelationship.RolePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(corerole.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RoleIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   coredatarelationship.RoleTable,
+			Columns: coredatarelationship.RolePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(corerole.FieldID, field.TypeString),
@@ -428,42 +494,34 @@ func (_u *CoreDataRelationshipUpdateOne) ClearRoleID() *CoreDataRelationshipUpda
 	return _u
 }
 
-// SetDataRelationshipFromMenuID sets the "data_relationship_from_menu" edge to the CoreMenu entity by ID.
-func (_u *CoreDataRelationshipUpdateOne) SetDataRelationshipFromMenuID(id string) *CoreDataRelationshipUpdateOne {
-	_u.mutation.SetDataRelationshipFromMenuID(id)
+// AddMenuIDs adds the "menu" edge to the CoreMenu entity by IDs.
+func (_u *CoreDataRelationshipUpdateOne) AddMenuIDs(ids ...string) *CoreDataRelationshipUpdateOne {
+	_u.mutation.AddMenuIDs(ids...)
 	return _u
 }
 
-// SetNillableDataRelationshipFromMenuID sets the "data_relationship_from_menu" edge to the CoreMenu entity by ID if the given value is not nil.
-func (_u *CoreDataRelationshipUpdateOne) SetNillableDataRelationshipFromMenuID(id *string) *CoreDataRelationshipUpdateOne {
-	if id != nil {
-		_u = _u.SetDataRelationshipFromMenuID(*id)
+// AddMenu adds the "menu" edges to the CoreMenu entity.
+func (_u *CoreDataRelationshipUpdateOne) AddMenu(v ...*CoreMenu) *CoreDataRelationshipUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
+	return _u.AddMenuIDs(ids...)
+}
+
+// AddRoleIDs adds the "role" edge to the CoreRole entity by IDs.
+func (_u *CoreDataRelationshipUpdateOne) AddRoleIDs(ids ...string) *CoreDataRelationshipUpdateOne {
+	_u.mutation.AddRoleIDs(ids...)
 	return _u
 }
 
-// SetDataRelationshipFromMenu sets the "data_relationship_from_menu" edge to the CoreMenu entity.
-func (_u *CoreDataRelationshipUpdateOne) SetDataRelationshipFromMenu(v *CoreMenu) *CoreDataRelationshipUpdateOne {
-	return _u.SetDataRelationshipFromMenuID(v.ID)
-}
-
-// SetDataRelationshipFromRoleID sets the "data_relationship_from_role" edge to the CoreRole entity by ID.
-func (_u *CoreDataRelationshipUpdateOne) SetDataRelationshipFromRoleID(id string) *CoreDataRelationshipUpdateOne {
-	_u.mutation.SetDataRelationshipFromRoleID(id)
-	return _u
-}
-
-// SetNillableDataRelationshipFromRoleID sets the "data_relationship_from_role" edge to the CoreRole entity by ID if the given value is not nil.
-func (_u *CoreDataRelationshipUpdateOne) SetNillableDataRelationshipFromRoleID(id *string) *CoreDataRelationshipUpdateOne {
-	if id != nil {
-		_u = _u.SetDataRelationshipFromRoleID(*id)
+// AddRole adds the "role" edges to the CoreRole entity.
+func (_u *CoreDataRelationshipUpdateOne) AddRole(v ...*CoreRole) *CoreDataRelationshipUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return _u
-}
-
-// SetDataRelationshipFromRole sets the "data_relationship_from_role" edge to the CoreRole entity.
-func (_u *CoreDataRelationshipUpdateOne) SetDataRelationshipFromRole(v *CoreRole) *CoreDataRelationshipUpdateOne {
-	return _u.SetDataRelationshipFromRoleID(v.ID)
+	return _u.AddRoleIDs(ids...)
 }
 
 // Mutation returns the CoreDataRelationshipMutation object of the builder.
@@ -471,16 +529,46 @@ func (_u *CoreDataRelationshipUpdateOne) Mutation() *CoreDataRelationshipMutatio
 	return _u.mutation
 }
 
-// ClearDataRelationshipFromMenu clears the "data_relationship_from_menu" edge to the CoreMenu entity.
-func (_u *CoreDataRelationshipUpdateOne) ClearDataRelationshipFromMenu() *CoreDataRelationshipUpdateOne {
-	_u.mutation.ClearDataRelationshipFromMenu()
+// ClearMenu clears all "menu" edges to the CoreMenu entity.
+func (_u *CoreDataRelationshipUpdateOne) ClearMenu() *CoreDataRelationshipUpdateOne {
+	_u.mutation.ClearMenu()
 	return _u
 }
 
-// ClearDataRelationshipFromRole clears the "data_relationship_from_role" edge to the CoreRole entity.
-func (_u *CoreDataRelationshipUpdateOne) ClearDataRelationshipFromRole() *CoreDataRelationshipUpdateOne {
-	_u.mutation.ClearDataRelationshipFromRole()
+// RemoveMenuIDs removes the "menu" edge to CoreMenu entities by IDs.
+func (_u *CoreDataRelationshipUpdateOne) RemoveMenuIDs(ids ...string) *CoreDataRelationshipUpdateOne {
+	_u.mutation.RemoveMenuIDs(ids...)
 	return _u
+}
+
+// RemoveMenu removes "menu" edges to CoreMenu entities.
+func (_u *CoreDataRelationshipUpdateOne) RemoveMenu(v ...*CoreMenu) *CoreDataRelationshipUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveMenuIDs(ids...)
+}
+
+// ClearRole clears all "role" edges to the CoreRole entity.
+func (_u *CoreDataRelationshipUpdateOne) ClearRole() *CoreDataRelationshipUpdateOne {
+	_u.mutation.ClearRole()
+	return _u
+}
+
+// RemoveRoleIDs removes the "role" edge to CoreRole entities by IDs.
+func (_u *CoreDataRelationshipUpdateOne) RemoveRoleIDs(ids ...string) *CoreDataRelationshipUpdateOne {
+	_u.mutation.RemoveRoleIDs(ids...)
+	return _u
+}
+
+// RemoveRole removes "role" edges to CoreRole entities.
+func (_u *CoreDataRelationshipUpdateOne) RemoveRole(v ...*CoreRole) *CoreDataRelationshipUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveRoleIDs(ids...)
 }
 
 // Where appends a list predicates to the CoreDataRelationshipUpdate builder.
@@ -588,12 +676,24 @@ func (_u *CoreDataRelationshipUpdateOne) sqlSave(ctx context.Context) (_node *Co
 	if _u.mutation.DataRelationshipTypeCleared() {
 		_spec.ClearField(coredatarelationship.FieldDataRelationshipType, field.TypeInt8)
 	}
-	if _u.mutation.DataRelationshipFromMenuCleared() {
+	if value, ok := _u.mutation.MenuID(); ok {
+		_spec.SetField(coredatarelationship.FieldMenuID, field.TypeString, value)
+	}
+	if _u.mutation.MenuIDCleared() {
+		_spec.ClearField(coredatarelationship.FieldMenuID, field.TypeString)
+	}
+	if value, ok := _u.mutation.RoleID(); ok {
+		_spec.SetField(coredatarelationship.FieldRoleID, field.TypeString, value)
+	}
+	if _u.mutation.RoleIDCleared() {
+		_spec.ClearField(coredatarelationship.FieldRoleID, field.TypeString)
+	}
+	if _u.mutation.MenuCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   coredatarelationship.DataRelationshipFromMenuTable,
-			Columns: []string{coredatarelationship.DataRelationshipFromMenuColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   coredatarelationship.MenuTable,
+			Columns: coredatarelationship.MenuPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(coremenu.FieldID, field.TypeString),
@@ -601,12 +701,28 @@ func (_u *CoreDataRelationshipUpdateOne) sqlSave(ctx context.Context) (_node *Co
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.DataRelationshipFromMenuIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedMenuIDs(); len(nodes) > 0 && !_u.mutation.MenuCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   coredatarelationship.DataRelationshipFromMenuTable,
-			Columns: []string{coredatarelationship.DataRelationshipFromMenuColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   coredatarelationship.MenuTable,
+			Columns: coredatarelationship.MenuPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(coremenu.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.MenuIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   coredatarelationship.MenuTable,
+			Columns: coredatarelationship.MenuPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(coremenu.FieldID, field.TypeString),
@@ -617,12 +733,12 @@ func (_u *CoreDataRelationshipUpdateOne) sqlSave(ctx context.Context) (_node *Co
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.DataRelationshipFromRoleCleared() {
+	if _u.mutation.RoleCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   coredatarelationship.DataRelationshipFromRoleTable,
-			Columns: []string{coredatarelationship.DataRelationshipFromRoleColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   coredatarelationship.RoleTable,
+			Columns: coredatarelationship.RolePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(corerole.FieldID, field.TypeString),
@@ -630,12 +746,28 @@ func (_u *CoreDataRelationshipUpdateOne) sqlSave(ctx context.Context) (_node *Co
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.DataRelationshipFromRoleIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedRoleIDs(); len(nodes) > 0 && !_u.mutation.RoleCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   coredatarelationship.DataRelationshipFromRoleTable,
-			Columns: []string{coredatarelationship.DataRelationshipFromRoleColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   coredatarelationship.RoleTable,
+			Columns: coredatarelationship.RolePrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(corerole.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RoleIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   coredatarelationship.RoleTable,
+			Columns: coredatarelationship.RolePrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(corerole.FieldID, field.TypeString),

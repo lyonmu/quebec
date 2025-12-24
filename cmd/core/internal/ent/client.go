@@ -20,6 +20,7 @@ import (
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewaynode"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreonlineuser"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreoperationlog"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 
@@ -41,6 +42,8 @@ type Client struct {
 	CoreMenu *CoreMenuClient
 	// CoreOnLineUser is the client for interacting with the CoreOnLineUser builders.
 	CoreOnLineUser *CoreOnLineUserClient
+	// CoreOperationLog is the client for interacting with the CoreOperationLog builders.
+	CoreOperationLog *CoreOperationLogClient
 	// CoreRole is the client for interacting with the CoreRole builders.
 	CoreRole *CoreRoleClient
 	// CoreUser is the client for interacting with the CoreUser builders.
@@ -61,6 +64,7 @@ func (c *Client) init() {
 	c.CoreGatewayNode = NewCoreGatewayNodeClient(c.config)
 	c.CoreMenu = NewCoreMenuClient(c.config)
 	c.CoreOnLineUser = NewCoreOnLineUserClient(c.config)
+	c.CoreOperationLog = NewCoreOperationLogClient(c.config)
 	c.CoreRole = NewCoreRoleClient(c.config)
 	c.CoreUser = NewCoreUserClient(c.config)
 }
@@ -160,6 +164,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		CoreGatewayNode:      NewCoreGatewayNodeClient(cfg),
 		CoreMenu:             NewCoreMenuClient(cfg),
 		CoreOnLineUser:       NewCoreOnLineUserClient(cfg),
+		CoreOperationLog:     NewCoreOperationLogClient(cfg),
 		CoreRole:             NewCoreRoleClient(cfg),
 		CoreUser:             NewCoreUserClient(cfg),
 	}, nil
@@ -186,6 +191,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		CoreGatewayNode:      NewCoreGatewayNodeClient(cfg),
 		CoreMenu:             NewCoreMenuClient(cfg),
 		CoreOnLineUser:       NewCoreOnLineUserClient(cfg),
+		CoreOperationLog:     NewCoreOperationLogClient(cfg),
 		CoreRole:             NewCoreRoleClient(cfg),
 		CoreUser:             NewCoreUserClient(cfg),
 	}, nil
@@ -218,7 +224,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.CoreDataRelationship, c.CoreGatewayCluster, c.CoreGatewayNode, c.CoreMenu,
-		c.CoreOnLineUser, c.CoreRole, c.CoreUser,
+		c.CoreOnLineUser, c.CoreOperationLog, c.CoreRole, c.CoreUser,
 	} {
 		n.Use(hooks...)
 	}
@@ -229,7 +235,7 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.CoreDataRelationship, c.CoreGatewayCluster, c.CoreGatewayNode, c.CoreMenu,
-		c.CoreOnLineUser, c.CoreRole, c.CoreUser,
+		c.CoreOnLineUser, c.CoreOperationLog, c.CoreRole, c.CoreUser,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -248,6 +254,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.CoreMenu.mutate(ctx, m)
 	case *CoreOnLineUserMutation:
 		return c.CoreOnLineUser.mutate(ctx, m)
+	case *CoreOperationLogMutation:
+		return c.CoreOperationLog.mutate(ctx, m)
 	case *CoreRoleMutation:
 		return c.CoreRole.mutate(ctx, m)
 	case *CoreUserMutation:
@@ -365,15 +373,15 @@ func (c *CoreDataRelationshipClient) GetX(ctx context.Context, id string) *CoreD
 	return obj
 }
 
-// QueryDataRelationshipFromMenu queries the data_relationship_from_menu edge of a CoreDataRelationship.
-func (c *CoreDataRelationshipClient) QueryDataRelationshipFromMenu(_m *CoreDataRelationship) *CoreMenuQuery {
+// QueryMenu queries the menu edge of a CoreDataRelationship.
+func (c *CoreDataRelationshipClient) QueryMenu(_m *CoreDataRelationship) *CoreMenuQuery {
 	query := (&CoreMenuClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(coredatarelationship.Table, coredatarelationship.FieldID, id),
 			sqlgraph.To(coremenu.Table, coremenu.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, coredatarelationship.DataRelationshipFromMenuTable, coredatarelationship.DataRelationshipFromMenuColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, coredatarelationship.MenuTable, coredatarelationship.MenuPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -381,15 +389,15 @@ func (c *CoreDataRelationshipClient) QueryDataRelationshipFromMenu(_m *CoreDataR
 	return query
 }
 
-// QueryDataRelationshipFromRole queries the data_relationship_from_role edge of a CoreDataRelationship.
-func (c *CoreDataRelationshipClient) QueryDataRelationshipFromRole(_m *CoreDataRelationship) *CoreRoleQuery {
+// QueryRole queries the role edge of a CoreDataRelationship.
+func (c *CoreDataRelationshipClient) QueryRole(_m *CoreDataRelationship) *CoreRoleQuery {
 	query := (&CoreRoleClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(coredatarelationship.Table, coredatarelationship.FieldID, id),
 			sqlgraph.To(corerole.Table, corerole.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, coredatarelationship.DataRelationshipFromRoleTable, coredatarelationship.DataRelationshipFromRoleColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, coredatarelationship.RoleTable, coredatarelationship.RolePrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -847,15 +855,15 @@ func (c *CoreMenuClient) QueryMenuFromParent(_m *CoreMenu) *CoreMenuQuery {
 	return query
 }
 
-// QueryMenuToDataRelationship queries the menu_to_data_relationship edge of a CoreMenu.
-func (c *CoreMenuClient) QueryMenuToDataRelationship(_m *CoreMenu) *CoreDataRelationshipQuery {
+// QueryDataRelationships queries the data_relationships edge of a CoreMenu.
+func (c *CoreMenuClient) QueryDataRelationships(_m *CoreMenu) *CoreDataRelationshipQuery {
 	query := (&CoreDataRelationshipClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(coremenu.Table, coremenu.FieldID, id),
 			sqlgraph.To(coredatarelationship.Table, coredatarelationship.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, coremenu.MenuToDataRelationshipTable, coremenu.MenuToDataRelationshipColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, coremenu.DataRelationshipsTable, coremenu.DataRelationshipsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1055,6 +1063,156 @@ func (c *CoreOnLineUserClient) mutate(ctx context.Context, m *CoreOnLineUserMuta
 	}
 }
 
+// CoreOperationLogClient is a client for the CoreOperationLog schema.
+type CoreOperationLogClient struct {
+	config
+}
+
+// NewCoreOperationLogClient returns a client for the CoreOperationLog from the given config.
+func NewCoreOperationLogClient(c config) *CoreOperationLogClient {
+	return &CoreOperationLogClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `coreoperationlog.Hooks(f(g(h())))`.
+func (c *CoreOperationLogClient) Use(hooks ...Hook) {
+	c.hooks.CoreOperationLog = append(c.hooks.CoreOperationLog, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `coreoperationlog.Intercept(f(g(h())))`.
+func (c *CoreOperationLogClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CoreOperationLog = append(c.inters.CoreOperationLog, interceptors...)
+}
+
+// Create returns a builder for creating a CoreOperationLog entity.
+func (c *CoreOperationLogClient) Create() *CoreOperationLogCreate {
+	mutation := newCoreOperationLogMutation(c.config, OpCreate)
+	return &CoreOperationLogCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CoreOperationLog entities.
+func (c *CoreOperationLogClient) CreateBulk(builders ...*CoreOperationLogCreate) *CoreOperationLogCreateBulk {
+	return &CoreOperationLogCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CoreOperationLogClient) MapCreateBulk(slice any, setFunc func(*CoreOperationLogCreate, int)) *CoreOperationLogCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CoreOperationLogCreateBulk{err: fmt.Errorf("calling to CoreOperationLogClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CoreOperationLogCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CoreOperationLogCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CoreOperationLog.
+func (c *CoreOperationLogClient) Update() *CoreOperationLogUpdate {
+	mutation := newCoreOperationLogMutation(c.config, OpUpdate)
+	return &CoreOperationLogUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CoreOperationLogClient) UpdateOne(_m *CoreOperationLog) *CoreOperationLogUpdateOne {
+	mutation := newCoreOperationLogMutation(c.config, OpUpdateOne, withCoreOperationLog(_m))
+	return &CoreOperationLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CoreOperationLogClient) UpdateOneID(id string) *CoreOperationLogUpdateOne {
+	mutation := newCoreOperationLogMutation(c.config, OpUpdateOne, withCoreOperationLogID(id))
+	return &CoreOperationLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CoreOperationLog.
+func (c *CoreOperationLogClient) Delete() *CoreOperationLogDelete {
+	mutation := newCoreOperationLogMutation(c.config, OpDelete)
+	return &CoreOperationLogDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CoreOperationLogClient) DeleteOne(_m *CoreOperationLog) *CoreOperationLogDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CoreOperationLogClient) DeleteOneID(id string) *CoreOperationLogDeleteOne {
+	builder := c.Delete().Where(coreoperationlog.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CoreOperationLogDeleteOne{builder}
+}
+
+// Query returns a query builder for CoreOperationLog.
+func (c *CoreOperationLogClient) Query() *CoreOperationLogQuery {
+	return &CoreOperationLogQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCoreOperationLog},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CoreOperationLog entity by its id.
+func (c *CoreOperationLogClient) Get(ctx context.Context, id string) (*CoreOperationLog, error) {
+	return c.Query().Where(coreoperationlog.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CoreOperationLogClient) GetX(ctx context.Context, id string) *CoreOperationLog {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryOperationLogFromUser queries the operation_log_from_user edge of a CoreOperationLog.
+func (c *CoreOperationLogClient) QueryOperationLogFromUser(_m *CoreOperationLog) *CoreUserQuery {
+	query := (&CoreUserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(coreoperationlog.Table, coreoperationlog.FieldID, id),
+			sqlgraph.To(coreuser.Table, coreuser.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, coreoperationlog.OperationLogFromUserTable, coreoperationlog.OperationLogFromUserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CoreOperationLogClient) Hooks() []Hook {
+	hooks := c.hooks.CoreOperationLog
+	return append(hooks[:len(hooks):len(hooks)], coreoperationlog.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *CoreOperationLogClient) Interceptors() []Interceptor {
+	return c.inters.CoreOperationLog
+}
+
+func (c *CoreOperationLogClient) mutate(ctx context.Context, m *CoreOperationLogMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CoreOperationLogCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CoreOperationLogUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CoreOperationLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CoreOperationLogDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CoreOperationLog mutation op: %q", m.Op())
+	}
+}
+
 // CoreRoleClient is a client for the CoreRole schema.
 type CoreRoleClient struct {
 	config
@@ -1179,15 +1337,15 @@ func (c *CoreRoleClient) QueryRoleToUser(_m *CoreRole) *CoreUserQuery {
 	return query
 }
 
-// QueryRoleToDataRelationship queries the role_to_data_relationship edge of a CoreRole.
-func (c *CoreRoleClient) QueryRoleToDataRelationship(_m *CoreRole) *CoreDataRelationshipQuery {
+// QueryDataRelationships queries the data_relationships edge of a CoreRole.
+func (c *CoreRoleClient) QueryDataRelationships(_m *CoreRole) *CoreDataRelationshipQuery {
 	query := (&CoreDataRelationshipClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(corerole.Table, corerole.FieldID, id),
 			sqlgraph.To(coredatarelationship.Table, coredatarelationship.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, corerole.RoleToDataRelationshipTable, corerole.RoleToDataRelationshipColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, corerole.DataRelationshipsTable, corerole.DataRelationshipsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1361,6 +1519,22 @@ func (c *CoreUserClient) QueryOnLineToUser(_m *CoreUser) *CoreOnLineUserQuery {
 	return query
 }
 
+// QueryOperationLogToUser queries the operation_log_to_user edge of a CoreUser.
+func (c *CoreUserClient) QueryOperationLogToUser(_m *CoreUser) *CoreOperationLogQuery {
+	query := (&CoreOperationLogClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(coreuser.Table, coreuser.FieldID, id),
+			sqlgraph.To(coreoperationlog.Table, coreoperationlog.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, coreuser.OperationLogToUserTable, coreuser.OperationLogToUserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *CoreUserClient) Hooks() []Hook {
 	hooks := c.hooks.CoreUser
@@ -1391,11 +1565,11 @@ func (c *CoreUserClient) mutate(ctx context.Context, m *CoreUserMutation) (Value
 type (
 	hooks struct {
 		CoreDataRelationship, CoreGatewayCluster, CoreGatewayNode, CoreMenu,
-		CoreOnLineUser, CoreRole, CoreUser []ent.Hook
+		CoreOnLineUser, CoreOperationLog, CoreRole, CoreUser []ent.Hook
 	}
 	inters struct {
 		CoreDataRelationship, CoreGatewayCluster, CoreGatewayNode, CoreMenu,
-		CoreOnLineUser, CoreRole, CoreUser []ent.Interceptor
+		CoreOnLineUser, CoreOperationLog, CoreRole, CoreUser []ent.Interceptor
 	}
 )
 

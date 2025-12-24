@@ -40,7 +40,7 @@ func (CoreMenu) Fields() []ent.Field {
 func (CoreMenu) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("menu_from_parent", CoreMenu.Type).Ref("menu_to_children").Field("parent_id").Unique(),
-		edge.To("menu_to_data_relationship", CoreDataRelationship.Type),
+		edge.From("data_relationships", CoreDataRelationship.Type).Ref("menu"),
 		edge.To("menu_to_children", CoreMenu.Type),
 	}
 }

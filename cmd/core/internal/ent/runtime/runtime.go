@@ -11,6 +11,7 @@ import (
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewaynode"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreonlineuser"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreoperationlog"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/schema"
@@ -240,6 +241,50 @@ func init() {
 	// coreonlineuser.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	coreonlineuser.IDValidator = func() func(string) error {
 		validators := coreonlineuserDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	coreoperationlogMixin := schema.CoreOperationLog{}.Mixin()
+	coreoperationlogMixinHooks1 := coreoperationlogMixin[1].Hooks()
+	coreoperationlog.Hooks[0] = coreoperationlogMixinHooks1[0]
+	coreoperationlog.Hooks[1] = coreoperationlogMixinHooks1[1]
+	coreoperationlogMixinFields0 := coreoperationlogMixin[0].Fields()
+	_ = coreoperationlogMixinFields0
+	coreoperationlogMixinFields1 := coreoperationlogMixin[1].Fields()
+	_ = coreoperationlogMixinFields1
+	coreoperationlogFields := schema.CoreOperationLog{}.Fields()
+	_ = coreoperationlogFields
+	// coreoperationlogDescCreatedAt is the schema descriptor for created_at field.
+	coreoperationlogDescCreatedAt := coreoperationlogMixinFields1[0].Descriptor()
+	// coreoperationlog.DefaultCreatedAt holds the default value on creation for the created_at field.
+	coreoperationlog.DefaultCreatedAt = coreoperationlogDescCreatedAt.Default.(func() time.Time)
+	// coreoperationlogDescUpdatedAt is the schema descriptor for updated_at field.
+	coreoperationlogDescUpdatedAt := coreoperationlogMixinFields1[1].Descriptor()
+	// coreoperationlog.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	coreoperationlog.DefaultUpdatedAt = coreoperationlogDescUpdatedAt.Default.(func() time.Time)
+	// coreoperationlog.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	coreoperationlog.UpdateDefaultUpdatedAt = coreoperationlogDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// coreoperationlogDescOperationTime is the schema descriptor for operation_time field.
+	coreoperationlogDescOperationTime := coreoperationlogFields[2].Descriptor()
+	// coreoperationlog.DefaultOperationTime holds the default value on creation for the operation_time field.
+	coreoperationlog.DefaultOperationTime = coreoperationlogDescOperationTime.Default.(func() int64)
+	// coreoperationlogDescID is the schema descriptor for id field.
+	coreoperationlogDescID := coreoperationlogMixinFields0[0].Descriptor()
+	// coreoperationlog.DefaultID holds the default value on creation for the id field.
+	coreoperationlog.DefaultID = coreoperationlogDescID.Default.(func() string)
+	// coreoperationlog.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	coreoperationlog.IDValidator = func() func(string) error {
+		validators := coreoperationlogDescID.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),

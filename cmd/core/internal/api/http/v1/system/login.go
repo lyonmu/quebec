@@ -26,9 +26,10 @@ func (b *SystemV1ApiGroup) SystemLogin(c *gin.Context) {
 		return
 	}
 
-	ua := tools.ParseUserAgent(c.Request.UserAgent())
+	uaStr := c.Request.UserAgent()
+	ua := tools.ParseUserAgent(uaStr)
 	access_ip := c.ClientIP()
-	resp, err := systemsvc.Login(&req, ua, access_ip, c.Request.Context())
+	resp, err := systemsvc.Login(&req, ua, uaStr, access_ip, c.Request.Context())
 	if err != nil {
 		err.(*code.Response).Failed(c)
 		return

@@ -34,7 +34,7 @@ func (CoreRole) Fields() []ent.Field {
 func (CoreRole) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("role_to_user", CoreUser.Type),
-		edge.To("role_to_data_relationship", CoreDataRelationship.Type),
+		edge.From("data_relationships", CoreDataRelationship.Type).Ref("role"),
 	}
 }
 

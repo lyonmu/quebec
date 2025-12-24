@@ -43,8 +43,8 @@ type CoreRole struct {
 type CoreRoleEdges struct {
 	// RoleToUser holds the value of the role_to_user edge.
 	RoleToUser []*CoreUser `json:"role_to_user,omitempty"`
-	// RoleToDataRelationship holds the value of the role_to_data_relationship edge.
-	RoleToDataRelationship []*CoreDataRelationship `json:"role_to_data_relationship,omitempty"`
+	// DataRelationships holds the value of the data_relationships edge.
+	DataRelationships []*CoreDataRelationship `json:"data_relationships,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -59,13 +59,13 @@ func (e CoreRoleEdges) RoleToUserOrErr() ([]*CoreUser, error) {
 	return nil, &NotLoadedError{edge: "role_to_user"}
 }
 
-// RoleToDataRelationshipOrErr returns the RoleToDataRelationship value or an error if the edge
+// DataRelationshipsOrErr returns the DataRelationships value or an error if the edge
 // was not loaded in eager-loading.
-func (e CoreRoleEdges) RoleToDataRelationshipOrErr() ([]*CoreDataRelationship, error) {
+func (e CoreRoleEdges) DataRelationshipsOrErr() ([]*CoreDataRelationship, error) {
 	if e.loadedTypes[1] {
-		return e.RoleToDataRelationship, nil
+		return e.DataRelationships, nil
 	}
-	return nil, &NotLoadedError{edge: "role_to_data_relationship"}
+	return nil, &NotLoadedError{edge: "data_relationships"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -161,9 +161,9 @@ func (_m *CoreRole) QueryRoleToUser() *CoreUserQuery {
 	return NewCoreRoleClient(_m.config).QueryRoleToUser(_m)
 }
 
-// QueryRoleToDataRelationship queries the "role_to_data_relationship" edge of the CoreRole entity.
-func (_m *CoreRole) QueryRoleToDataRelationship() *CoreDataRelationshipQuery {
-	return NewCoreRoleClient(_m.config).QueryRoleToDataRelationship(_m)
+// QueryDataRelationships queries the "data_relationships" edge of the CoreRole entity.
+func (_m *CoreRole) QueryDataRelationships() *CoreDataRelationshipQuery {
+	return NewCoreRoleClient(_m.config).QueryDataRelationships(_m)
 }
 
 // Update returns a builder for updating this CoreRole.

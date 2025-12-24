@@ -21,13 +21,13 @@ import (
 // CoreRoleQuery is the builder for querying CoreRole entities.
 type CoreRoleQuery struct {
 	config
-	ctx                        *QueryContext
-	order                      []corerole.OrderOption
-	inters                     []Interceptor
-	predicates                 []predicate.CoreRole
-	withRoleToUser             *CoreUserQuery
-	withRoleToDataRelationship *CoreDataRelationshipQuery
-	modifiers                  []func(*sql.Selector)
+	ctx                   *QueryContext
+	order                 []corerole.OrderOption
+	inters                []Interceptor
+	predicates            []predicate.CoreRole
+	withRoleToUser        *CoreUserQuery
+	withDataRelationships *CoreDataRelationshipQuery
+	modifiers             []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -86,8 +86,8 @@ func (_q *CoreRoleQuery) QueryRoleToUser() *CoreUserQuery {
 	return query
 }
 
-// QueryRoleToDataRelationship chains the current query on the "role_to_data_relationship" edge.
-func (_q *CoreRoleQuery) QueryRoleToDataRelationship() *CoreDataRelationshipQuery {
+// QueryDataRelationships chains the current query on the "data_relationships" edge.
+func (_q *CoreRoleQuery) QueryDataRelationships() *CoreDataRelationshipQuery {
 	query := (&CoreDataRelationshipClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
@@ -100,7 +100,7 @@ func (_q *CoreRoleQuery) QueryRoleToDataRelationship() *CoreDataRelationshipQuer
 		step := sqlgraph.NewStep(
 			sqlgraph.From(corerole.Table, corerole.FieldID, selector),
 			sqlgraph.To(coredatarelationship.Table, coredatarelationship.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, corerole.RoleToDataRelationshipTable, corerole.RoleToDataRelationshipColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, corerole.DataRelationshipsTable, corerole.DataRelationshipsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -295,13 +295,13 @@ func (_q *CoreRoleQuery) Clone() *CoreRoleQuery {
 		return nil
 	}
 	return &CoreRoleQuery{
-		config:                     _q.config,
-		ctx:                        _q.ctx.Clone(),
-		order:                      append([]corerole.OrderOption{}, _q.order...),
-		inters:                     append([]Interceptor{}, _q.inters...),
-		predicates:                 append([]predicate.CoreRole{}, _q.predicates...),
-		withRoleToUser:             _q.withRoleToUser.Clone(),
-		withRoleToDataRelationship: _q.withRoleToDataRelationship.Clone(),
+		config:                _q.config,
+		ctx:                   _q.ctx.Clone(),
+		order:                 append([]corerole.OrderOption{}, _q.order...),
+		inters:                append([]Interceptor{}, _q.inters...),
+		predicates:            append([]predicate.CoreRole{}, _q.predicates...),
+		withRoleToUser:        _q.withRoleToUser.Clone(),
+		withDataRelationships: _q.withDataRelationships.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -320,14 +320,14 @@ func (_q *CoreRoleQuery) WithRoleToUser(opts ...func(*CoreUserQuery)) *CoreRoleQ
 	return _q
 }
 
-// WithRoleToDataRelationship tells the query-builder to eager-load the nodes that are connected to
-// the "role_to_data_relationship" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *CoreRoleQuery) WithRoleToDataRelationship(opts ...func(*CoreDataRelationshipQuery)) *CoreRoleQuery {
+// WithDataRelationships tells the query-builder to eager-load the nodes that are connected to
+// the "data_relationships" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *CoreRoleQuery) WithDataRelationships(opts ...func(*CoreDataRelationshipQuery)) *CoreRoleQuery {
 	query := (&CoreDataRelationshipClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withRoleToDataRelationship = query
+	_q.withDataRelationships = query
 	return _q
 }
 
@@ -411,7 +411,7 @@ func (_q *CoreRoleQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Cor
 		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
 			_q.withRoleToUser != nil,
-			_q.withRoleToDataRelationship != nil,
+			_q.withDataRelationships != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -442,11 +442,11 @@ func (_q *CoreRoleQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Cor
 			return nil, err
 		}
 	}
-	if query := _q.withRoleToDataRelationship; query != nil {
-		if err := _q.loadRoleToDataRelationship(ctx, query, nodes,
-			func(n *CoreRole) { n.Edges.RoleToDataRelationship = []*CoreDataRelationship{} },
+	if query := _q.withDataRelationships; query != nil {
+		if err := _q.loadDataRelationships(ctx, query, nodes,
+			func(n *CoreRole) { n.Edges.DataRelationships = []*CoreDataRelationship{} },
 			func(n *CoreRole, e *CoreDataRelationship) {
-				n.Edges.RoleToDataRelationship = append(n.Edges.RoleToDataRelationship, e)
+				n.Edges.DataRelationships = append(n.Edges.DataRelationships, e)
 			}); err != nil {
 			return nil, err
 		}
@@ -484,33 +484,64 @@ func (_q *CoreRoleQuery) loadRoleToUser(ctx context.Context, query *CoreUserQuer
 	}
 	return nil
 }
-func (_q *CoreRoleQuery) loadRoleToDataRelationship(ctx context.Context, query *CoreDataRelationshipQuery, nodes []*CoreRole, init func(*CoreRole), assign func(*CoreRole, *CoreDataRelationship)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[string]*CoreRole)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
+func (_q *CoreRoleQuery) loadDataRelationships(ctx context.Context, query *CoreDataRelationshipQuery, nodes []*CoreRole, init func(*CoreRole), assign func(*CoreRole, *CoreDataRelationship)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[string]*CoreRole)
+	nids := make(map[string]map[*CoreRole]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
 		if init != nil {
-			init(nodes[i])
+			init(node)
 		}
 	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(coredatarelationship.FieldRoleID)
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(corerole.DataRelationshipsTable)
+		s.Join(joinT).On(s.C(coredatarelationship.FieldID), joinT.C(corerole.DataRelationshipsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(corerole.DataRelationshipsPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(corerole.DataRelationshipsPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
 	}
-	query.Where(predicate.CoreDataRelationship(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(corerole.RoleToDataRelationshipColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullString)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := values[0].(*sql.NullString).String
+				inValue := values[1].(*sql.NullString).String
+				if nids[inValue] == nil {
+					nids[inValue] = map[*CoreRole]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*CoreDataRelationship](ctx, query, qr, query.inters)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.RoleID
-		node, ok := nodeids[fk]
+		nodes, ok := nids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "role_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected "data_relationships" node returned %v`, n.ID)
 		}
-		assign(node, n)
+		for kn := range nodes {
+			assign(kn, n)
+		}
 	}
 	return nil
 }

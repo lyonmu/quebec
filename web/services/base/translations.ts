@@ -1,13 +1,29 @@
 // 操作类型映射常量
 export const OPERATION_TYPE_MAP: Record<number, string> = {
-  1: 'online_users.operation_types.login',
-  // 可以根据实际需求添加更多操作类型
-  // 2: 'online_users.operation_types.logout',
-  // 3: 'online_users.operation_types.update',
+  1: 'operation.types.login',
+  2: 'operation.types.logout',
+  3: 'operation.types.user_create',
+  4: 'operation.types.user_update',
+  5: 'operation.types.user_delete',
+  6: 'operation.types.role_create',
+  7: 'operation.types.role_update',
+  8: 'operation.types.role_delete',
+  9: 'operation.types.menu_create',
+  10: 'operation.types.menu_update',
+  11: 'operation.types.menu_delete',
+  12: 'operation.types.online_user_clearance',
+  13: 'operation.types.log_query',
+  14: 'operation.types.log_export',
+  15: 'operation.types.log_clear',
+  16: 'operation.types.password_change',
+  17: 'operation.types.user_enable',
+  18: 'operation.types.role_enable',
+  19: 'operation.types.menu_enable',
+  20: 'operation.types.role_bind_menus',
 };
 
 // 默认操作类型
-export const DEFAULT_OPERATION_TYPE = 'online_users.operation_types.other';
+export const DEFAULT_OPERATION_TYPE = 'operation.types.unknown';
 
 export const translations = {
   zh: {
@@ -141,8 +157,8 @@ export const translations = {
       table: {
         username: "用户名称",
         ip: "访问 IP",
-        lastTime: "最后操作时间",
-        type: "操作类型",
+        lastTime: "最新操作时间",
+        type: "最新操作类型",
         os: "操作系统",
         platform: "操作平台",
         browser: "浏览器名称",
@@ -225,7 +241,6 @@ export const translations = {
         enabled: "启用",
         disabled: "禁用"
       },
-      confirmDelete: "确定要删除该菜单吗？删除后，子菜单也将被删除。"
     },
     logs: {
       title: "操作日志",
@@ -242,6 +257,32 @@ export const translations = {
       status: {
         success: "成功",
         failure: "失败"
+      }
+    },
+    operation: {
+      types: {
+        all: "全部操作",
+        login: "登录",
+        logout: "登出",
+        user_create: "创建用户",
+        user_update: "更新用户",
+        user_delete: "删除用户",
+        role_create: "创建角色",
+        role_update: "更新角色",
+        role_delete: "删除角色",
+        menu_create: "创建菜单",
+        menu_update: "更新菜单",
+        menu_delete: "删除菜单",
+        online_user_clearance: "踢出在线用户",
+        log_query: "查询操作日志",
+        log_export: "导出操作日志",
+        log_clear: "清理操作日志",
+        password_change: "修改密码",
+        user_enable: "启用/禁用用户",
+        role_enable: "启用/禁用角色",
+        menu_enable: "启用/禁用菜单",
+        role_bind_menus: "角色绑定菜单",
+        unknown: "未知操作"
       }
     },
     sidebar: {
@@ -265,17 +306,6 @@ export const translations = {
       platform: "平台",
       adminUser: "管理员",
       superAdmin: "超级管理员"
-    },
-    ai: {
-      button: "AI 配置生成",
-      title: "Quebec AI 架构师",
-      placeholder: "描述您需要的路由、集群或监听器...",
-      hint: '例如："创建一个指向 backend-svc 集群的 HTTP 路由，路径为 /api/v1，超时时间 5s"',
-      inputPlaceholder: "让 AI 生成配置...",
-      copy: "复制 YAML",
-      copied: "已复制",
-      error: "生成配置出错。",
-      genButton: "发送"
     },
     login: {
       username: "用户名",
@@ -430,7 +460,7 @@ export const translations = {
         username: "Username",
         ip: "Access IP",
         lastTime: "Last Operation Time",
-        type: "Operation Type",
+        type: "Last Operation Type",
         os: "OS",
         platform: "Platform",
         browser: "Browser Name",
@@ -513,7 +543,6 @@ export const translations = {
         enabled: "Enabled",
         disabled: "Disabled"
       },
-      confirmDelete: "Are you sure you want to delete this menu? Child menus will also be deleted."
     },
     logs: {
       title: "Operation Logs",
@@ -530,6 +559,32 @@ export const translations = {
       status: {
         success: "Success",
         failure: "Failure"
+      }
+    },
+    operation: {
+      types: {
+        all: "All Operations",
+        login: "Login",
+        logout: "Logout",
+        user_create: "Create User",
+        user_update: "Update User",
+        user_delete: "Delete User",
+        role_create: "Create Role",
+        role_update: "Update Role",
+        role_delete: "Delete Role",
+        menu_create: "Create Menu",
+        menu_update: "Update Menu",
+        menu_delete: "Delete Menu",
+        online_user_clearance: "Clear Online User",
+        log_query: "Query Operation Log",
+        log_export: "Export Operation Log",
+        log_clear: "Clear Operation Log",
+        password_change: "Change Password",
+        user_enable: "Enable/Disable User",
+        role_enable: "Enable/Disable Role",
+        menu_enable: "Enable/Disable Menu",
+        role_bind_menus: "Bind Role Menus",
+        unknown: "Unknown"
       }
     },
     sidebar: {
@@ -553,17 +608,6 @@ export const translations = {
       platform: "Platform",
       adminUser: "Admin User",
       superAdmin: "Super Admin"
-    },
-    ai: {
-      button: "AI Config Gen",
-      title: "Quebec AI Architect",
-      placeholder: "Describe the route, cluster, or listener you need.",
-      hint: 'e.g., "Create an HTTP route for /api/v1 with a 5s timeout pointing to cluster backend-svc"',
-      inputPlaceholder: "Ask AI to generate config...",
-      copy: "Copy YAML",
-      copied: "Copied",
-      error: "Error generating configuration.",
-      genButton: "Send"
     },
     login: {
       username: "Username",
