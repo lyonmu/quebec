@@ -243,6 +243,7 @@ export const translations = {
       },
     },
     logs: {
+      reset:"重置",
       title: "操作日志",
       subtitle: "审计用户操作行为与系统变更记录。",
       table: {
@@ -252,7 +253,12 @@ export const translations = {
         target: "目标对象",
         status: "结果",
         time: "操作时间",
-        details: "详情"
+        details: "详情",
+        operationType: "操作类型",
+        os: "操作系统",
+        platform: "操作平台",
+        browser: "浏览器名称",
+        engine: "引擎名称"
       },
       status: {
         success: "成功",
@@ -325,7 +331,17 @@ export const translations = {
       title: "消息通知",
       empty: "暂无消息",
       noMore: "没有更多消息了",
-      loading: "加载中..."
+      loading: "加载中...",
+      table: {
+        username: "用户名称",
+        ip: "访问 IP",
+        operationTime: "操作时间",
+        operationType: "操作类型",
+        os: "操作系统",
+        platform: "操作平台",
+        browser: "浏览器名称",
+        engine: "引擎名称"
+      }
     }
   },
   en: {
@@ -545,6 +561,7 @@ export const translations = {
       },
     },
     logs: {
+      reset:"Reset",
       title: "Operation Logs",
       subtitle: "Audit user actions and system changes.",
       table: {
@@ -554,7 +571,12 @@ export const translations = {
         target: "Target",
         status: "Status",
         time: "Timestamp",
-        details: "Details"
+        details: "Details",
+        operationType: "Operation Type",
+        os: "OS",
+        platform: "Platform",
+        browser: "Browser",
+        engine: "Engine"
       },
       status: {
         success: "Success",
@@ -627,7 +649,17 @@ export const translations = {
       title: "Notifications",
       empty: "No notifications",
       noMore: "No more messages",
-      loading: "Loading..."
+      loading: "Loading...",
+      table: {
+        username: "Username",
+        ip: "Access IP",
+        operationTime: "Operation Time",
+        operationType: "Operation Type",
+        os: "OS",
+        platform: "Platform",
+        browser: "Browser",
+        engine: "Engine"
+      }
     }
   }
 };

@@ -200,7 +200,7 @@ const RoleManager: React.FC = () => {
     if (actionLoading) return;
     setActionLoading(true);
     try {
-      const menuIds = Array.from(selectedMenuIds);
+      const menuIds = Array.from(selectedMenuIds) as string[];
       const res = await roleMenuService.bindRoleMenus(currentRoleId, menuIds);
       if (res.code === 50000) {
         setIsMenuPermissionOpen(false);
@@ -254,8 +254,8 @@ const RoleManager: React.FC = () => {
   };
 
   return (
-    <div className="p-6 h-full flex flex-col">
-      <div className="flex justify-between items-center mb-6">
+    <div className="p-6 max-w-[1600px] mx-auto space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{t('roles.title')}</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{t('roles.subtitle')}</p>
@@ -413,7 +413,7 @@ const RoleManager: React.FC = () => {
                   <ShieldCheck size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="text"
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg pl-4 py-2 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
                     value={form.name}
                     onChange={e => setForm({...form, name: e.target.value})}
                     required

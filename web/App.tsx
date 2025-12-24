@@ -4,7 +4,7 @@ import { HashRouter } from 'react-router-dom';
 import Sidebar from './components/layout/Sidebar';
 import Dashboard from './components/dashboard/Dashboard';
 import ProxyManager from './components/proxy/ProxyManager';
-import CertManager from './components/system/CertManager';
+import CertManager from './components/proxy/CertManager';
 import NodeList from './components/proxy/NodeList';
 
 import Login from './components/auth/Login';

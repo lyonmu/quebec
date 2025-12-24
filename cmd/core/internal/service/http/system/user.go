@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/lyonmu/quebec/cmd/core/internal/dto/request"
 	"github.com/lyonmu/quebec/cmd/core/internal/dto/response"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent"
@@ -58,7 +59,7 @@ func (s *SystemSvc) UserPage(ctx context.Context, req *request.SystemUserPageReq
 			func(q *ent.CoreRoleQuery) {
 				q.Select(corerole.FieldID, corerole.FieldName).Where(corerole.DeletedAtIsNil())
 			},
-		).All(ctx)
+		).Order(coreuser.ByCreatedAt(sql.OrderDesc())).All(ctx)
 	if err != nil {
 		global.Logger.Sugar().Errorf("select core_user failed: %s", err)
 		return nil, &code.UserQueryFailed
@@ -98,7 +99,7 @@ func (s *SystemSvc) UserList(ctx context.Context, req *request.SystemUserListReq
 			func(q *ent.CoreRoleQuery) {
 				q.Select(corerole.FieldID, corerole.FieldName).Where(corerole.DeletedAtIsNil())
 			},
-		).All(ctx)
+		).Order(coreuser.ByCreatedAt(sql.OrderDesc())).All(ctx)
 	if err != nil {
 		global.Logger.Sugar().Errorf("select core_user failed: %s", err)
 		return nil, &code.UserQueryFailed
@@ -282,7 +283,7 @@ func (s *SystemSvc) UserEnable(ctx context.Context, id string, req *request.Enab
 		return &code.UserSystemNotAllow
 	}
 
-	_, err := global.EntClient.CoreRole.UpdateOneID(id).SetStatus(req.Status).Save(ctx)
+	_, err := global.EntClient.CoreUser.UpdateOneID(id).SetStatus(req.Status).Save(ctx)
 	if err != nil {
 		global.Logger.Sugar().Errorf("enable core_user failed: %s", err)
 		return &code.UserEnableFailed
@@ -299,9 +300,10 @@ func (s *SystemSvc) UserEditPassword(ctx context.Context, id string, req *reques
 		return &code.UserNotExists
 	}
 
-	if row.Password != req.PrePassword {
+	if encrypt.CompareWithBcryptString(row.Password, req.PrePassword) {
 		return &code.UserPasswordError
 	}
+
 	password, err := encrypt.HashWithBcryptString(req.NewPassword)
 	if err != nil {
 		global.Logger.Sugar().Errorf("hash password failed: %s", err)

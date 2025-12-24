@@ -24,8 +24,8 @@ const ProxyManager: React.FC<ProxyManagerProps> = ({ layer }) => {
   });
 
   return (
-    <div className="p-6 h-full flex flex-col">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+    <div className="p-6 max-w-[1600px] mx-auto space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{layer === 'L4' ? t('proxy.titleL4') : t('proxy.titleL7')}</h2>
            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{layer === 'L4' ? t('proxy.subtitleL4') : t('proxy.subtitleL7')}</p>

@@ -99,11 +99,10 @@ type OperationLogReq struct {
 }
 
 type OperationLogPageReq struct {
-	ID            string               `json:"id,omitempty"`                                                                                                     // ID
-	AccessIP      string               `json:"access_ip,omitempty"`                                                                                              // 访问IP
+	ID            string               `json:"user_id,omitempty" form:"user_id"`                                                                                 // 用户ID                                                                          // 访问IP
 	StartTime     int64                `json:"start_time,omitempty" form:"start_time"`                                                                           // 开始时间
 	EndTime       int64                `json:"end_time,omitempty" form:"end_time"`                                                                               // 结束时间
-	OperationType common.OperationType `json:"operation_type,omitempty"`                                                                                         // 操作类型
+	OperationType common.OperationType `json:"operation_type,omitempty" form:"operation_type"`                                                                   // 操作类型
 	Page          int                  `json:"page,omitempty" binding:"required,min=1" form:"page" minimum:"1" default:"1"`                                      // 页码
 	PageSize      int                  `json:"page_size,omitempty" binding:"required,min=10,max=1000" form:"page_size" minimum:"10" maximum:"1000" default:"10"` // 每页条数
 }

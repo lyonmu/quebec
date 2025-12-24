@@ -1,3 +1,8 @@
+import { YesOrNo, MenuType } from './api';
+
+// Re-export for backward compatibility
+export type { MenuType };
+
 // Menu Types
 export interface SystemMenu {
   id: string;
@@ -12,8 +17,6 @@ export interface SystemMenu {
   status: YesOrNo;
   remark: string;
 }
-
-export type MenuType = 1 | 2 | 3; // 1: 目录, 2: 菜单, 3: 按钮
 
 export interface SystemMenuPageReq {
   name?: string;

@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, Info, AlertTriangle, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
-import { Notification } from '../../types';
+import { Bell, Loader2 } from 'lucide-react';
+import { Notification } from '../../types/onlineuser';
 import { fetchNotifications } from '../../services/base/mockData';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { OPERATION_TYPE_MAP, DEFAULT_OPERATION_TYPE } from '../../services/base/translations';
 
 const NotificationDropdown: React.FC = () => {
   const { t } = useLanguage();
@@ -70,17 +71,13 @@ const NotificationDropdown: React.FC = () => {
     }
   };
 
-  const getIcon = (type: string) => {
-    switch (type) {
-      case 'error': return <AlertCircle size={16} className="text-rose-500" />;
-      case 'warning': return <AlertTriangle size={16} className="text-amber-500" />;
-      case 'success': return <CheckCircle size={16} className="text-emerald-500" />;
-      default: return <Info size={16} className="text-blue-500" />;
-    }
+  const getOperationType = (operationType: number) => {
+    const translationKey = OPERATION_TYPE_MAP[operationType] || DEFAULT_OPERATION_TYPE;
+    return t(translationKey);
   };
 
-  const formatTime = (isoString: string) => {
-    const date = new Date(isoString);
+  const formatTime = (timestamp: number) => {
+    const date = new Date(timestamp * 1000);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
@@ -126,27 +123,49 @@ const NotificationDropdown: React.FC = () => {
             ) : (
               <div className="divide-y divide-slate-100 dark:divide-slate-800">
                 {notifications.map((notif) => (
-                  <div key={notif.id} className={`p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors flex gap-3 ${!notif.read ? 'bg-blue-50/30 dark:bg-blue-900/10' : ''}`}>
-                    <div className={`mt-0.5 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                      notif.type === 'error' ? 'bg-rose-100 dark:bg-rose-900/20' : 
-                      notif.type === 'warning' ? 'bg-amber-100 dark:bg-amber-900/20' : 
-                      notif.type === 'success' ? 'bg-emerald-100 dark:bg-emerald-900/20' : 
-                      'bg-blue-100 dark:bg-blue-900/20'
-                    }`}>
-                      {getIcon(notif.type)}
+                  <div
+                    key={`${notif.username}-${notif.access_ip}-${notif.operation_time}`}
+                    className={`p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors flex gap-3 ${!notif.read ? 'bg-blue-50/30 dark:bg-blue-900/10' : ''}`}
+                  >
+                    <div className="mt-0.5 shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-medium text-sm shadow-sm">
+                      {notif.username.substring(0, 2).toUpperCase()}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start mb-1">
-                        <h4 className={`text-sm font-medium truncate pr-2 ${!notif.read ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>
-                          {notif.title}
-                        </h4>
-                        <span className="text-[10px] text-slate-400 dark:text-slate-500 flex-shrink-0 whitespace-nowrap">
-                          {formatTime(notif.timestamp)}
+
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-2">
+                          <h4 className={`text-sm font-medium ${!notif.read ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>
+                            {notif.nickname || notif.username}
+                          </h4>
+                          <span className="text-xs text-slate-400">•</span>
+                          <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                            {notif.access_ip}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 shrink-0 whitespace-nowrap">
+                          {formatTime(notif.operation_time)}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">
-                        {notif.message}
-                      </p>
+
+                      <div className="flex items-center gap-2">
+                        <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                          {getOperationType(notif.operation_type)}
+                        </span>
+                        <span className="text-xs text-slate-400">•</span>
+                        <span className="text-xs text-slate-500 dark:text-slate-400">
+                          {notif.os}
+                        </span>
+                        <span className="text-xs text-slate-400">•</span>
+                        <span className="text-xs text-slate-500 dark:text-slate-400">
+                          {notif.platform}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+                        <span>{notif.browser_name} {notif.browser_version}</span>
+                        <span className="text-slate-300 dark:text-slate-600">|</span>
+                        <span>{notif.browser_engine_name} {notif.browser_engine_version}</span>
+                      </div>
                     </div>
                   </div>
                 ))}

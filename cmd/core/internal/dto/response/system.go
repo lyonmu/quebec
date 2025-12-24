@@ -139,7 +139,7 @@ type SystemOperationLogResp struct {
 }
 
 func (r *SystemOperationLogResp) LoadDb(e *ent.CoreOperationLog) {
-	r.ID = e.UserID
+	r.ID = e.ID
 	r.AccessIP = e.AccessIP
 	r.OperationTime = e.OperationTime
 	r.OperationType = e.OperationType

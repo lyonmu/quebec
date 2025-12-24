@@ -4,10 +4,11 @@ import (
 	"context"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/lyonmu/quebec/cmd/core/internal/dto/request"
 	"github.com/lyonmu/quebec/cmd/core/internal/dto/response"
-	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
 	"github.com/lyonmu/quebec/pkg/code"
 	"github.com/lyonmu/quebec/pkg/constant"
@@ -37,7 +38,7 @@ func (s *SystemSvc) RolePage(ctx context.Context, req *request.SystemRolePageReq
 		return nil, &code.RoleQueryFailed
 	}
 
-	rows, err := query.Offset(page).Limit(pageSize).All(ctx)
+	rows, err := query.Offset(page).Limit(pageSize).Order(corerole.ByCreatedAt(sql.OrderDesc())).All(ctx)
 	if err != nil {
 		global.Logger.Sugar().Errorf("select core_role failed: %s", err)
 		return nil, &code.RoleQueryFailed
@@ -79,7 +80,7 @@ func (s *SystemSvc) RoleList(ctx context.Context, req *request.SystemRoleListReq
 		query = query.Where(corerole.Status(req.Status))
 	}
 
-	rows, err := query.All(ctx)
+	rows, err := query.Order(corerole.ByCreatedAt(sql.OrderDesc())).All(ctx)
 	if err != nil {
 		global.Logger.Sugar().Errorf("select core_role failed: %s", err)
 		return nil, &code.RoleQueryFailed

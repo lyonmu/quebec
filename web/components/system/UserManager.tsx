@@ -7,6 +7,7 @@ import { userService } from '../../services/system/userService';
 import { roleService } from '../../services/system/roleService';
 import { Options, YesOrNo, SystemUserDetail } from '../../types';
 import { OPERATION_TYPE_MAP, DEFAULT_OPERATION_TYPE } from '../../services/base/translations';
+import forge from 'node-forge';
 
 const UserManager: React.FC = () => {
   const { t } = useLanguage();
@@ -210,10 +211,23 @@ const UserManager: React.FC = () => {
 
     setActionLoading(true);
     try {
+      // Hash passwords with SHA256
+      const hashPrePassword = forge.md.sha256.create();
+      hashPrePassword.update(passForm.prePassword);
+      const hashedPrePassword = hashPrePassword.digest().toHex();
+
+      const hashNewPassword = forge.md.sha256.create();
+      hashNewPassword.update(passForm.newPassword);
+      const hashedNewPassword = hashNewPassword.digest().toHex();
+
+      const hashConfirmPassword = forge.md.sha256.create();
+      hashConfirmPassword.update(passForm.confirmPassword);
+      const hashedConfirmPassword = hashConfirmPassword.digest().toHex();
+
       const payload = {
-        pre_password: passForm.prePassword,
-        new_password: passForm.newPassword,
-        confirm_password: passForm.confirmPassword,
+        pre_password: hashedPrePassword,
+        new_password: hashedNewPassword,
+        confirm_password: hashedConfirmPassword,
       };
       const res = await userService.updateUserPassword(selectedUser.id, payload);
       if (res.code === 50000) {
@@ -259,8 +273,8 @@ const UserManager: React.FC = () => {
   };
 
   return (
-    <div className="p-6 h-full flex flex-col">
-      <div className="flex justify-between items-center mb-6">
+    <div className="p-6 max-w-[1600px] mx-auto space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{t('users.title')}</h2>
            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{t('users.subtitle')}</p>

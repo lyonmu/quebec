@@ -4,11 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/lyonmu/quebec/cmd/core/internal/common"
 	"github.com/lyonmu/quebec/cmd/core/internal/dto/request"
 	"github.com/lyonmu/quebec/cmd/core/internal/dto/response"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreonlineuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreoperationlog"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
 	"github.com/lyonmu/quebec/pkg/code"
 )
@@ -96,7 +99,12 @@ func (s *SystemSvc) OperationLogPage(ctx context.Context, req *request.Operation
 		return nil, &code.LogQueryFailed
 	}
 
-	rows, err := query.Offset(page).Limit(pageSize).Order(coreoperationlog.ByCreatedAt()).All(ctx)
+	rows, err := query.Offset(page).Limit(pageSize).
+		WithOperationLogFromUser(
+			func(q *ent.CoreUserQuery) {
+				q.Select(coreuser.FieldID, coreuser.FieldUsername, coreuser.FieldNickname).Where(coreuser.DeletedAtIsNil())
+			},
+		).Order(coreoperationlog.ByOperationTime(sql.OrderDesc())).All(ctx)
 	if err != nil {
 		global.Logger.Sugar().Errorf("select operation log failed: %s", err)
 		return nil, &code.LogQueryFailed

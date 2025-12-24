@@ -8,8 +8,8 @@ const NodeList: React.FC = () => {
   const { t } = useLanguage();
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="p-6 max-w-[1600px] mx-auto space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{t('nodes.title')}</h2>
         <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-md shadow-blue-900/10 dark:shadow-blue-900/20">
           {t('nodes.deployNew')}

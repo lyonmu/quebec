@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/lyonmu/quebec/cmd/core/internal/dto/request"
 	"github.com/lyonmu/quebec/cmd/core/internal/dto/response"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent"
@@ -51,7 +52,7 @@ func (s *SystemSvc) ListOnlineUser(req *request.SystemOnlineUserListReq, ctx con
 			func(q *ent.CoreUserQuery) {
 				q.Select(coreuser.FieldID, coreuser.FieldUsername, coreuser.FieldNickname).Where(coreuser.DeletedAtIsNil())
 			},
-		).
+		).Order(coreonlineuser.ByLastOperationTime(sql.OrderDesc())).
 		All(ctx)
 	if err != nil {
 		global.Logger.Sugar().Errorf("获取在线用户列表失败: %v", err)

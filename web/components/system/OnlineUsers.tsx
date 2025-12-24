@@ -64,7 +64,7 @@ const OnlineUsers: React.FC = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, [page, pageSize]);
+  }, [page, pageSize, ipSearch, selectedUserId, startTime, endTime]);
 
   const handleSearch = () => {
     if (page === 1) {
@@ -184,14 +184,6 @@ const OnlineUsers: React.FC = () => {
               <Search size={16} />
               {t('common.search')}
             </button>
-            
-            {/* <button 
-              onClick={fetchUsers}
-              className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-              title={t('common.refresh')}
-            >
-              <RefreshCw size={20} />
-            </button> */}
           </div>
         </div>
       </div>

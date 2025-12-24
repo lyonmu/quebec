@@ -1,3 +1,8 @@
+import { YesOrNo, OperationType } from './api';
+
+// Re-export for backward compatibility
+export type { YesOrNo };
+
 // System Management Types
 export interface Certificate {
   id: string;
@@ -8,26 +13,22 @@ export interface Certificate {
   status: 'VALID' | 'EXPIRING_SOON' | 'EXPIRED';
 }
 
-export interface OperationLog {
-  id: string;
-  user: string;
-  action: string;
-  target: string;
-  ip: string;
-  status: 'SUCCESS' | 'FAILURE';
-  timestamp: string;
-  details: string;
-}
-
 export interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  timestamp: string;
-  read: boolean;
-  type: 'info' | 'warning' | 'error' | 'success';
+  username: string;
+  access_ip: string;
+  operation_type: OperationType;
+  operation_time: number;
+  os: string;
+  platform: string;
+  browser_name: string;
+  browser_engine_name: string;
+  browser_version?: string;
+  browser_engine_version?: string;
+  nickname?: string;
+  read?: boolean;
 }
 
+// 在线用户响应 (对应 response.SystemOnlineUserResp)
 export interface OnlineUser {
   id: string;
   access_ip: string;
@@ -38,11 +39,12 @@ export interface OnlineUser {
   last_operation_time: number;
   username: string;
   nickname: string;
-  operation_type: number;
+  operation_type: OperationType;
   os: string;
   platform: string;
 }
 
+// 在线用户列表响应 (对应 response.SystemOnlineUserListResp)
 export interface OnlineUserListResponse {
   items: OnlineUser[];
   page: number;
@@ -56,17 +58,45 @@ export interface OnlineUserLabel {
   children?: OnlineUserLabel[];
 }
 
-// ---- System User & Role Types (from core swagger) ----
+// ---- 操作日志类型 (from core swagger) ----
 
-// 通用 Options 结构，用于标签等
-export interface Options {
-  label: string;
-  value: string;
-  children?: Options[];
+// 操作日志响应 (对应 response.SystemOperationLogResp)
+export interface SystemOperationLog {
+  id: string;
+  access_ip: string;
+  browser_engine_name: string;
+  browser_engine_version: string;
+  browser_name: string;
+  browser_version: string;
+  nickname: string;
+  operation_time: number;
+  operation_type: OperationType;
+  os: string;
+  platform: string;
+  username: string;
 }
 
-// 后端的 YesOrNo 状态 [1: 启用, 2: 禁用]
-export type YesOrNo = 1 | 2;
+// 操作日志列表响应 (对应 response.SystemOperationLogListResp)
+export interface SystemOperationLogListResponse {
+  items: SystemOperationLog[];
+  page: number;
+  page_size: number;
+  total: number;
+}
+
+// 操作日志查询请求
+export interface SystemOperationLogPageReq {
+  id?: string;
+  access_ip?: string;
+  operation_type?: OperationType;
+  user_id?: string;
+  start_time?: number;
+  end_time?: number;
+  page: number;
+  page_size: number;
+}
+
+// ---- System User & Role Types (from core swagger) ----
 
 // 用户详情响应（对应 response.SystemUserResp）
 export interface SystemUserDetail {
@@ -80,6 +110,7 @@ export interface SystemUserDetail {
   remark?: string;
   last_operation_time?: number;
   last_password_change?: number;
+  operation_type?: OperationType;
 }
 
 // 用户列表响应（对应 response.SystemUserListResp）
@@ -144,4 +175,3 @@ export interface SystemRoleAddReq {
   name: string;
   remark?: string;
 }
-
