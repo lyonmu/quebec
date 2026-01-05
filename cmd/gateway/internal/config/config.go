@@ -1,13 +1,15 @@
 package config
 
 import (
+	"github.com/lyonmu/quebec/pkg/config"
 	log "github.com/lyonmu/quebec/pkg/logger"
 )
 
 type Config struct {
-	Version bool          `short:"v" long:"version" help:"版本信息" default:"false" mapstructure:"version" json:"version" yaml:"version"`
-	Log     log.LogConfig `embed:"" prefix:"log." mapstructure:"log" json:"log" yaml:"log"`
-	Gateway GatewayConfig `embed:"" prefix:"gateway." mapstructure:"gateway" json:"gateway" yaml:"gateway"`
+	Version bool               `short:"v" long:"version" help:"版本信息" default:"false" mapstructure:"version" json:"version" yaml:"version"`
+	Log     log.LogConfig      `embed:"" prefix:"log." mapstructure:"log" json:"log" yaml:"log"`
+	Gateway GatewayConfig      `embed:"" prefix:"gateway." mapstructure:"gateway" json:"gateway" yaml:"gateway"`
+	Kafka   config.KafkaConfig `embed:"" prefix:"kafka." mapstructure:"kafka" json:"kafka" yaml:"kafka"`
 }
 
 type GatewayConfig struct {

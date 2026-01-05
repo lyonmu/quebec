@@ -2,7 +2,7 @@ package mq
 
 import "context"
 
-type Publish[K, V any] interface {
+type Produce[K, V any] interface {
 	Produce(ctx context.Context, key *K, payload *V) error
 }
 
@@ -11,12 +11,13 @@ type Subscribe[K, V any] interface {
 	Close() error
 }
 
-type Decoder[K, V any] interface {
-	DecodeKey(raw []byte, key *K) error
-	DecodeValue(raw []byte, value *V) error
+type Encode[K, V any] interface {
+	EncoderKey(key *K) ([]byte, error)
+	EncoderValue(value *V) ([]byte, error)
+}
+type Decode[K, V any] interface {
+	DecoderKey(raw []byte, key *K) error
+	DecoderValue(raw []byte, value *V) error
 }
 
-type Encoder[K, V any] interface {
-	EncodeKey(key *K) ([]byte, error)
-	EncodeValue(value *V) ([]byte, error)
-}
+
