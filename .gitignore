@@ -72,3 +72,5 @@ openspec/
 .cursor/
 .claude/
 CLAUDE.md
+AGENTS.md
+code_review_report.md

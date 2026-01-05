@@ -217,7 +217,6 @@ func (s *SystemSvc) UserUpdate(ctx context.Context, id string, req *request.Syst
 		SetNillableNickname(req.Nickname).
 		SetNillableEmail(req.Email).
 		SetNillableRoleID(req.RoleID).
-		SetNillablePassword(req.Email).
 		SetNillableRemark(req.Remark).
 		Save(ctx)
 	if uerr != nil {

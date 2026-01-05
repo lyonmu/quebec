@@ -32,13 +32,13 @@ func Start() {
 
 		idGenerator, err := tools.NewSonySnowFlake(global.Cfg.MachineID)
 		if err != nil {
-			global.Logger.Sugar().Error("初始化雪花算法失败: %v", err)
+			global.Logger.Sugar().Error("初始化雪花算法失败: ", err)
 			os.Exit(1)
 		}
 		global.Id = idGenerator
 
 		if err := InitMySQL(global.Cfg.MySQL); err != nil {
-			global.Logger.Sugar().Error("初始化mysql失败: %v", err)
+			global.Logger.Sugar().Error("初始化mysql失败: ", err)
 			os.Exit(1)
 		}
 
@@ -47,7 +47,7 @@ func Start() {
 		global.CaptchaGenerator = global.Cfg.Core.Captcha.WithRedis(global.RedisCli)
 
 		if err := initialize.Init(global.EntClient); err != nil {
-			global.Logger.Sugar().Error("初始化数据失败: %v", err)
+			global.Logger.Sugar().Error("初始化数据失败: ", err)
 			os.Exit(1)
 		}
 
@@ -58,7 +58,7 @@ func Start() {
 	scheduler.StartSchedulerTask()
 
 	if err := InitServer(); err != nil {
-		global.Logger.Sugar().Error("初始化服务失败: %v", err)
+		global.Logger.Sugar().Error("初始化服务失败: ", err)
 		os.Exit(1)
 	}
 }

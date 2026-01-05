@@ -56,7 +56,7 @@ func (s *SystemSvc) Login(req *request.SystemLoginRequest, ua *useragent.UserAge
 		return nil, &code.RoleNotExists
 	}
 
-	if encrypt.CompareWithBcryptString(u.Password, req.Password) {
+	if !encrypt.CompareWithBcryptString(u.Password, req.Password) {
 		global.Logger.Sugar().Errorf("用户 %s 登录密码错误", req.Username)
 		return nil, &code.UserPasswordError
 	}
