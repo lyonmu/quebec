@@ -78,6 +78,26 @@ func (_u *CoreMenuUpdate) ClearName() *CoreMenuUpdate {
 	return _u
 }
 
+// SetMenuCode sets the "menu_code" field.
+func (_u *CoreMenuUpdate) SetMenuCode(v string) *CoreMenuUpdate {
+	_u.mutation.SetMenuCode(v)
+	return _u
+}
+
+// SetNillableMenuCode sets the "menu_code" field if the given value is not nil.
+func (_u *CoreMenuUpdate) SetNillableMenuCode(v *string) *CoreMenuUpdate {
+	if v != nil {
+		_u.SetMenuCode(*v)
+	}
+	return _u
+}
+
+// ClearMenuCode clears the value of the "menu_code" field.
+func (_u *CoreMenuUpdate) ClearMenuCode() *CoreMenuUpdate {
+	_u.mutation.ClearMenuCode()
+	return _u
+}
+
 // SetMenuType sets the "menu_type" field.
 func (_u *CoreMenuUpdate) SetMenuType(v common.MenuType) *CoreMenuUpdate {
 	_u.mutation.ResetMenuType()
@@ -172,23 +192,23 @@ func (_u *CoreMenuUpdate) ClearOrder() *CoreMenuUpdate {
 	return _u
 }
 
-// SetParentID sets the "parent_id" field.
-func (_u *CoreMenuUpdate) SetParentID(v string) *CoreMenuUpdate {
-	_u.mutation.SetParentID(v)
+// SetParentMenuCode sets the "parent_menu_code" field.
+func (_u *CoreMenuUpdate) SetParentMenuCode(v string) *CoreMenuUpdate {
+	_u.mutation.SetParentMenuCode(v)
 	return _u
 }
 
-// SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_u *CoreMenuUpdate) SetNillableParentID(v *string) *CoreMenuUpdate {
+// SetNillableParentMenuCode sets the "parent_menu_code" field if the given value is not nil.
+func (_u *CoreMenuUpdate) SetNillableParentMenuCode(v *string) *CoreMenuUpdate {
 	if v != nil {
-		_u.SetParentID(*v)
+		_u.SetParentMenuCode(*v)
 	}
 	return _u
 }
 
-// ClearParentID clears the value of the "parent_id" field.
-func (_u *CoreMenuUpdate) ClearParentID() *CoreMenuUpdate {
-	_u.mutation.ClearParentID()
+// ClearParentMenuCode clears the value of the "parent_menu_code" field.
+func (_u *CoreMenuUpdate) ClearParentMenuCode() *CoreMenuUpdate {
+	_u.mutation.ClearParentMenuCode()
 	return _u
 }
 
@@ -216,46 +236,6 @@ func (_u *CoreMenuUpdate) AddStatus(v constant.YesOrNo) *CoreMenuUpdate {
 // ClearStatus clears the value of the "status" field.
 func (_u *CoreMenuUpdate) ClearStatus() *CoreMenuUpdate {
 	_u.mutation.ClearStatus()
-	return _u
-}
-
-// SetComponent sets the "component" field.
-func (_u *CoreMenuUpdate) SetComponent(v string) *CoreMenuUpdate {
-	_u.mutation.SetComponent(v)
-	return _u
-}
-
-// SetNillableComponent sets the "component" field if the given value is not nil.
-func (_u *CoreMenuUpdate) SetNillableComponent(v *string) *CoreMenuUpdate {
-	if v != nil {
-		_u.SetComponent(*v)
-	}
-	return _u
-}
-
-// ClearComponent clears the value of the "component" field.
-func (_u *CoreMenuUpdate) ClearComponent() *CoreMenuUpdate {
-	_u.mutation.ClearComponent()
-	return _u
-}
-
-// SetRemark sets the "remark" field.
-func (_u *CoreMenuUpdate) SetRemark(v string) *CoreMenuUpdate {
-	_u.mutation.SetRemark(v)
-	return _u
-}
-
-// SetNillableRemark sets the "remark" field if the given value is not nil.
-func (_u *CoreMenuUpdate) SetNillableRemark(v *string) *CoreMenuUpdate {
-	if v != nil {
-		_u.SetRemark(*v)
-	}
-	return _u
-}
-
-// ClearRemark clears the value of the "remark" field.
-func (_u *CoreMenuUpdate) ClearRemark() *CoreMenuUpdate {
-	_u.mutation.ClearRemark()
 	return _u
 }
 
@@ -433,6 +413,12 @@ func (_u *CoreMenuUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.NameCleared() {
 		_spec.ClearField(coremenu.FieldName, field.TypeString)
 	}
+	if value, ok := _u.mutation.MenuCode(); ok {
+		_spec.SetField(coremenu.FieldMenuCode, field.TypeString, value)
+	}
+	if _u.mutation.MenuCodeCleared() {
+		_spec.ClearField(coremenu.FieldMenuCode, field.TypeString)
+	}
 	if value, ok := _u.mutation.MenuType(); ok {
 		_spec.SetField(coremenu.FieldMenuType, field.TypeInt8, value)
 	}
@@ -471,18 +457,6 @@ func (_u *CoreMenuUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.StatusCleared() {
 		_spec.ClearField(coremenu.FieldStatus, field.TypeInt8)
-	}
-	if value, ok := _u.mutation.Component(); ok {
-		_spec.SetField(coremenu.FieldComponent, field.TypeString, value)
-	}
-	if _u.mutation.ComponentCleared() {
-		_spec.ClearField(coremenu.FieldComponent, field.TypeString)
-	}
-	if value, ok := _u.mutation.Remark(); ok {
-		_spec.SetField(coremenu.FieldRemark, field.TypeString, value)
-	}
-	if _u.mutation.RemarkCleared() {
-		_spec.ClearField(coremenu.FieldRemark, field.TypeString)
 	}
 	if _u.mutation.MenuFromParentCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -671,6 +645,26 @@ func (_u *CoreMenuUpdateOne) ClearName() *CoreMenuUpdateOne {
 	return _u
 }
 
+// SetMenuCode sets the "menu_code" field.
+func (_u *CoreMenuUpdateOne) SetMenuCode(v string) *CoreMenuUpdateOne {
+	_u.mutation.SetMenuCode(v)
+	return _u
+}
+
+// SetNillableMenuCode sets the "menu_code" field if the given value is not nil.
+func (_u *CoreMenuUpdateOne) SetNillableMenuCode(v *string) *CoreMenuUpdateOne {
+	if v != nil {
+		_u.SetMenuCode(*v)
+	}
+	return _u
+}
+
+// ClearMenuCode clears the value of the "menu_code" field.
+func (_u *CoreMenuUpdateOne) ClearMenuCode() *CoreMenuUpdateOne {
+	_u.mutation.ClearMenuCode()
+	return _u
+}
+
 // SetMenuType sets the "menu_type" field.
 func (_u *CoreMenuUpdateOne) SetMenuType(v common.MenuType) *CoreMenuUpdateOne {
 	_u.mutation.ResetMenuType()
@@ -765,23 +759,23 @@ func (_u *CoreMenuUpdateOne) ClearOrder() *CoreMenuUpdateOne {
 	return _u
 }
 
-// SetParentID sets the "parent_id" field.
-func (_u *CoreMenuUpdateOne) SetParentID(v string) *CoreMenuUpdateOne {
-	_u.mutation.SetParentID(v)
+// SetParentMenuCode sets the "parent_menu_code" field.
+func (_u *CoreMenuUpdateOne) SetParentMenuCode(v string) *CoreMenuUpdateOne {
+	_u.mutation.SetParentMenuCode(v)
 	return _u
 }
 
-// SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_u *CoreMenuUpdateOne) SetNillableParentID(v *string) *CoreMenuUpdateOne {
+// SetNillableParentMenuCode sets the "parent_menu_code" field if the given value is not nil.
+func (_u *CoreMenuUpdateOne) SetNillableParentMenuCode(v *string) *CoreMenuUpdateOne {
 	if v != nil {
-		_u.SetParentID(*v)
+		_u.SetParentMenuCode(*v)
 	}
 	return _u
 }
 
-// ClearParentID clears the value of the "parent_id" field.
-func (_u *CoreMenuUpdateOne) ClearParentID() *CoreMenuUpdateOne {
-	_u.mutation.ClearParentID()
+// ClearParentMenuCode clears the value of the "parent_menu_code" field.
+func (_u *CoreMenuUpdateOne) ClearParentMenuCode() *CoreMenuUpdateOne {
+	_u.mutation.ClearParentMenuCode()
 	return _u
 }
 
@@ -809,46 +803,6 @@ func (_u *CoreMenuUpdateOne) AddStatus(v constant.YesOrNo) *CoreMenuUpdateOne {
 // ClearStatus clears the value of the "status" field.
 func (_u *CoreMenuUpdateOne) ClearStatus() *CoreMenuUpdateOne {
 	_u.mutation.ClearStatus()
-	return _u
-}
-
-// SetComponent sets the "component" field.
-func (_u *CoreMenuUpdateOne) SetComponent(v string) *CoreMenuUpdateOne {
-	_u.mutation.SetComponent(v)
-	return _u
-}
-
-// SetNillableComponent sets the "component" field if the given value is not nil.
-func (_u *CoreMenuUpdateOne) SetNillableComponent(v *string) *CoreMenuUpdateOne {
-	if v != nil {
-		_u.SetComponent(*v)
-	}
-	return _u
-}
-
-// ClearComponent clears the value of the "component" field.
-func (_u *CoreMenuUpdateOne) ClearComponent() *CoreMenuUpdateOne {
-	_u.mutation.ClearComponent()
-	return _u
-}
-
-// SetRemark sets the "remark" field.
-func (_u *CoreMenuUpdateOne) SetRemark(v string) *CoreMenuUpdateOne {
-	_u.mutation.SetRemark(v)
-	return _u
-}
-
-// SetNillableRemark sets the "remark" field if the given value is not nil.
-func (_u *CoreMenuUpdateOne) SetNillableRemark(v *string) *CoreMenuUpdateOne {
-	if v != nil {
-		_u.SetRemark(*v)
-	}
-	return _u
-}
-
-// ClearRemark clears the value of the "remark" field.
-func (_u *CoreMenuUpdateOne) ClearRemark() *CoreMenuUpdateOne {
-	_u.mutation.ClearRemark()
 	return _u
 }
 
@@ -1056,6 +1010,12 @@ func (_u *CoreMenuUpdateOne) sqlSave(ctx context.Context) (_node *CoreMenu, err 
 	if _u.mutation.NameCleared() {
 		_spec.ClearField(coremenu.FieldName, field.TypeString)
 	}
+	if value, ok := _u.mutation.MenuCode(); ok {
+		_spec.SetField(coremenu.FieldMenuCode, field.TypeString, value)
+	}
+	if _u.mutation.MenuCodeCleared() {
+		_spec.ClearField(coremenu.FieldMenuCode, field.TypeString)
+	}
 	if value, ok := _u.mutation.MenuType(); ok {
 		_spec.SetField(coremenu.FieldMenuType, field.TypeInt8, value)
 	}
@@ -1094,18 +1054,6 @@ func (_u *CoreMenuUpdateOne) sqlSave(ctx context.Context) (_node *CoreMenu, err 
 	}
 	if _u.mutation.StatusCleared() {
 		_spec.ClearField(coremenu.FieldStatus, field.TypeInt8)
-	}
-	if value, ok := _u.mutation.Component(); ok {
-		_spec.SetField(coremenu.FieldComponent, field.TypeString, value)
-	}
-	if _u.mutation.ComponentCleared() {
-		_spec.ClearField(coremenu.FieldComponent, field.TypeString)
-	}
-	if value, ok := _u.mutation.Remark(); ok {
-		_spec.SetField(coremenu.FieldRemark, field.TypeString, value)
-	}
-	if _u.mutation.RemarkCleared() {
-		_spec.ClearField(coremenu.FieldRemark, field.TypeString)
 	}
 	if _u.mutation.MenuFromParentCleared() {
 		edge := &sqlgraph.EdgeSpec{

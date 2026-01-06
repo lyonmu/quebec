@@ -82,6 +82,20 @@ func (_c *CoreMenuCreate) SetNillableName(v *string) *CoreMenuCreate {
 	return _c
 }
 
+// SetMenuCode sets the "menu_code" field.
+func (_c *CoreMenuCreate) SetMenuCode(v string) *CoreMenuCreate {
+	_c.mutation.SetMenuCode(v)
+	return _c
+}
+
+// SetNillableMenuCode sets the "menu_code" field if the given value is not nil.
+func (_c *CoreMenuCreate) SetNillableMenuCode(v *string) *CoreMenuCreate {
+	if v != nil {
+		_c.SetMenuCode(*v)
+	}
+	return _c
+}
+
 // SetMenuType sets the "menu_type" field.
 func (_c *CoreMenuCreate) SetMenuType(v common.MenuType) *CoreMenuCreate {
 	_c.mutation.SetMenuType(v)
@@ -138,16 +152,16 @@ func (_c *CoreMenuCreate) SetNillableOrder(v *int8) *CoreMenuCreate {
 	return _c
 }
 
-// SetParentID sets the "parent_id" field.
-func (_c *CoreMenuCreate) SetParentID(v string) *CoreMenuCreate {
-	_c.mutation.SetParentID(v)
+// SetParentMenuCode sets the "parent_menu_code" field.
+func (_c *CoreMenuCreate) SetParentMenuCode(v string) *CoreMenuCreate {
+	_c.mutation.SetParentMenuCode(v)
 	return _c
 }
 
-// SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_c *CoreMenuCreate) SetNillableParentID(v *string) *CoreMenuCreate {
+// SetNillableParentMenuCode sets the "parent_menu_code" field if the given value is not nil.
+func (_c *CoreMenuCreate) SetNillableParentMenuCode(v *string) *CoreMenuCreate {
 	if v != nil {
-		_c.SetParentID(*v)
+		_c.SetParentMenuCode(*v)
 	}
 	return _c
 }
@@ -162,34 +176,6 @@ func (_c *CoreMenuCreate) SetStatus(v constant.YesOrNo) *CoreMenuCreate {
 func (_c *CoreMenuCreate) SetNillableStatus(v *constant.YesOrNo) *CoreMenuCreate {
 	if v != nil {
 		_c.SetStatus(*v)
-	}
-	return _c
-}
-
-// SetComponent sets the "component" field.
-func (_c *CoreMenuCreate) SetComponent(v string) *CoreMenuCreate {
-	_c.mutation.SetComponent(v)
-	return _c
-}
-
-// SetNillableComponent sets the "component" field if the given value is not nil.
-func (_c *CoreMenuCreate) SetNillableComponent(v *string) *CoreMenuCreate {
-	if v != nil {
-		_c.SetComponent(*v)
-	}
-	return _c
-}
-
-// SetRemark sets the "remark" field.
-func (_c *CoreMenuCreate) SetRemark(v string) *CoreMenuCreate {
-	_c.mutation.SetRemark(v)
-	return _c
-}
-
-// SetNillableRemark sets the "remark" field if the given value is not nil.
-func (_c *CoreMenuCreate) SetNillableRemark(v *string) *CoreMenuCreate {
-	if v != nil {
-		_c.SetRemark(*v)
 	}
 	return _c
 }
@@ -395,6 +381,10 @@ func (_c *CoreMenuCreate) createSpec() (*CoreMenu, *sqlgraph.CreateSpec) {
 		_spec.SetField(coremenu.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
+	if value, ok := _c.mutation.MenuCode(); ok {
+		_spec.SetField(coremenu.FieldMenuCode, field.TypeString, value)
+		_node.MenuCode = value
+	}
 	if value, ok := _c.mutation.MenuType(); ok {
 		_spec.SetField(coremenu.FieldMenuType, field.TypeInt8, value)
 		_node.MenuType = value
@@ -415,14 +405,6 @@ func (_c *CoreMenuCreate) createSpec() (*CoreMenu, *sqlgraph.CreateSpec) {
 		_spec.SetField(coremenu.FieldStatus, field.TypeInt8, value)
 		_node.Status = value
 	}
-	if value, ok := _c.mutation.Component(); ok {
-		_spec.SetField(coremenu.FieldComponent, field.TypeString, value)
-		_node.Component = value
-	}
-	if value, ok := _c.mutation.Remark(); ok {
-		_spec.SetField(coremenu.FieldRemark, field.TypeString, value)
-		_node.Remark = value
-	}
 	if nodes := _c.mutation.MenuFromParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -437,7 +419,7 @@ func (_c *CoreMenuCreate) createSpec() (*CoreMenu, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.ParentID = nodes[0]
+		_node.ParentMenuCode = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.DataRelationshipsIDs(); len(nodes) > 0 {
@@ -572,6 +554,24 @@ func (u *CoreMenuUpsert) ClearName() *CoreMenuUpsert {
 	return u
 }
 
+// SetMenuCode sets the "menu_code" field.
+func (u *CoreMenuUpsert) SetMenuCode(v string) *CoreMenuUpsert {
+	u.Set(coremenu.FieldMenuCode, v)
+	return u
+}
+
+// UpdateMenuCode sets the "menu_code" field to the value that was provided on create.
+func (u *CoreMenuUpsert) UpdateMenuCode() *CoreMenuUpsert {
+	u.SetExcluded(coremenu.FieldMenuCode)
+	return u
+}
+
+// ClearMenuCode clears the value of the "menu_code" field.
+func (u *CoreMenuUpsert) ClearMenuCode() *CoreMenuUpsert {
+	u.SetNull(coremenu.FieldMenuCode)
+	return u
+}
+
 // SetMenuType sets the "menu_type" field.
 func (u *CoreMenuUpsert) SetMenuType(v common.MenuType) *CoreMenuUpsert {
 	u.Set(coremenu.FieldMenuType, v)
@@ -656,21 +656,21 @@ func (u *CoreMenuUpsert) ClearOrder() *CoreMenuUpsert {
 	return u
 }
 
-// SetParentID sets the "parent_id" field.
-func (u *CoreMenuUpsert) SetParentID(v string) *CoreMenuUpsert {
-	u.Set(coremenu.FieldParentID, v)
+// SetParentMenuCode sets the "parent_menu_code" field.
+func (u *CoreMenuUpsert) SetParentMenuCode(v string) *CoreMenuUpsert {
+	u.Set(coremenu.FieldParentMenuCode, v)
 	return u
 }
 
-// UpdateParentID sets the "parent_id" field to the value that was provided on create.
-func (u *CoreMenuUpsert) UpdateParentID() *CoreMenuUpsert {
-	u.SetExcluded(coremenu.FieldParentID)
+// UpdateParentMenuCode sets the "parent_menu_code" field to the value that was provided on create.
+func (u *CoreMenuUpsert) UpdateParentMenuCode() *CoreMenuUpsert {
+	u.SetExcluded(coremenu.FieldParentMenuCode)
 	return u
 }
 
-// ClearParentID clears the value of the "parent_id" field.
-func (u *CoreMenuUpsert) ClearParentID() *CoreMenuUpsert {
-	u.SetNull(coremenu.FieldParentID)
+// ClearParentMenuCode clears the value of the "parent_menu_code" field.
+func (u *CoreMenuUpsert) ClearParentMenuCode() *CoreMenuUpsert {
+	u.SetNull(coremenu.FieldParentMenuCode)
 	return u
 }
 
@@ -695,42 +695,6 @@ func (u *CoreMenuUpsert) AddStatus(v constant.YesOrNo) *CoreMenuUpsert {
 // ClearStatus clears the value of the "status" field.
 func (u *CoreMenuUpsert) ClearStatus() *CoreMenuUpsert {
 	u.SetNull(coremenu.FieldStatus)
-	return u
-}
-
-// SetComponent sets the "component" field.
-func (u *CoreMenuUpsert) SetComponent(v string) *CoreMenuUpsert {
-	u.Set(coremenu.FieldComponent, v)
-	return u
-}
-
-// UpdateComponent sets the "component" field to the value that was provided on create.
-func (u *CoreMenuUpsert) UpdateComponent() *CoreMenuUpsert {
-	u.SetExcluded(coremenu.FieldComponent)
-	return u
-}
-
-// ClearComponent clears the value of the "component" field.
-func (u *CoreMenuUpsert) ClearComponent() *CoreMenuUpsert {
-	u.SetNull(coremenu.FieldComponent)
-	return u
-}
-
-// SetRemark sets the "remark" field.
-func (u *CoreMenuUpsert) SetRemark(v string) *CoreMenuUpsert {
-	u.Set(coremenu.FieldRemark, v)
-	return u
-}
-
-// UpdateRemark sets the "remark" field to the value that was provided on create.
-func (u *CoreMenuUpsert) UpdateRemark() *CoreMenuUpsert {
-	u.SetExcluded(coremenu.FieldRemark)
-	return u
-}
-
-// ClearRemark clears the value of the "remark" field.
-func (u *CoreMenuUpsert) ClearRemark() *CoreMenuUpsert {
-	u.SetNull(coremenu.FieldRemark)
 	return u
 }
 
@@ -841,6 +805,27 @@ func (u *CoreMenuUpsertOne) ClearName() *CoreMenuUpsertOne {
 	})
 }
 
+// SetMenuCode sets the "menu_code" field.
+func (u *CoreMenuUpsertOne) SetMenuCode(v string) *CoreMenuUpsertOne {
+	return u.Update(func(s *CoreMenuUpsert) {
+		s.SetMenuCode(v)
+	})
+}
+
+// UpdateMenuCode sets the "menu_code" field to the value that was provided on create.
+func (u *CoreMenuUpsertOne) UpdateMenuCode() *CoreMenuUpsertOne {
+	return u.Update(func(s *CoreMenuUpsert) {
+		s.UpdateMenuCode()
+	})
+}
+
+// ClearMenuCode clears the value of the "menu_code" field.
+func (u *CoreMenuUpsertOne) ClearMenuCode() *CoreMenuUpsertOne {
+	return u.Update(func(s *CoreMenuUpsert) {
+		s.ClearMenuCode()
+	})
+}
+
 // SetMenuType sets the "menu_type" field.
 func (u *CoreMenuUpsertOne) SetMenuType(v common.MenuType) *CoreMenuUpsertOne {
 	return u.Update(func(s *CoreMenuUpsert) {
@@ -939,24 +924,24 @@ func (u *CoreMenuUpsertOne) ClearOrder() *CoreMenuUpsertOne {
 	})
 }
 
-// SetParentID sets the "parent_id" field.
-func (u *CoreMenuUpsertOne) SetParentID(v string) *CoreMenuUpsertOne {
+// SetParentMenuCode sets the "parent_menu_code" field.
+func (u *CoreMenuUpsertOne) SetParentMenuCode(v string) *CoreMenuUpsertOne {
 	return u.Update(func(s *CoreMenuUpsert) {
-		s.SetParentID(v)
+		s.SetParentMenuCode(v)
 	})
 }
 
-// UpdateParentID sets the "parent_id" field to the value that was provided on create.
-func (u *CoreMenuUpsertOne) UpdateParentID() *CoreMenuUpsertOne {
+// UpdateParentMenuCode sets the "parent_menu_code" field to the value that was provided on create.
+func (u *CoreMenuUpsertOne) UpdateParentMenuCode() *CoreMenuUpsertOne {
 	return u.Update(func(s *CoreMenuUpsert) {
-		s.UpdateParentID()
+		s.UpdateParentMenuCode()
 	})
 }
 
-// ClearParentID clears the value of the "parent_id" field.
-func (u *CoreMenuUpsertOne) ClearParentID() *CoreMenuUpsertOne {
+// ClearParentMenuCode clears the value of the "parent_menu_code" field.
+func (u *CoreMenuUpsertOne) ClearParentMenuCode() *CoreMenuUpsertOne {
 	return u.Update(func(s *CoreMenuUpsert) {
-		s.ClearParentID()
+		s.ClearParentMenuCode()
 	})
 }
 
@@ -985,48 +970,6 @@ func (u *CoreMenuUpsertOne) UpdateStatus() *CoreMenuUpsertOne {
 func (u *CoreMenuUpsertOne) ClearStatus() *CoreMenuUpsertOne {
 	return u.Update(func(s *CoreMenuUpsert) {
 		s.ClearStatus()
-	})
-}
-
-// SetComponent sets the "component" field.
-func (u *CoreMenuUpsertOne) SetComponent(v string) *CoreMenuUpsertOne {
-	return u.Update(func(s *CoreMenuUpsert) {
-		s.SetComponent(v)
-	})
-}
-
-// UpdateComponent sets the "component" field to the value that was provided on create.
-func (u *CoreMenuUpsertOne) UpdateComponent() *CoreMenuUpsertOne {
-	return u.Update(func(s *CoreMenuUpsert) {
-		s.UpdateComponent()
-	})
-}
-
-// ClearComponent clears the value of the "component" field.
-func (u *CoreMenuUpsertOne) ClearComponent() *CoreMenuUpsertOne {
-	return u.Update(func(s *CoreMenuUpsert) {
-		s.ClearComponent()
-	})
-}
-
-// SetRemark sets the "remark" field.
-func (u *CoreMenuUpsertOne) SetRemark(v string) *CoreMenuUpsertOne {
-	return u.Update(func(s *CoreMenuUpsert) {
-		s.SetRemark(v)
-	})
-}
-
-// UpdateRemark sets the "remark" field to the value that was provided on create.
-func (u *CoreMenuUpsertOne) UpdateRemark() *CoreMenuUpsertOne {
-	return u.Update(func(s *CoreMenuUpsert) {
-		s.UpdateRemark()
-	})
-}
-
-// ClearRemark clears the value of the "remark" field.
-func (u *CoreMenuUpsertOne) ClearRemark() *CoreMenuUpsertOne {
-	return u.Update(func(s *CoreMenuUpsert) {
-		s.ClearRemark()
 	})
 }
 
@@ -1304,6 +1247,27 @@ func (u *CoreMenuUpsertBulk) ClearName() *CoreMenuUpsertBulk {
 	})
 }
 
+// SetMenuCode sets the "menu_code" field.
+func (u *CoreMenuUpsertBulk) SetMenuCode(v string) *CoreMenuUpsertBulk {
+	return u.Update(func(s *CoreMenuUpsert) {
+		s.SetMenuCode(v)
+	})
+}
+
+// UpdateMenuCode sets the "menu_code" field to the value that was provided on create.
+func (u *CoreMenuUpsertBulk) UpdateMenuCode() *CoreMenuUpsertBulk {
+	return u.Update(func(s *CoreMenuUpsert) {
+		s.UpdateMenuCode()
+	})
+}
+
+// ClearMenuCode clears the value of the "menu_code" field.
+func (u *CoreMenuUpsertBulk) ClearMenuCode() *CoreMenuUpsertBulk {
+	return u.Update(func(s *CoreMenuUpsert) {
+		s.ClearMenuCode()
+	})
+}
+
 // SetMenuType sets the "menu_type" field.
 func (u *CoreMenuUpsertBulk) SetMenuType(v common.MenuType) *CoreMenuUpsertBulk {
 	return u.Update(func(s *CoreMenuUpsert) {
@@ -1402,24 +1366,24 @@ func (u *CoreMenuUpsertBulk) ClearOrder() *CoreMenuUpsertBulk {
 	})
 }
 
-// SetParentID sets the "parent_id" field.
-func (u *CoreMenuUpsertBulk) SetParentID(v string) *CoreMenuUpsertBulk {
+// SetParentMenuCode sets the "parent_menu_code" field.
+func (u *CoreMenuUpsertBulk) SetParentMenuCode(v string) *CoreMenuUpsertBulk {
 	return u.Update(func(s *CoreMenuUpsert) {
-		s.SetParentID(v)
+		s.SetParentMenuCode(v)
 	})
 }
 
-// UpdateParentID sets the "parent_id" field to the value that was provided on create.
-func (u *CoreMenuUpsertBulk) UpdateParentID() *CoreMenuUpsertBulk {
+// UpdateParentMenuCode sets the "parent_menu_code" field to the value that was provided on create.
+func (u *CoreMenuUpsertBulk) UpdateParentMenuCode() *CoreMenuUpsertBulk {
 	return u.Update(func(s *CoreMenuUpsert) {
-		s.UpdateParentID()
+		s.UpdateParentMenuCode()
 	})
 }
 
-// ClearParentID clears the value of the "parent_id" field.
-func (u *CoreMenuUpsertBulk) ClearParentID() *CoreMenuUpsertBulk {
+// ClearParentMenuCode clears the value of the "parent_menu_code" field.
+func (u *CoreMenuUpsertBulk) ClearParentMenuCode() *CoreMenuUpsertBulk {
 	return u.Update(func(s *CoreMenuUpsert) {
-		s.ClearParentID()
+		s.ClearParentMenuCode()
 	})
 }
 
@@ -1448,48 +1412,6 @@ func (u *CoreMenuUpsertBulk) UpdateStatus() *CoreMenuUpsertBulk {
 func (u *CoreMenuUpsertBulk) ClearStatus() *CoreMenuUpsertBulk {
 	return u.Update(func(s *CoreMenuUpsert) {
 		s.ClearStatus()
-	})
-}
-
-// SetComponent sets the "component" field.
-func (u *CoreMenuUpsertBulk) SetComponent(v string) *CoreMenuUpsertBulk {
-	return u.Update(func(s *CoreMenuUpsert) {
-		s.SetComponent(v)
-	})
-}
-
-// UpdateComponent sets the "component" field to the value that was provided on create.
-func (u *CoreMenuUpsertBulk) UpdateComponent() *CoreMenuUpsertBulk {
-	return u.Update(func(s *CoreMenuUpsert) {
-		s.UpdateComponent()
-	})
-}
-
-// ClearComponent clears the value of the "component" field.
-func (u *CoreMenuUpsertBulk) ClearComponent() *CoreMenuUpsertBulk {
-	return u.Update(func(s *CoreMenuUpsert) {
-		s.ClearComponent()
-	})
-}
-
-// SetRemark sets the "remark" field.
-func (u *CoreMenuUpsertBulk) SetRemark(v string) *CoreMenuUpsertBulk {
-	return u.Update(func(s *CoreMenuUpsert) {
-		s.SetRemark(v)
-	})
-}
-
-// UpdateRemark sets the "remark" field to the value that was provided on create.
-func (u *CoreMenuUpsertBulk) UpdateRemark() *CoreMenuUpsertBulk {
-	return u.Update(func(s *CoreMenuUpsert) {
-		s.UpdateRemark()
-	})
-}
-
-// ClearRemark clears the value of the "remark" field.
-func (u *CoreMenuUpsertBulk) ClearRemark() *CoreMenuUpsertBulk {
-	return u.Update(func(s *CoreMenuUpsert) {
-		s.ClearRemark()
 	})
 }
 

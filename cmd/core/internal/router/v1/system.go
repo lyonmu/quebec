@@ -60,12 +60,6 @@ func (r *SystemRouter) InitSystemRouter(group *gin.RouterGroup, apiGroup v1.V1Ap
 		systemRouterWithAuth.GET("menu/list", apiGroup.SystemMenuList)
 		systemRouterWithAuth.GET("menu/tree", apiGroup.SystemMenuTree)
 		systemRouterWithAuth.GET("menu/label", apiGroup.SystemMenuLabel)
-		// 创建菜单（需要记录操作日志）
-		systemRouterWithAuth.POST("menu", operationLogMiddleware.Handle(common.OperationMenuCreate), apiGroup.SystemMenuAdd)
-		// 更新菜单（需要记录操作日志）
-		systemRouterWithAuth.PUT("menu/:id", operationLogMiddleware.Handle(common.OperationMenuUpdate), apiGroup.SystemMenuEdit)
-		// 删除菜单（需要记录操作日志）
-		systemRouterWithAuth.DELETE("menu/:id", operationLogMiddleware.Handle(common.OperationMenuDelete), apiGroup.SystemMenuDelete)
 		systemRouterWithAuth.GET("menu/:id", apiGroup.SystemMenuGetById)
 		// 启用/禁用菜单（需要记录操作日志）
 		systemRouterWithAuth.PUT("menu/enable/:id", operationLogMiddleware.Handle(common.OperationMenuEnable), apiGroup.SystemMenuEnable)

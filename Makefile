@@ -36,6 +36,14 @@ core:
 	make ui
 	CGO_ENABLED=0 go build -tags netgo,osusergo ${FLAGS} -o bin/core cmd/core/core.go
 
+.PHONY: swag
+swag:
+	cd cmd/core && swag init -g core.go -o ./internal/docs --parseDependency --parseInternal
+
+.PHONY: ent
+ent:
+	cd cmd/core/internal/ent && go run -mod=mod entgo.io/ent/cmd/ent --feature sql/upsert,sql/execquery,sql/modifier generate ./schema
+
 .PHONY: all
 all: gateway core ui
 

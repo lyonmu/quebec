@@ -179,15 +179,15 @@ func init() {
 	// coremenu.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	coremenu.UpdateDefaultUpdatedAt = coremenuDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// coremenuDescMenuType is the schema descriptor for menu_type field.
-	coremenuDescMenuType := coremenuFields[1].Descriptor()
+	coremenuDescMenuType := coremenuFields[2].Descriptor()
 	// coremenu.DefaultMenuType holds the default value on creation for the menu_type field.
 	coremenu.DefaultMenuType = common.MenuType(coremenuDescMenuType.Default.(int8))
 	// coremenuDescOrder is the schema descriptor for order field.
-	coremenuDescOrder := coremenuFields[4].Descriptor()
+	coremenuDescOrder := coremenuFields[5].Descriptor()
 	// coremenu.DefaultOrder holds the default value on creation for the order field.
 	coremenu.DefaultOrder = coremenuDescOrder.Default.(int8)
 	// coremenuDescStatus is the schema descriptor for status field.
-	coremenuDescStatus := coremenuFields[6].Descriptor()
+	coremenuDescStatus := coremenuFields[7].Descriptor()
 	// coremenu.DefaultStatus holds the default value on creation for the status field.
 	coremenu.DefaultStatus = constant.YesOrNo(coremenuDescStatus.Default.(int8))
 	// coremenuDescID is the schema descriptor for id field.

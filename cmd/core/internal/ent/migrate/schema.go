@@ -189,14 +189,13 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
 		{Name: "name", Type: field.TypeString, Nullable: true, Comment: "菜单名称"},
+		{Name: "menu_code", Type: field.TypeString, Nullable: true, Comment: "菜单编码"},
 		{Name: "menu_type", Type: field.TypeInt8, Nullable: true, Comment: "菜单类型 [1: 目录, 2: 菜单, 3: 按钮]", Default: 1},
 		{Name: "api_path", Type: field.TypeString, Nullable: true, Comment: "菜单API路径"},
 		{Name: "api_path_method", Type: field.TypeString, Nullable: true, Comment: "菜单API方法"},
 		{Name: "order", Type: field.TypeInt8, Nullable: true, Comment: "菜单排序", Default: 1},
 		{Name: "status", Type: field.TypeInt8, Nullable: true, Comment: "菜单状态 [1: 启用, 2: 禁用]", Default: 1},
-		{Name: "component", Type: field.TypeString, Nullable: true, Comment: "菜单组件"},
-		{Name: "remark", Type: field.TypeString, Nullable: true, Comment: "菜单备注", SchemaType: map[string]string{"mysql": "text", "postgres": "text", "sqlite3": "text"}},
-		{Name: "parent_id", Type: field.TypeString, Nullable: true, Size: 64, Comment: "父菜单ID"},
+		{Name: "parent_menu_code", Type: field.TypeString, Nullable: true, Size: 64, Comment: "父菜单编码"},
 	}
 	// QuebecCoreMenuTable holds the schema information for the "quebec_core_menu" table.
 	QuebecCoreMenuTable = &schema.Table{
@@ -207,7 +206,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "quebec_core_menu_quebec_core_menu_menu_to_children",
-				Columns:    []*schema.Column{QuebecCoreMenuColumns[12]},
+				Columns:    []*schema.Column{QuebecCoreMenuColumns[11]},
 				RefColumns: []*schema.Column{QuebecCoreMenuColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -241,22 +240,37 @@ var (
 			{
 				Name:    "coremenu_menu_type",
 				Unique:  false,
-				Columns: []*schema.Column{QuebecCoreMenuColumns[5]},
+				Columns: []*schema.Column{QuebecCoreMenuColumns[6]},
 			},
 			{
 				Name:    "coremenu_api_path",
 				Unique:  false,
-				Columns: []*schema.Column{QuebecCoreMenuColumns[6]},
+				Columns: []*schema.Column{QuebecCoreMenuColumns[7]},
+			},
+			{
+				Name:    "coremenu_api_path_method",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreMenuColumns[8]},
 			},
 			{
 				Name:    "coremenu_status",
 				Unique:  false,
-				Columns: []*schema.Column{QuebecCoreMenuColumns[9]},
+				Columns: []*schema.Column{QuebecCoreMenuColumns[10]},
 			},
 			{
-				Name:    "coremenu_parent_id",
+				Name:    "coremenu_parent_menu_code",
 				Unique:  false,
-				Columns: []*schema.Column{QuebecCoreMenuColumns[12]},
+				Columns: []*schema.Column{QuebecCoreMenuColumns[11]},
+			},
+			{
+				Name:    "coremenu_menu_code",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreMenuColumns[5]},
+			},
+			{
+				Name:    "coremenu_order",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreMenuColumns[9]},
 			},
 		},
 	}

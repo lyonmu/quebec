@@ -18,6 +18,10 @@ func Init(client *ent.Client) error {
 			return err
 		}
 	}
+	if err := data.InitMenu(client); err != nil {
+		global.Logger.Sugar().Errorf("core_menu表数据初始化失败: %v", err)
+		return err
+	}
 
 	return nil
 }

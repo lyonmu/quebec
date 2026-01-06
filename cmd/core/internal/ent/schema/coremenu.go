@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"entgo.io/ent"
-	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
@@ -25,21 +24,20 @@ type CoreMenu struct {
 func (CoreMenu) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name").Optional().Comment("菜单名称"),
+		field.String("menu_code").Optional().Comment("菜单编码"),
 		field.Int8("menu_type").GoType(corecommon.MenuType(1)).Optional().Comment("菜单类型 [1: 目录, 2: 菜单, 3: 按钮]").Default(int8(corecommon.MenuTypeDirectory)),
 		field.String("api_path").Optional().Comment("菜单API路径"),
 		field.String("api_path_method").Optional().Comment("菜单API方法"),
 		field.Int8("order").Optional().Comment("菜单排序").Default(1),
-		field.String("parent_id").Optional().Comment("父菜单ID"),
+		field.String("parent_menu_code").Optional().Comment("父菜单编码"),
 		field.Int8("status").GoType(constant.YesOrNo(1)).Optional().Comment("菜单状态 [1: 启用, 2: 禁用]").Default(int8(constant.Yes)),
-		field.String("component").Optional().Comment("菜单组件"),
-		field.String("remark").SchemaType(map[string]string{dialect.MySQL: "text", dialect.SQLite: "text", dialect.Postgres: "text"}).Optional().Comment("菜单备注"),
 	}
 }
 
 // Edges of the CoreMenu.
 func (CoreMenu) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("menu_from_parent", CoreMenu.Type).Ref("menu_to_children").Field("parent_id").Unique(),
+		edge.From("menu_from_parent", CoreMenu.Type).Ref("menu_to_children").Field("parent_menu_code").Unique(),
 		edge.From("data_relationships", CoreDataRelationship.Type).Ref("menu"),
 		edge.To("menu_to_children", CoreMenu.Type),
 	}
@@ -60,8 +58,11 @@ func (CoreMenu) Indexes() []ent.Index {
 		index.Fields("name"),
 		index.Fields("menu_type"),
 		index.Fields("api_path"),
+		index.Fields("api_path_method"),
 		index.Fields("status"),
-		index.Fields("parent_id"),
+		index.Fields("parent_menu_code"),
+		index.Fields("menu_code"),
+		index.Fields("order"),
 	}
 }
 

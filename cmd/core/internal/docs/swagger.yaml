@@ -1152,18 +1152,10 @@ paths:
     get:
       description: 获取操作日志分页列表
       parameters:
-      - description: 访问IP
-        in: query
-        name: access_ip
-        type: string
       - description: 结束时间
         in: query
         name: end_time
         type: integer
-      - description: ID
-        in: query
-        name: id
-        type: string
       - description: 操作类型
         enum:
         - 1
@@ -1271,6 +1263,11 @@ paths:
         in: query
         name: start_time
         type: integer
+      - description: 用户ID                                                                          //
+          访问IP
+        in: query
+        name: user_id
+        type: string
       produces:
       - application/json
       responses:

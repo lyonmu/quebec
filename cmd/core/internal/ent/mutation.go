@@ -2898,6 +2898,7 @@ type CoreMenuMutation struct {
 	updated_at                *time.Time
 	deleted_at                *time.Time
 	name                      *string
+	menu_code                 *string
 	menu_type                 *common.MenuType
 	addmenu_type              *common.MenuType
 	api_path                  *string
@@ -2906,8 +2907,6 @@ type CoreMenuMutation struct {
 	add_order                 *int8
 	status                    *constant.YesOrNo
 	addstatus                 *constant.YesOrNo
-	component                 *string
-	remark                    *string
 	clearedFields             map[string]struct{}
 	menu_from_parent          *string
 	clearedmenu_from_parent   bool
@@ -3196,6 +3195,55 @@ func (m *CoreMenuMutation) ResetName() {
 	delete(m.clearedFields, coremenu.FieldName)
 }
 
+// SetMenuCode sets the "menu_code" field.
+func (m *CoreMenuMutation) SetMenuCode(s string) {
+	m.menu_code = &s
+}
+
+// MenuCode returns the value of the "menu_code" field in the mutation.
+func (m *CoreMenuMutation) MenuCode() (r string, exists bool) {
+	v := m.menu_code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMenuCode returns the old "menu_code" field's value of the CoreMenu entity.
+// If the CoreMenu object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreMenuMutation) OldMenuCode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMenuCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMenuCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMenuCode: %w", err)
+	}
+	return oldValue.MenuCode, nil
+}
+
+// ClearMenuCode clears the value of the "menu_code" field.
+func (m *CoreMenuMutation) ClearMenuCode() {
+	m.menu_code = nil
+	m.clearedFields[coremenu.FieldMenuCode] = struct{}{}
+}
+
+// MenuCodeCleared returns if the "menu_code" field was cleared in this mutation.
+func (m *CoreMenuMutation) MenuCodeCleared() bool {
+	_, ok := m.clearedFields[coremenu.FieldMenuCode]
+	return ok
+}
+
+// ResetMenuCode resets all changes to the "menu_code" field.
+func (m *CoreMenuMutation) ResetMenuCode() {
+	m.menu_code = nil
+	delete(m.clearedFields, coremenu.FieldMenuCode)
+}
+
 // SetMenuType sets the "menu_type" field.
 func (m *CoreMenuMutation) SetMenuType(ct common.MenuType) {
 	m.menu_type = &ct
@@ -3434,13 +3482,13 @@ func (m *CoreMenuMutation) ResetOrder() {
 	delete(m.clearedFields, coremenu.FieldOrder)
 }
 
-// SetParentID sets the "parent_id" field.
-func (m *CoreMenuMutation) SetParentID(s string) {
+// SetParentMenuCode sets the "parent_menu_code" field.
+func (m *CoreMenuMutation) SetParentMenuCode(s string) {
 	m.menu_from_parent = &s
 }
 
-// ParentID returns the value of the "parent_id" field in the mutation.
-func (m *CoreMenuMutation) ParentID() (r string, exists bool) {
+// ParentMenuCode returns the value of the "parent_menu_code" field in the mutation.
+func (m *CoreMenuMutation) ParentMenuCode() (r string, exists bool) {
 	v := m.menu_from_parent
 	if v == nil {
 		return
@@ -3448,39 +3496,39 @@ func (m *CoreMenuMutation) ParentID() (r string, exists bool) {
 	return *v, true
 }
 
-// OldParentID returns the old "parent_id" field's value of the CoreMenu entity.
+// OldParentMenuCode returns the old "parent_menu_code" field's value of the CoreMenu entity.
 // If the CoreMenu object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CoreMenuMutation) OldParentID(ctx context.Context) (v string, err error) {
+func (m *CoreMenuMutation) OldParentMenuCode(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldParentID is only allowed on UpdateOne operations")
+		return v, errors.New("OldParentMenuCode is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldParentID requires an ID field in the mutation")
+		return v, errors.New("OldParentMenuCode requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldParentID: %w", err)
+		return v, fmt.Errorf("querying old value for OldParentMenuCode: %w", err)
 	}
-	return oldValue.ParentID, nil
+	return oldValue.ParentMenuCode, nil
 }
 
-// ClearParentID clears the value of the "parent_id" field.
-func (m *CoreMenuMutation) ClearParentID() {
+// ClearParentMenuCode clears the value of the "parent_menu_code" field.
+func (m *CoreMenuMutation) ClearParentMenuCode() {
 	m.menu_from_parent = nil
-	m.clearedFields[coremenu.FieldParentID] = struct{}{}
+	m.clearedFields[coremenu.FieldParentMenuCode] = struct{}{}
 }
 
-// ParentIDCleared returns if the "parent_id" field was cleared in this mutation.
-func (m *CoreMenuMutation) ParentIDCleared() bool {
-	_, ok := m.clearedFields[coremenu.FieldParentID]
+// ParentMenuCodeCleared returns if the "parent_menu_code" field was cleared in this mutation.
+func (m *CoreMenuMutation) ParentMenuCodeCleared() bool {
+	_, ok := m.clearedFields[coremenu.FieldParentMenuCode]
 	return ok
 }
 
-// ResetParentID resets all changes to the "parent_id" field.
-func (m *CoreMenuMutation) ResetParentID() {
+// ResetParentMenuCode resets all changes to the "parent_menu_code" field.
+func (m *CoreMenuMutation) ResetParentMenuCode() {
 	m.menu_from_parent = nil
-	delete(m.clearedFields, coremenu.FieldParentID)
+	delete(m.clearedFields, coremenu.FieldParentMenuCode)
 }
 
 // SetStatus sets the "status" field.
@@ -3553,104 +3601,6 @@ func (m *CoreMenuMutation) ResetStatus() {
 	delete(m.clearedFields, coremenu.FieldStatus)
 }
 
-// SetComponent sets the "component" field.
-func (m *CoreMenuMutation) SetComponent(s string) {
-	m.component = &s
-}
-
-// Component returns the value of the "component" field in the mutation.
-func (m *CoreMenuMutation) Component() (r string, exists bool) {
-	v := m.component
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldComponent returns the old "component" field's value of the CoreMenu entity.
-// If the CoreMenu object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CoreMenuMutation) OldComponent(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldComponent is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldComponent requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldComponent: %w", err)
-	}
-	return oldValue.Component, nil
-}
-
-// ClearComponent clears the value of the "component" field.
-func (m *CoreMenuMutation) ClearComponent() {
-	m.component = nil
-	m.clearedFields[coremenu.FieldComponent] = struct{}{}
-}
-
-// ComponentCleared returns if the "component" field was cleared in this mutation.
-func (m *CoreMenuMutation) ComponentCleared() bool {
-	_, ok := m.clearedFields[coremenu.FieldComponent]
-	return ok
-}
-
-// ResetComponent resets all changes to the "component" field.
-func (m *CoreMenuMutation) ResetComponent() {
-	m.component = nil
-	delete(m.clearedFields, coremenu.FieldComponent)
-}
-
-// SetRemark sets the "remark" field.
-func (m *CoreMenuMutation) SetRemark(s string) {
-	m.remark = &s
-}
-
-// Remark returns the value of the "remark" field in the mutation.
-func (m *CoreMenuMutation) Remark() (r string, exists bool) {
-	v := m.remark
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldRemark returns the old "remark" field's value of the CoreMenu entity.
-// If the CoreMenu object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CoreMenuMutation) OldRemark(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRemark is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRemark requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRemark: %w", err)
-	}
-	return oldValue.Remark, nil
-}
-
-// ClearRemark clears the value of the "remark" field.
-func (m *CoreMenuMutation) ClearRemark() {
-	m.remark = nil
-	m.clearedFields[coremenu.FieldRemark] = struct{}{}
-}
-
-// RemarkCleared returns if the "remark" field was cleared in this mutation.
-func (m *CoreMenuMutation) RemarkCleared() bool {
-	_, ok := m.clearedFields[coremenu.FieldRemark]
-	return ok
-}
-
-// ResetRemark resets all changes to the "remark" field.
-func (m *CoreMenuMutation) ResetRemark() {
-	m.remark = nil
-	delete(m.clearedFields, coremenu.FieldRemark)
-}
-
 // SetMenuFromParentID sets the "menu_from_parent" edge to the CoreMenu entity by id.
 func (m *CoreMenuMutation) SetMenuFromParentID(id string) {
 	m.menu_from_parent = &id
@@ -3659,12 +3609,12 @@ func (m *CoreMenuMutation) SetMenuFromParentID(id string) {
 // ClearMenuFromParent clears the "menu_from_parent" edge to the CoreMenu entity.
 func (m *CoreMenuMutation) ClearMenuFromParent() {
 	m.clearedmenu_from_parent = true
-	m.clearedFields[coremenu.FieldParentID] = struct{}{}
+	m.clearedFields[coremenu.FieldParentMenuCode] = struct{}{}
 }
 
 // MenuFromParentCleared reports if the "menu_from_parent" edge to the CoreMenu entity was cleared.
 func (m *CoreMenuMutation) MenuFromParentCleared() bool {
-	return m.ParentIDCleared() || m.clearedmenu_from_parent
+	return m.ParentMenuCodeCleared() || m.clearedmenu_from_parent
 }
 
 // MenuFromParentID returns the "menu_from_parent" edge ID in the mutation.
@@ -3833,7 +3783,7 @@ func (m *CoreMenuMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CoreMenuMutation) Fields() []string {
-	fields := make([]string, 0, 12)
+	fields := make([]string, 0, 11)
 	if m.created_at != nil {
 		fields = append(fields, coremenu.FieldCreatedAt)
 	}
@@ -3845,6 +3795,9 @@ func (m *CoreMenuMutation) Fields() []string {
 	}
 	if m.name != nil {
 		fields = append(fields, coremenu.FieldName)
+	}
+	if m.menu_code != nil {
+		fields = append(fields, coremenu.FieldMenuCode)
 	}
 	if m.menu_type != nil {
 		fields = append(fields, coremenu.FieldMenuType)
@@ -3859,16 +3812,10 @@ func (m *CoreMenuMutation) Fields() []string {
 		fields = append(fields, coremenu.FieldOrder)
 	}
 	if m.menu_from_parent != nil {
-		fields = append(fields, coremenu.FieldParentID)
+		fields = append(fields, coremenu.FieldParentMenuCode)
 	}
 	if m.status != nil {
 		fields = append(fields, coremenu.FieldStatus)
-	}
-	if m.component != nil {
-		fields = append(fields, coremenu.FieldComponent)
-	}
-	if m.remark != nil {
-		fields = append(fields, coremenu.FieldRemark)
 	}
 	return fields
 }
@@ -3886,6 +3833,8 @@ func (m *CoreMenuMutation) Field(name string) (ent.Value, bool) {
 		return m.DeletedAt()
 	case coremenu.FieldName:
 		return m.Name()
+	case coremenu.FieldMenuCode:
+		return m.MenuCode()
 	case coremenu.FieldMenuType:
 		return m.MenuType()
 	case coremenu.FieldAPIPath:
@@ -3894,14 +3843,10 @@ func (m *CoreMenuMutation) Field(name string) (ent.Value, bool) {
 		return m.APIPathMethod()
 	case coremenu.FieldOrder:
 		return m.Order()
-	case coremenu.FieldParentID:
-		return m.ParentID()
+	case coremenu.FieldParentMenuCode:
+		return m.ParentMenuCode()
 	case coremenu.FieldStatus:
 		return m.Status()
-	case coremenu.FieldComponent:
-		return m.Component()
-	case coremenu.FieldRemark:
-		return m.Remark()
 	}
 	return nil, false
 }
@@ -3919,6 +3864,8 @@ func (m *CoreMenuMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldDeletedAt(ctx)
 	case coremenu.FieldName:
 		return m.OldName(ctx)
+	case coremenu.FieldMenuCode:
+		return m.OldMenuCode(ctx)
 	case coremenu.FieldMenuType:
 		return m.OldMenuType(ctx)
 	case coremenu.FieldAPIPath:
@@ -3927,14 +3874,10 @@ func (m *CoreMenuMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldAPIPathMethod(ctx)
 	case coremenu.FieldOrder:
 		return m.OldOrder(ctx)
-	case coremenu.FieldParentID:
-		return m.OldParentID(ctx)
+	case coremenu.FieldParentMenuCode:
+		return m.OldParentMenuCode(ctx)
 	case coremenu.FieldStatus:
 		return m.OldStatus(ctx)
-	case coremenu.FieldComponent:
-		return m.OldComponent(ctx)
-	case coremenu.FieldRemark:
-		return m.OldRemark(ctx)
 	}
 	return nil, fmt.Errorf("unknown CoreMenu field %s", name)
 }
@@ -3972,6 +3915,13 @@ func (m *CoreMenuMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetName(v)
 		return nil
+	case coremenu.FieldMenuCode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMenuCode(v)
+		return nil
 	case coremenu.FieldMenuType:
 		v, ok := value.(common.MenuType)
 		if !ok {
@@ -4000,12 +3950,12 @@ func (m *CoreMenuMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetOrder(v)
 		return nil
-	case coremenu.FieldParentID:
+	case coremenu.FieldParentMenuCode:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetParentID(v)
+		m.SetParentMenuCode(v)
 		return nil
 	case coremenu.FieldStatus:
 		v, ok := value.(constant.YesOrNo)
@@ -4013,20 +3963,6 @@ func (m *CoreMenuMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetStatus(v)
-		return nil
-	case coremenu.FieldComponent:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetComponent(v)
-		return nil
-	case coremenu.FieldRemark:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetRemark(v)
 		return nil
 	}
 	return fmt.Errorf("unknown CoreMenu field %s", name)
@@ -4103,6 +4039,9 @@ func (m *CoreMenuMutation) ClearedFields() []string {
 	if m.FieldCleared(coremenu.FieldName) {
 		fields = append(fields, coremenu.FieldName)
 	}
+	if m.FieldCleared(coremenu.FieldMenuCode) {
+		fields = append(fields, coremenu.FieldMenuCode)
+	}
 	if m.FieldCleared(coremenu.FieldMenuType) {
 		fields = append(fields, coremenu.FieldMenuType)
 	}
@@ -4115,17 +4054,11 @@ func (m *CoreMenuMutation) ClearedFields() []string {
 	if m.FieldCleared(coremenu.FieldOrder) {
 		fields = append(fields, coremenu.FieldOrder)
 	}
-	if m.FieldCleared(coremenu.FieldParentID) {
-		fields = append(fields, coremenu.FieldParentID)
+	if m.FieldCleared(coremenu.FieldParentMenuCode) {
+		fields = append(fields, coremenu.FieldParentMenuCode)
 	}
 	if m.FieldCleared(coremenu.FieldStatus) {
 		fields = append(fields, coremenu.FieldStatus)
-	}
-	if m.FieldCleared(coremenu.FieldComponent) {
-		fields = append(fields, coremenu.FieldComponent)
-	}
-	if m.FieldCleared(coremenu.FieldRemark) {
-		fields = append(fields, coremenu.FieldRemark)
 	}
 	return fields
 }
@@ -4147,6 +4080,9 @@ func (m *CoreMenuMutation) ClearField(name string) error {
 	case coremenu.FieldName:
 		m.ClearName()
 		return nil
+	case coremenu.FieldMenuCode:
+		m.ClearMenuCode()
+		return nil
 	case coremenu.FieldMenuType:
 		m.ClearMenuType()
 		return nil
@@ -4159,17 +4095,11 @@ func (m *CoreMenuMutation) ClearField(name string) error {
 	case coremenu.FieldOrder:
 		m.ClearOrder()
 		return nil
-	case coremenu.FieldParentID:
-		m.ClearParentID()
+	case coremenu.FieldParentMenuCode:
+		m.ClearParentMenuCode()
 		return nil
 	case coremenu.FieldStatus:
 		m.ClearStatus()
-		return nil
-	case coremenu.FieldComponent:
-		m.ClearComponent()
-		return nil
-	case coremenu.FieldRemark:
-		m.ClearRemark()
 		return nil
 	}
 	return fmt.Errorf("unknown CoreMenu nullable field %s", name)
@@ -4191,6 +4121,9 @@ func (m *CoreMenuMutation) ResetField(name string) error {
 	case coremenu.FieldName:
 		m.ResetName()
 		return nil
+	case coremenu.FieldMenuCode:
+		m.ResetMenuCode()
+		return nil
 	case coremenu.FieldMenuType:
 		m.ResetMenuType()
 		return nil
@@ -4203,17 +4136,11 @@ func (m *CoreMenuMutation) ResetField(name string) error {
 	case coremenu.FieldOrder:
 		m.ResetOrder()
 		return nil
-	case coremenu.FieldParentID:
-		m.ResetParentID()
+	case coremenu.FieldParentMenuCode:
+		m.ResetParentMenuCode()
 		return nil
 	case coremenu.FieldStatus:
 		m.ResetStatus()
-		return nil
-	case coremenu.FieldComponent:
-		m.ResetComponent()
-		return nil
-	case coremenu.FieldRemark:
-		m.ResetRemark()
 		return nil
 	}
 	return fmt.Errorf("unknown CoreMenu field %s", name)

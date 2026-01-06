@@ -25,6 +25,8 @@ const (
 	FieldDeletedAt = "deleted_at"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldMenuCode holds the string denoting the menu_code field in the database.
+	FieldMenuCode = "menu_code"
 	// FieldMenuType holds the string denoting the menu_type field in the database.
 	FieldMenuType = "menu_type"
 	// FieldAPIPath holds the string denoting the api_path field in the database.
@@ -33,14 +35,10 @@ const (
 	FieldAPIPathMethod = "api_path_method"
 	// FieldOrder holds the string denoting the order field in the database.
 	FieldOrder = "order"
-	// FieldParentID holds the string denoting the parent_id field in the database.
-	FieldParentID = "parent_id"
+	// FieldParentMenuCode holds the string denoting the parent_menu_code field in the database.
+	FieldParentMenuCode = "parent_menu_code"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
-	// FieldComponent holds the string denoting the component field in the database.
-	FieldComponent = "component"
-	// FieldRemark holds the string denoting the remark field in the database.
-	FieldRemark = "remark"
 	// EdgeMenuFromParent holds the string denoting the menu_from_parent edge name in mutations.
 	EdgeMenuFromParent = "menu_from_parent"
 	// EdgeDataRelationships holds the string denoting the data_relationships edge name in mutations.
@@ -52,7 +50,7 @@ const (
 	// MenuFromParentTable is the table that holds the menu_from_parent relation/edge.
 	MenuFromParentTable = "quebec_core_menu"
 	// MenuFromParentColumn is the table column denoting the menu_from_parent relation/edge.
-	MenuFromParentColumn = "parent_id"
+	MenuFromParentColumn = "parent_menu_code"
 	// DataRelationshipsTable is the table that holds the data_relationships relation/edge. The primary key declared below.
 	DataRelationshipsTable = "core_data_relationship_menu"
 	// DataRelationshipsInverseTable is the table name for the CoreDataRelationship entity.
@@ -61,7 +59,7 @@ const (
 	// MenuToChildrenTable is the table that holds the menu_to_children relation/edge.
 	MenuToChildrenTable = "quebec_core_menu"
 	// MenuToChildrenColumn is the table column denoting the menu_to_children relation/edge.
-	MenuToChildrenColumn = "parent_id"
+	MenuToChildrenColumn = "parent_menu_code"
 )
 
 // Columns holds all SQL columns for coremenu fields.
@@ -71,14 +69,13 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldDeletedAt,
 	FieldName,
+	FieldMenuCode,
 	FieldMenuType,
 	FieldAPIPath,
 	FieldAPIPathMethod,
 	FieldOrder,
-	FieldParentID,
+	FieldParentMenuCode,
 	FieldStatus,
-	FieldComponent,
-	FieldRemark,
 }
 
 var (
@@ -150,6 +147,11 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
+// ByMenuCode orders the results by the menu_code field.
+func ByMenuCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMenuCode, opts...).ToFunc()
+}
+
 // ByMenuType orders the results by the menu_type field.
 func ByMenuType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMenuType, opts...).ToFunc()
@@ -170,24 +172,14 @@ func ByOrder(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOrder, opts...).ToFunc()
 }
 
-// ByParentID orders the results by the parent_id field.
-func ByParentID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldParentID, opts...).ToFunc()
+// ByParentMenuCode orders the results by the parent_menu_code field.
+func ByParentMenuCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldParentMenuCode, opts...).ToFunc()
 }
 
 // ByStatus orders the results by the status field.
 func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
-}
-
-// ByComponent orders the results by the component field.
-func ByComponent(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldComponent, opts...).ToFunc()
-}
-
-// ByRemark orders the results by the remark field.
-func ByRemark(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldRemark, opts...).ToFunc()
 }
 
 // ByMenuFromParentField orders the results by menu_from_parent field.

@@ -28,6 +28,8 @@ type CoreMenu struct {
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// 菜单名称
 	Name string `json:"name,omitempty"`
+	// 菜单编码
+	MenuCode string `json:"menu_code,omitempty"`
 	// 菜单类型 [1: 目录, 2: 菜单, 3: 按钮]
 	MenuType common.MenuType `json:"menu_type,omitempty"`
 	// 菜单API路径
@@ -36,14 +38,10 @@ type CoreMenu struct {
 	APIPathMethod string `json:"api_path_method,omitempty"`
 	// 菜单排序
 	Order int8 `json:"order,omitempty"`
-	// 父菜单ID
-	ParentID string `json:"parent_id,omitempty"`
+	// 父菜单编码
+	ParentMenuCode string `json:"parent_menu_code,omitempty"`
 	// 菜单状态 [1: 启用, 2: 禁用]
 	Status constant.YesOrNo `json:"status,omitempty"`
-	// 菜单组件
-	Component string `json:"component,omitempty"`
-	// 菜单备注
-	Remark string `json:"remark,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CoreMenuQuery when eager-loading is set.
 	Edges        CoreMenuEdges `json:"-" gorm:"-"`
@@ -99,7 +97,7 @@ func (*CoreMenu) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case coremenu.FieldMenuType, coremenu.FieldOrder, coremenu.FieldStatus:
 			values[i] = new(sql.NullInt64)
-		case coremenu.FieldID, coremenu.FieldName, coremenu.FieldAPIPath, coremenu.FieldAPIPathMethod, coremenu.FieldParentID, coremenu.FieldComponent, coremenu.FieldRemark:
+		case coremenu.FieldID, coremenu.FieldName, coremenu.FieldMenuCode, coremenu.FieldAPIPath, coremenu.FieldAPIPathMethod, coremenu.FieldParentMenuCode:
 			values[i] = new(sql.NullString)
 		case coremenu.FieldCreatedAt, coremenu.FieldUpdatedAt, coremenu.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -149,6 +147,12 @@ func (_m *CoreMenu) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Name = value.String
 			}
+		case coremenu.FieldMenuCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field menu_code", values[i])
+			} else if value.Valid {
+				_m.MenuCode = value.String
+			}
 		case coremenu.FieldMenuType:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field menu_type", values[i])
@@ -173,29 +177,17 @@ func (_m *CoreMenu) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Order = int8(value.Int64)
 			}
-		case coremenu.FieldParentID:
+		case coremenu.FieldParentMenuCode:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field parent_id", values[i])
+				return fmt.Errorf("unexpected type %T for field parent_menu_code", values[i])
 			} else if value.Valid {
-				_m.ParentID = value.String
+				_m.ParentMenuCode = value.String
 			}
 		case coremenu.FieldStatus:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
 				_m.Status = constant.YesOrNo(value.Int64)
-			}
-		case coremenu.FieldComponent:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field component", values[i])
-			} else if value.Valid {
-				_m.Component = value.String
-			}
-		case coremenu.FieldRemark:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field remark", values[i])
-			} else if value.Valid {
-				_m.Remark = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -262,6 +254,9 @@ func (_m *CoreMenu) String() string {
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
+	builder.WriteString("menu_code=")
+	builder.WriteString(_m.MenuCode)
+	builder.WriteString(", ")
 	builder.WriteString("menu_type=")
 	builder.WriteString(fmt.Sprintf("%v", _m.MenuType))
 	builder.WriteString(", ")
@@ -274,17 +269,11 @@ func (_m *CoreMenu) String() string {
 	builder.WriteString("order=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Order))
 	builder.WriteString(", ")
-	builder.WriteString("parent_id=")
-	builder.WriteString(_m.ParentID)
+	builder.WriteString("parent_menu_code=")
+	builder.WriteString(_m.ParentMenuCode)
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Status))
-	builder.WriteString(", ")
-	builder.WriteString("component=")
-	builder.WriteString(_m.Component)
-	builder.WriteString(", ")
-	builder.WriteString("remark=")
-	builder.WriteString(_m.Remark)
 	builder.WriteByte(')')
 	return builder.String()
 }

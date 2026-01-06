@@ -830,21 +830,9 @@ const docTemplate = `{
                 "summary": "操作日志分页列表",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "访问IP",
-                        "name": "access_ip",
-                        "in": "query"
-                    },
-                    {
                         "type": "integer",
                         "description": "结束时间",
                         "name": "end_time",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "ID",
-                        "name": "id",
                         "in": "query"
                     },
                     {
@@ -964,6 +952,12 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "开始时间",
                         "name": "start_time",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户ID                                                                          // 访问IP",
+                        "name": "user_id",
                         "in": "query"
                     }
                 ],

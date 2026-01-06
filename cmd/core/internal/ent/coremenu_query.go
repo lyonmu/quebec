@@ -499,7 +499,7 @@ func (_q *CoreMenuQuery) loadMenuFromParent(ctx context.Context, query *CoreMenu
 	ids := make([]string, 0, len(nodes))
 	nodeids := make(map[string][]*CoreMenu)
 	for i := range nodes {
-		fk := nodes[i].ParentID
+		fk := nodes[i].ParentMenuCode
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -516,7 +516,7 @@ func (_q *CoreMenuQuery) loadMenuFromParent(ctx context.Context, query *CoreMenu
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "parent_id" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "parent_menu_code" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -596,7 +596,7 @@ func (_q *CoreMenuQuery) loadMenuToChildren(ctx context.Context, query *CoreMenu
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(coremenu.FieldParentID)
+		query.ctx.AppendFieldOnce(coremenu.FieldParentMenuCode)
 	}
 	query.Where(predicate.CoreMenu(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(coremenu.MenuToChildrenColumn), fks...))
@@ -606,10 +606,10 @@ func (_q *CoreMenuQuery) loadMenuToChildren(ctx context.Context, query *CoreMenu
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.ParentID
+		fk := n.ParentMenuCode
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "parent_menu_code" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -645,7 +645,7 @@ func (_q *CoreMenuQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 		if _q.withMenuFromParent != nil {
-			_spec.Node.AddColumnOnce(coremenu.FieldParentID)
+			_spec.Node.AddColumnOnce(coremenu.FieldParentMenuCode)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

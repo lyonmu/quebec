@@ -4,14 +4,15 @@ import (
 	"context"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
+	corecommon "github.com/lyonmu/quebec/cmd/core/internal/common"
 	"github.com/lyonmu/quebec/cmd/core/internal/dto/request"
 	"github.com/lyonmu/quebec/cmd/core/internal/dto/response"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent"
-	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coredatarelationship"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
 	"github.com/lyonmu/quebec/cmd/core/internal/global"
-	corecommon "github.com/lyonmu/quebec/cmd/core/internal/common"
 	"github.com/lyonmu/quebec/pkg/code"
 	"github.com/lyonmu/quebec/pkg/constant"
 )
@@ -30,6 +31,10 @@ func (s *SystemSvc) MenuPage(ctx context.Context, req *request.SystemMenuPageReq
 		query = query.Where(coremenu.NameContains(req.Name))
 	}
 
+	if len(req.MenuCode) > 0 {
+		query = query.Where(coremenu.MenuCodeContains(req.MenuCode))
+	}
+
 	if req.MenuType != 0 {
 		query = query.Where(coremenu.MenuType(req.MenuType))
 	}
@@ -38,8 +43,8 @@ func (s *SystemSvc) MenuPage(ctx context.Context, req *request.SystemMenuPageReq
 		query = query.Where(coremenu.Status(req.Status))
 	}
 
-	if len(req.ParentID) > 0 {
-		query = query.Where(coremenu.ParentID(req.ParentID))
+	if len(req.ParentMenuCode) > 0 {
+		query = query.Where(coremenu.ParentMenuCode(req.ParentMenuCode))
 	}
 
 	total, err := query.Count(ctx)
@@ -48,7 +53,7 @@ func (s *SystemSvc) MenuPage(ctx context.Context, req *request.SystemMenuPageReq
 		return nil, &code.MenuQueryFailed
 	}
 
-	rows, err := query.Offset(page).Limit(pageSize).Order(coremenu.ByOrder()).All(ctx)
+	rows, err := query.Offset(page).Limit(pageSize).Order(coremenu.ByID(sql.OrderAsc())).All(ctx)
 	if err != nil {
 		global.Logger.Sugar().Errorf("select core_menu failed: %s", err)
 		return nil, &code.MenuQueryFailed
@@ -78,6 +83,10 @@ func (s *SystemSvc) MenuList(ctx context.Context, req *request.SystemMenuListReq
 		query = query.Where(coremenu.NameContains(req.Name))
 	}
 
+	if len(req.MenuCode) > 0 {
+		query = query.Where(coremenu.MenuCodeContains(req.MenuCode))
+	}
+
 	if req.MenuType != 0 {
 		query = query.Where(coremenu.MenuType(req.MenuType))
 	}
@@ -86,7 +95,11 @@ func (s *SystemSvc) MenuList(ctx context.Context, req *request.SystemMenuListReq
 		query = query.Where(coremenu.Status(req.Status))
 	}
 
-	rows, err := query.Order(coremenu.ByOrder()).All(ctx)
+	if len(req.ParentMenuCode) > 0 {
+		query = query.Where(coremenu.ParentMenuCode(req.ParentMenuCode))
+	}
+
+	rows, err := query.Order(coremenu.ByID(sql.OrderAsc())).All(ctx)
 	if err != nil {
 		global.Logger.Sugar().Errorf("select core_menu failed: %s", err)
 		return nil, &code.MenuQueryFailed
@@ -104,7 +117,7 @@ func (s *SystemSvc) MenuList(ctx context.Context, req *request.SystemMenuListReq
 func (s *SystemSvc) MenuTree(ctx context.Context) ([]*response.SystemMenuTreeResp, error) {
 	// Get all root menus (parent_id is empty)
 	rootMenus, err := global.EntClient.CoreMenu.Query().
-		Where(coremenu.DeletedAtIsNil(), coremenu.ParentIDIsNil()).
+		Where(coremenu.DeletedAtIsNil(), coremenu.ParentMenuCodeIsNil()).
 		Order(coremenu.ByOrder()).
 		All(ctx)
 	if err != nil {
@@ -120,20 +133,20 @@ func buildMenuTree(menus []*ent.CoreMenu, ctx context.Context) []*response.Syste
 
 	for _, menu := range menus {
 		node := &response.SystemMenuTreeResp{
-			ID:             menu.ID,
-			Name:           menu.Name,
-			MenuType:       menu.MenuType,
-			ApiPath:        menu.APIPath,
-			ApiPathMethod:  menu.APIPathMethod,
-			Order:          menu.Order,
-			Component:      menu.Component,
-			Status:         menu.Status,
-			Children:       nil,
+			ID:            menu.ID,
+			Name:          menu.Name,
+			MenuType:      menu.MenuType,
+			ApiPath:       menu.APIPath,
+			ApiPathMethod: menu.APIPathMethod,
+			Order:         menu.Order,
+			MenuCode:      menu.MenuCode,
+			Status:        menu.Status,
+			Children:      nil,
 		}
 
 		// Get children
 		children, err := global.EntClient.CoreMenu.Query().
-			Where(coremenu.DeletedAtIsNil(), coremenu.ParentID(menu.ID)).
+			Where(coremenu.DeletedAtIsNil(), coremenu.ParentMenuCode(menu.MenuCode)).
 			Order(coremenu.ByOrder()).
 			All(ctx)
 		if err != nil {
@@ -174,89 +187,6 @@ func (s *SystemSvc) MenuLabel(ctx context.Context) ([]*response.Options, error) 
 	}
 
 	return resp, nil
-}
-
-func (s *SystemSvc) MenuAdd(ctx context.Context, req *request.SystemMenuAddReq) error {
-	exist, err := global.EntClient.CoreMenu.Query().Where(coremenu.Name(req.Name), coremenu.DeletedAtIsNil()).Exist(ctx)
-	if err != nil {
-		global.Logger.Sugar().Errorf("select core_menu failed: %s", err)
-		return &code.MenuQueryFailed
-	}
-
-	if exist {
-		return &code.MenuNameDuplicate
-	}
-
-	builder := global.EntClient.CoreMenu.Create().
-		SetName(req.Name).
-		SetMenuType(req.MenuType).
-		SetNillableAPIPath(req.ApiPath).
-		SetNillableAPIPathMethod(req.ApiPathMethod).
-		SetNillableOrder(req.Order).
-		SetNillableParentID(req.ParentID).
-		SetNillableComponent(req.Component).
-		SetNillableRemark(req.Remark)
-
-	if req.Status != nil {
-		builder.SetStatus(*req.Status)
-	} else {
-		builder.SetStatus(constant.Yes)
-	}
-
-	_, cerr := builder.Save(ctx)
-	if cerr != nil {
-		global.Logger.Sugar().Errorf("add core_menu failed: %s", cerr)
-		return &code.MenuAddFailed
-	}
-
-	return nil
-}
-
-func (s *SystemSvc) MenuUpdate(ctx context.Context, id string, req *request.SystemMenuUpdateReq) error {
-	exist, err := global.EntClient.CoreMenu.Query().Where(coremenu.Name(*req.Name), coremenu.IDNEQ(id), coremenu.DeletedAtIsNil()).Exist(ctx)
-	if err != nil {
-		global.Logger.Sugar().Errorf("select core_menu failed: %s", err)
-		return &code.MenuQueryFailed
-	}
-
-	if exist {
-		return &code.MenuNameDuplicate
-	}
-
-	builder := global.EntClient.CoreMenu.UpdateOneID(id).
-		SetNillableName(req.Name).
-		SetNillableMenuType(req.MenuType).
-		SetNillableAPIPath(req.ApiPath).
-		SetNillableAPIPathMethod(req.ApiPathMethod).
-		SetNillableOrder(req.Order).
-		SetNillableParentID(req.ParentID).
-		SetNillableComponent(req.Component).
-		SetNillableRemark(req.Remark).
-		SetNillableStatus(req.Status)
-
-	_, uerr := builder.Save(ctx)
-	if uerr != nil {
-		global.Logger.Sugar().Errorf("update core_menu failed: %s", uerr)
-		return &code.MenuEditFailed
-	}
-
-	return nil
-}
-
-func (s *SystemSvc) MenuDelete(ctx context.Context, id string) error {
-	_, err := global.EntClient.CoreMenu.Query().Where(coremenu.ID(id), coremenu.DeletedAtIsNil()).First(ctx)
-	if err != nil {
-		global.Logger.Sugar().Errorf("select core_menu failed: %s", err)
-		return &code.MenuNotExists
-	}
-
-	_, derr := global.EntClient.CoreMenu.UpdateOneID(id).SetDeletedAt(time.Now()).Save(ctx)
-	if derr != nil {
-		global.Logger.Sugar().Errorf("delete core_menu failed: %s", derr)
-		return &code.MenuDelFailed
-	}
-
-	return nil
 }
 
 func (s *SystemSvc) MenuGetById(ctx context.Context, id string) (*response.SystemMenuResp, error) {
