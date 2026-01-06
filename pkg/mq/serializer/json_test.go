@@ -164,7 +164,7 @@ func TestJsonCodec_RoundTrip(t *testing.T) {
 
 	// 1. Encode Key
 	// 注意：必须传入指针
-	keyBytes, err := codec.EncoderKey(&key)
+	keyBytes, err := codec.MarshalKey(&key)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -174,17 +174,17 @@ func TestJsonCodec_RoundTrip(t *testing.T) {
 	}
 
 	// 2. Encode Value
-	valBytes, err := codec.EncoderValue(&val)
+	valBytes, err := codec.MarshalValue(&val)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if strings.HasSuffix(string(valBytes), "\n") {
-		t.Error("EncoderValue should strip trailing newline")
+		t.Error("MarshalValue should strip trailing newline")
 	}
 
 	// 3. Decode Key
 	var decodedKey string
-	if err := codec.DecoderKey(keyBytes, &decodedKey); err != nil {
+	if err := codec.UnmarshalKey(keyBytes, &decodedKey); err != nil {
 		t.Fatal(err)
 	}
 	if decodedKey != key {
@@ -193,7 +193,7 @@ func TestJsonCodec_RoundTrip(t *testing.T) {
 
 	// 4. Decode Value
 	var decodedVal TestStruct
-	if err := codec.DecoderValue(valBytes, &decodedVal); err != nil {
+	if err := codec.UnmarshalValue(valBytes, &decodedVal); err != nil {
 		t.Fatal(err)
 	}
 	if decodedVal != val {
@@ -206,7 +206,7 @@ func TestJsonCodec_MemorySafety_DeepCopy(t *testing.T) {
 	val := TestStruct{ID: 999, Name: "Critical Data"}
 
 	// Encode
-	bytes1, err := codec.EncoderValue(&val)
+	bytes1, err := codec.MarshalValue(&val)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -218,7 +218,7 @@ func TestJsonCodec_MemorySafety_DeepCopy(t *testing.T) {
 	// 强制多次进行 Pool 操作，触发内存复用
 	for i := 0; i < 10; i++ {
 		temp := TestStruct{ID: i}
-		_, _ = codec.EncoderValue(&temp)
+		_, _ = codec.MarshalValue(&temp)
 	}
 
 	// 验证 bytes1 依然有效且数据未被 Pool 污染
@@ -240,7 +240,7 @@ func TestJsonCodec_Decoder_ZeroCopy_Path(t *testing.T) {
 	rawJSON := []byte(`{"a": 100, "b": 200}`)
 	
 	var result map[string]int
-	err := codec.DecoderValue(rawJSON, &result)
+	err := codec.UnmarshalValue(rawJSON, &result)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -280,7 +280,7 @@ func BenchmarkCodec_Encode_Value(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		// 这里包含了: Acquire -> Marshal -> DeepCopy -> Release
-		_, _ = codec.EncoderValue(&data)
+		_, _ = codec.MarshalValue(&data)
 	}
 }
 
@@ -294,6 +294,6 @@ func BenchmarkCodec_Decode_Value(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		// 这里应该是 0 allocs
-		_ = codec.DecoderValue(data, &v)
+		_ = codec.UnmarshalValue(data, &v)
 	}
 }

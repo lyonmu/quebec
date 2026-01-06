@@ -7,16 +7,17 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/lyonmu/quebec/pkg/mq"
-	"github.com/lyonmu/quebec/pkg/mq/serializer"
+	ser "github.com/lyonmu/quebec/pkg/mq/serializer"
 )
 
 // Producer 泛型生产者实现
 type Producer[K, V any] struct {
-	producer sarama.AsyncProducer
-	codec    mq.Encode[K, V]
-	topic    string
-	closeCh  chan struct{}
-	wg       sync.WaitGroup
+	producer   sarama.AsyncProducer
+	serializer mq.Serializer[K, V] // 泛型编码器（JsonCodec）
+	codec      mq.Codec            // 通用编码器（ProtoCodec、BinaryCodec）
+	topic      string
+	closeCh    chan struct{}
+	wg         sync.WaitGroup
 }
 
 // initTopic 是一个独立的辅助函数，用于幂等地创建 Topic
@@ -73,13 +74,28 @@ func NewProducer[K, V any](topic string, opts ...Option) (*Producer[K, V], error
 	}
 
 	// 4. 初始化 Codec
-	codec := serializer.NewJsonCodec[K, V]()
+	var serializer mq.Serializer[K, V]
+	var codec mq.Codec
+
+	if options.codec != nil {
+		// 检查是否是通用 Codec 接口
+		if c, ok := options.codec.(mq.Codec); ok {
+			codec = c
+		} else {
+			// 尝试作为泛型 serializer 使用
+			serializer = options.codec.(mq.Serializer[K, V])
+		}
+	} else {
+		// 默认使用 JsonCodec
+		serializer = ser.NewJsonCodec[K, V]()
+	}
 
 	producer := &Producer[K, V]{
-		producer: p,
-		codec:    codec,
-		topic:    topic,
-		closeCh:  make(chan struct{}),
+		producer:   p,
+		serializer: serializer,
+		codec:      codec,
+		topic:      topic,
+		closeCh:    make(chan struct{}),
 	}
 
 	producer.wg.Add(1)
@@ -91,16 +107,32 @@ func NewProducer[K, V any](topic string, opts ...Option) (*Producer[K, V], error
 // Produce 实现 Produce 接口
 // 这是一个非阻塞操作（除非本地 Buffer 已满）
 func (p *Producer[K, V]) Produce(ctx context.Context, key *K, payload *V) error {
-	// 1. 序列化 (利用 JsonCodec 的高性能)
-	// 注意：EncoderKey/Value 返回的是 []byte
-	kBytes, err := p.codec.EncoderKey(key)
-	if err != nil {
-		return fmt.Errorf("encode key failed: %w", err)
-	}
+	var kBytes, vBytes []byte
+	var err error
 
-	vBytes, err := p.codec.EncoderValue(payload)
-	if err != nil {
-		return fmt.Errorf("encode value failed: %w", err)
+	// 1. 序列化
+	if p.codec != nil {
+		// 使用通用 codec（ProtoCodec、BinaryCodec）
+		kBytes, err = p.codec.Marshal(key)
+		if err != nil {
+			return fmt.Errorf("marshal key failed: %w", err)
+		}
+		vBytes, err = p.codec.Marshal(payload)
+		if err != nil {
+			return fmt.Errorf("marshal value failed: %w", err)
+		}
+	} else if p.serializer != nil {
+		// 使用默认 JsonCodec
+		kBytes, err = p.serializer.MarshalKey(key)
+		if err != nil {
+			return fmt.Errorf("marshal key failed: %w", err)
+		}
+		vBytes, err = p.serializer.MarshalValue(payload)
+		if err != nil {
+			return fmt.Errorf("marshal value failed: %w", err)
+		}
+	} else {
+		return fmt.Errorf("no codec configured")
 	}
 
 	// 2. 构建消息

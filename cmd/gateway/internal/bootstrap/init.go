@@ -10,6 +10,7 @@ import (
 	"github.com/lyonmu/quebec/cmd/gateway/internal/global"
 	"github.com/lyonmu/quebec/pkg/logger"
 	"github.com/lyonmu/quebec/pkg/metrics"
+	"github.com/lyonmu/quebec/pkg/mq/serializer"
 	"github.com/lyonmu/quebec/pkg/tools"
 	"gopkg.in/yaml.v3"
 )
@@ -36,6 +37,18 @@ func Start() {
 		}
 		global.Id = idGenerator
 		global.Metrics = metrics.NewPrometheusRegistry()
+
+		// 初始化 ALS Kafka Producer
+		if len(global.Cfg.Gateway.AlsTopic) > 0 {
+			producer, err := global.Cfg.Kafka.Producer(global.Cfg.Gateway.AlsTopic, serializer.NewBinaryCodec())
+			if err != nil {
+				global.Logger.Sugar().Errorf("failed to create ALS Kafka producer: %v", err)
+				// 不退出，ALS 功能降级为仅日志
+			} else {
+				global.AlsKafkaProducer = producer
+				global.Logger.Sugar().Infof("ALS Kafka producer initialized, topic: %s", global.Cfg.Gateway.AlsTopic)
+			}
+		}
 
 	})
 

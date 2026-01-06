@@ -9,9 +9,10 @@ import (
 )
 
 var (
-	Cfg        config.Config
-	Logger     *zap.Logger
-	Id         tools.IDGenerator
-	GrpcClient *grpc.ClientConn
-	Metrics    *prometheus.Registry
+	Cfg              config.Config
+	Logger           *zap.Logger
+	Id               tools.IDGenerator
+	GrpcClient       *grpc.ClientConn
+	Metrics          *prometheus.Registry
+	AlsKafkaProducer any
 )

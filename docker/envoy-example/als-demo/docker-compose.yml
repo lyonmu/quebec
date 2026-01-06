@@ -1,0 +1,27 @@
+services:
+  envoy-svc-1:
+    # pull_policy: always
+    restart: unless-stopped
+    container_name: envoy-svc-1
+    hostname: envoy-svc-1
+    image: envoyproxy/envoy:distroless-v1.36-latest
+    deploy:
+      resources:
+        limits:
+          cpus: 0.3
+          memory: 256M
+        reservations:
+          memory: 128M
+    network_mode: host
+    volumes:
+      - ./envoy.yaml:/etc/envoy/envoy.yaml
+    command:
+      [
+        "-c",
+        "/etc/envoy/envoy.yaml",
+        "--log-level",
+        "info",
+        "--enable-mutex-tracing",
+        "--concurrency 4",
+        "--base-id 1",
+      ]

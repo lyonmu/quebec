@@ -19,6 +19,7 @@ type Options struct {
 	errorHandler      func(error) // 异步错误回调
 	partitions        int32       // 使用 int32 匹配 sarama 定义
 	replicationFactor int16       // 副本因子，生产环境建议 >= 2
+	codec             any         // 自定义编码器，运行时类型检查
 }
 
 type Option func(*Options)
@@ -110,6 +111,15 @@ func WithSASLPlaintext(username, password string) Option {
 	}
 }
 
+func WithSASLScram(username, password string, mechanism sarama.SASLMechanism) Option {
+	return func(o *Options) {
+		o.cfg.Net.SASL.Enable = true
+		o.cfg.Net.SASL.Mechanism = mechanism
+		o.cfg.Net.SASL.User = username
+		o.cfg.Net.SASL.Password = password
+	}
+}
+
 func WithCompressionZSTD() Option {
 	return func(o *Options) {
 		o.cfg.Producer.Compression = sarama.CompressionZSTD
@@ -152,5 +162,13 @@ func WithHighThroughput() Option {
 		o.cfg.Producer.Flush.Frequency = 50 * time.Millisecond
 		o.cfg.Producer.Flush.Bytes = 128 * 1024 // 128KB
 		o.cfg.Producer.Compression = sarama.CompressionLZ4
+	}
+}
+
+// WithCodec 设置自定义编码器
+// 可选：serializer.NewJsonCodec, serializer.NewProtoCodec, serializer.NewBinaryCodec
+func WithCodec(c any) Option {
+	return func(o *Options) {
+		o.codec = c
 	}
 }

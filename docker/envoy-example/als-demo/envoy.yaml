@@ -1,0 +1,77 @@
+admin:
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 9901
+
+static_resources:
+  listeners:
+    - name: node_exporter_listener
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 59100
+      filter_chains:
+        - filters:
+            - name: node_exporter_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: ingress_http
+                codec_type: AUTO
+                route_config:
+                  name: node_exporter_route
+                  virtual_hosts:
+                    - name: node_exporter_host
+                      domains:
+                        - "*"
+                      routes:
+                        - match:
+                            prefix: "/"
+                          route:
+                            cluster: node_exporter_cluster
+                            timeout: 30s
+                http_filters:
+                  - name: node_exporter_router
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+                access_log:
+                  - name: envoy.access_loggers.http_grpc
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.access_loggers.grpc.v3.HttpGrpcAccessLogConfig
+                      common_config:
+                        log_name: "node_exporter_access_log"
+                        transport_api_version: V3
+                        grpc_service:
+                          envoy_grpc:
+                            cluster_name: quebec_gateway
+
+  clusters:
+    - name: quebec_gateway
+      connect_timeout: 5s
+      type: strict_dns # DNS 解析 xDS server
+      lb_policy: maglev
+      http2_protocol_options: {} # gRPC 必须
+      load_assignment:
+        cluster_name: quebec_gateway
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: 127.0.0.1 # xDS 服务 IP
+                      port_value: 59025 # xDS 服务 gRPC 端口
+
+    # node_exporter 集群配置
+    - name: node_exporter_cluster
+      connect_timeout: 5s
+      type: STRICT_DNS
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: node_exporter_cluster
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: 127.0.0.1
+                      port_value: 9100

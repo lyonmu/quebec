@@ -161,18 +161,20 @@ func (j *Json) Len() int {
 
 // --- MQ 接口实现 ---
 
-// 使用泛型增强类型安全
+// JsonCodec 泛型 JSON 编解码器
 type JsonCodec[K, V any] struct{}
 
 func NewJsonCodec[K, V any]() *JsonCodec[K, V] {
 	return &JsonCodec[K, V]{}
 }
 
-func (c *JsonCodec[K, V]) EncoderKey(key *K) ([]byte, error) {
+// MarshalKey 实现 Serializer 接口
+func (c *JsonCodec[K, V]) MarshalKey(key *K) ([]byte, error) {
 	return c.encode(key)
 }
 
-func (c *JsonCodec[K, V]) EncoderValue(value *V) ([]byte, error) {
+// MarshalValue 实现 Serializer 接口
+func (c *JsonCodec[K, V]) MarshalValue(value *V) ([]byte, error) {
 	return c.encode(value)
 }
 
@@ -183,18 +185,19 @@ func (c *JsonCodec[K, V]) encode(v any) ([]byte, error) {
 	if err := j.Marshal(v); err != nil {
 		return nil, err
 	}
-	
+
 	b := j.Bytes()
 	// 处理 sonic Encoder 带来的尾部换行
 	if len(b) > 0 && b[len(b)-1] == '\n' {
 		b = b[:len(b)-1]
 	}
-	
+
 	// ✅ 必须拷贝，Go 1.20+ 推荐 bytes.Clone
 	return bytes.Clone(b), nil
 }
 
-func (c *JsonCodec[K, V]) DecoderKey(raw []byte, key *K) error {
+// UnmarshalKey 实现 Deserializer 接口
+func (c *JsonCodec[K, V]) UnmarshalKey(raw []byte, key *K) error {
 	// ✅ 修正：直接解码，零拷贝
 	if len(raw) == 0 {
 		return nil
@@ -202,7 +205,8 @@ func (c *JsonCodec[K, V]) DecoderKey(raw []byte, key *K) error {
 	return sonicAPI.Unmarshal(raw, key)
 }
 
-func (c *JsonCodec[K, V]) DecoderValue(raw []byte, value *V) error {
+// UnmarshalValue 实现 Deserializer 接口
+func (c *JsonCodec[K, V]) UnmarshalValue(raw []byte, value *V) error {
 	// ✅ 修正：直接解码，零拷贝
 	if len(raw) == 0 {
 		return nil
