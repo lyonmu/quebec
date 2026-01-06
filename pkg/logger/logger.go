@@ -26,7 +26,7 @@ type LogConfig struct {
 
 // 自定义时间编码器
 func customTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
-	enc.AppendString(t.Format("15:04:05"))
+	enc.AppendString(t.Format(time.DateTime))
 }
 
 // 创建带有模块名的编码器配置
