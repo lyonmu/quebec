@@ -47,8 +47,9 @@ func (a *AlsSvc) StreamAccessLogs(stream accesslogv3.AccessLogService_StreamAcce
 				global.Logger.Sugar().Errorf("als event marshal error: %v", err)
 				continue
 			}
-			producer := global.AlsKafkaProducer.(*kafka.Producer[[]byte, []byte])
-			if err := producer.Produce(ctx, nil, &data); err != nil {
+			producer := global.AlsKafkaProducer.(*kafka.Producer[string, []byte])
+			key := fmt.Sprintf("als-%d", global.Id.GenID())
+			if err := producer.Produce(ctx, &key, &data); err != nil {
 				global.Logger.Sugar().Errorf("send als to kafka error: %v", err)
 			}
 		}

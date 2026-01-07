@@ -16,10 +16,12 @@ const (
 type Options struct {
 	cfg               *sarama.Config
 	addrs             []string
-	errorHandler      func(error) // 异步错误回调
-	partitions        int32       // 使用 int32 匹配 sarama 定义
-	replicationFactor int16       // 副本因子，生产环境建议 >= 2
-	codec             any         // 自定义编码器，运行时类型检查
+	errorHandler      func(error)
+	partitions        int32
+	replicationFactor int16
+	codec             any // 统一编码器
+	keyCodec          any // Key 编码器（优先级更高）
+	valueCodec        any // Value 编码器（优先级更高）
 }
 
 type Option func(*Options)
@@ -165,10 +167,23 @@ func WithHighThroughput() Option {
 	}
 }
 
-// WithCodec 设置自定义编码器
-// 可选：serializer.NewJsonCodec, serializer.NewProtoCodec, serializer.NewBinaryCodec
+// WithCodec 设置统一编码器（key 和 value 使用相同编码器）
 func WithCodec(c any) Option {
 	return func(o *Options) {
 		o.codec = c
+	}
+}
+
+// WithKeyCodec 设置 Key 编码器（优先级高于 WithCodec）
+func WithKeyCodec(c any) Option {
+	return func(o *Options) {
+		o.keyCodec = c
+	}
+}
+
+// WithValueCodec 设置 Value 编码器（优先级高于 WithCodec）
+func WithValueCodec(c any) Option {
+	return func(o *Options) {
+		o.valueCodec = c
 	}
 }

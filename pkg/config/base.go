@@ -27,25 +27,36 @@ type KafkaConfig struct {
 }
 
 // Producer 创建 Kafka Producer，自动处理 SASL 认证
-func (c *KafkaConfig) Producer(topic string, codec any) (*kafka.Producer[[]byte, []byte], error) {
-	opts := []kafka.Option{
+func (c *KafkaConfig) Producer(topic string, keyCodec, valueCodec any, opts ...kafka.Option) (*kafka.Producer[string, []byte], error) {
+	// 构建基础选项
+	baseOpts := []kafka.Option{
 		kafka.WithAddrs(c.Brokers),
-		kafka.WithCodec(codec),
 	}
+
+	// 添加编码器配置
+	if keyCodec != nil {
+		baseOpts = append(baseOpts, kafka.WithKeyCodec(keyCodec))
+	}
+	if valueCodec != nil {
+		baseOpts = append(baseOpts, kafka.WithValueCodec(valueCodec))
+	}
+
+	// 合并用户传入的选项
+	allOpts := append(baseOpts, opts...)
 
 	// 如果启用 SASL，添加认证配置
 	if c.SASL.Enable {
 		switch c.SASL.Mechanism {
 		case "PLAIN":
-			opts = append(opts, kafka.WithSASLPlaintext(c.SASL.Username, c.SASL.Password))
+			allOpts = append(allOpts, kafka.WithSASLPlaintext(c.SASL.Username, c.SASL.Password))
 		case "SCRAM-SHA-256":
-			opts = append(opts, kafka.WithSASLScram(c.SASL.Username, c.SASL.Password, sarama.SASLTypeSCRAMSHA256))
+			allOpts = append(allOpts, kafka.WithSASLScram(c.SASL.Username, c.SASL.Password, sarama.SASLTypeSCRAMSHA256))
 		case "SCRAM-SHA-512":
-			opts = append(opts, kafka.WithSASLScram(c.SASL.Username, c.SASL.Password, sarama.SASLTypeSCRAMSHA512))
+			allOpts = append(allOpts, kafka.WithSASLScram(c.SASL.Username, c.SASL.Password, sarama.SASLTypeSCRAMSHA512))
 		default:
 			return nil, fmt.Errorf("unsupported SASL mechanism: %s", c.SASL.Mechanism)
 		}
 	}
 
-	return kafka.NewProducer[[]byte, []byte](topic, opts...)
+	return kafka.NewProducer[string, []byte](topic, allOpts...)
 }

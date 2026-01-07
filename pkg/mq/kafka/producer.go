@@ -13,8 +13,8 @@ import (
 // Producer 泛型生产者实现
 type Producer[K, V any] struct {
 	producer   sarama.AsyncProducer
-	serializer mq.Serializer[K, V] // 泛型编码器（JsonCodec）
-	codec      mq.Codec            // 通用编码器（ProtoCodec、BinaryCodec）
+	keyCodec   mq.KeySerializer[K]   // Key 编码器
+	valueCodec mq.ValueSerializer[V] // Value 编码器
 	topic      string
 	closeCh    chan struct{}
 	wg         sync.WaitGroup
@@ -73,27 +73,37 @@ func NewProducer[K, V any](topic string, opts ...Option) (*Producer[K, V], error
 		return nil, fmt.Errorf("failed to create kafka producer: %w", err)
 	}
 
-	// 4. 初始化 Codec
-	var serializer mq.Serializer[K, V]
-	var codec mq.Codec
+	// 4. 初始化编码器
+	var keyCodec mq.KeySerializer[K]
+	var valueCodec mq.ValueSerializer[V]
 
-	if options.codec != nil {
-		// 检查是否是通用 Codec 接口
-		if c, ok := options.codec.(mq.Codec); ok {
-			codec = c
-		} else {
-			// 尝试作为泛型 serializer 使用
-			serializer = options.codec.(mq.Serializer[K, V])
+	switch {
+	case options.keyCodec != nil && options.valueCodec != nil:
+		// 独立配置 key 和 value 编码器
+		if kc, ok := options.keyCodec.(mq.KeySerializer[K]); ok {
+			keyCodec = kc
 		}
-	} else {
+		if vc, ok := options.valueCodec.(mq.ValueSerializer[V]); ok {
+			valueCodec = vc
+		}
+	case options.codec != nil:
+		// 统一编码器（key 和 value 使用相同编码器）
+		if kc, ok := options.codec.(mq.KeySerializer[K]); ok {
+			keyCodec = kc
+		}
+		if vc, ok := options.codec.(mq.ValueSerializer[V]); ok {
+			valueCodec = vc
+		}
+	default:
 		// 默认使用 JsonCodec
-		serializer = ser.NewJsonCodec[K, V]()
+		keyCodec = ser.NewJsonCodec[K, V]()
+		valueCodec = ser.NewJsonCodec[K, V]()
 	}
 
 	producer := &Producer[K, V]{
 		producer:   p,
-		serializer: serializer,
-		codec:      codec,
+		keyCodec:   keyCodec,
+		valueCodec: valueCodec,
 		topic:      topic,
 		closeCh:    make(chan struct{}),
 	}
@@ -105,46 +115,27 @@ func NewProducer[K, V any](topic string, opts ...Option) (*Producer[K, V], error
 }
 
 // Produce 实现 Produce 接口
-// 这是一个非阻塞操作（除非本地 Buffer 已满）
 func (p *Producer[K, V]) Produce(ctx context.Context, key *K, payload *V) error {
-	var kBytes, vBytes []byte
-	var err error
-
-	// 1. 序列化
-	if p.codec != nil {
-		// 使用通用 codec（ProtoCodec、BinaryCodec）
-		kBytes, err = p.codec.Marshal(key)
-		if err != nil {
-			return fmt.Errorf("marshal key failed: %w", err)
-		}
-		vBytes, err = p.codec.Marshal(payload)
-		if err != nil {
-			return fmt.Errorf("marshal value failed: %w", err)
-		}
-	} else if p.serializer != nil {
-		// 使用默认 JsonCodec
-		kBytes, err = p.serializer.MarshalKey(key)
-		if err != nil {
-			return fmt.Errorf("marshal key failed: %w", err)
-		}
-		vBytes, err = p.serializer.MarshalValue(payload)
-		if err != nil {
-			return fmt.Errorf("marshal value failed: %w", err)
-		}
-	} else {
-		return fmt.Errorf("no codec configured")
+	// 1. 序列化 Key
+	kBytes, err := p.keyCodec.MarshalKey(key)
+	if err != nil {
+		return fmt.Errorf("marshal key failed: %w", err)
 	}
 
-	// 2. 构建消息
-	// sarama.ByteEncoder 只是做类型转换，没有内存拷贝
+	// 2. 序列化 Value
+	vBytes, err := p.valueCodec.MarshalValue(payload)
+	if err != nil {
+		return fmt.Errorf("marshal value failed: %w", err)
+	}
+
+	// 3. 构建消息
 	msg := &sarama.ProducerMessage{
 		Topic: p.topic,
 		Key:   sarama.ByteEncoder(kBytes),
 		Value: sarama.ByteEncoder(vBytes),
 	}
 
-	// 3. 发送至 Sarama Input Channel
-	// 使用 select 监听 context，处理缓冲区满导致的阻塞或超时
+	// 4. 发送至 Sarama Input Channel
 	select {
 	case p.producer.Input() <- msg:
 		return nil
@@ -161,23 +152,18 @@ func (p *Producer[K, V]) dispatch(errHandler func(error)) {
 
 	for {
 		select {
-		// 必须处理 Errors，否则 channel 满了会阻塞 Sender
 		case err, ok := <-p.producer.Errors():
 			if !ok {
 				return
 			}
 			if errHandler != nil {
-				// 将 sarama.ProducerError 解包或直接传递
 				errHandler(err)
 			}
 
-		// 如果配置了 Return.Successes = true，这里必须读取，否则会死锁
-		// 默认配置是 false，这个 case 会被忽略
 		case _, ok := <-p.producer.Successes():
 			if !ok {
 				return
 			}
-			// 可以在这里做 Metric 统计 (e.g., QPS counter)
 
 		case <-p.closeCh:
 			return
@@ -187,11 +173,9 @@ func (p *Producer[K, V]) dispatch(errHandler func(error)) {
 
 // Close 优雅关闭
 func (p *Producer[K, V]) Close() error {
-	close(p.closeCh) // 通知 dispatch 退出
+	close(p.closeCh)
 
-	// 异步关闭 sarama producer，它会负责将 buffer 中的剩余消息刷出
 	err := p.producer.Close()
-
-	p.wg.Wait() // 等待 dispatch 处理完剩余的 errors
+	p.wg.Wait()
 	return err
 }

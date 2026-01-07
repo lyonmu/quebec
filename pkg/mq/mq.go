@@ -19,21 +19,24 @@ type Serializer[K, V any] interface {
 	MarshalValue(value *V) ([]byte, error)
 }
 
+// KeySerializer Key 编码器接口
+type KeySerializer[K any] interface {
+	MarshalKey(key *K) ([]byte, error)
+}
+
+// ValueSerializer Value 编码器接口
+type ValueSerializer[V any] interface {
+	MarshalValue(value *V) ([]byte, error)
+}
+
 // Deserializer 解码接口（消费者读取时使用）
 type Deserializer[K, V any] interface {
 	UnmarshalKey(raw []byte, key *K) error
 	UnmarshalValue(raw []byte, value *V) error
 }
 
-// Codec 通用编解码器接口（非泛型，支持 ProtoCodec、BinaryCodec）
-type Codec interface {
-	Marshal(key any) ([]byte, error)
-	Unmarshal(raw []byte, key any) error
+// Codec 统一编解码接口（组合 Serializer 和 Deserializer）
+type Codec[K, V any] interface {
+	Serializer[K, V]
+	Deserializer[K, V]
 }
-
-// 兼容别名（可选，逐步迁移）
-// Deprecated: 使用 Serializer 替代
-type Encode[K, V any] = Serializer[K, V]
-
-// Deprecated: 使用 Deserializer 替代
-type Decode[K, V any] = Deserializer[K, V]

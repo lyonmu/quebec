@@ -39,8 +39,13 @@ func Start() {
 		global.Metrics = metrics.NewPrometheusRegistry()
 
 		// 初始化 ALS Kafka Producer
+		// Key 使用 String 编码，Value 使用 Binary 编码
 		if len(global.Cfg.Gateway.AlsTopic) > 0 {
-			producer, err := global.Cfg.Kafka.Producer(global.Cfg.Gateway.AlsTopic, serializer.NewBinaryCodec())
+			producer, err := global.Cfg.Kafka.Producer(
+				global.Cfg.Gateway.AlsTopic,
+				serializer.NewStringCodec[string, string](),
+				serializer.NewBinaryCodec[[]byte, []byte](),
+			)
 			if err != nil {
 				global.Logger.Sugar().Errorf("failed to create ALS Kafka producer: %v", err)
 				// 不退出，ALS 功能降级为仅日志
