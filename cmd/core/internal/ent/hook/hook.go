@@ -9,6 +9,18 @@ import (
 	"github.com/lyonmu/quebec/cmd/core/internal/ent"
 )
 
+// The CoreCertFunc type is an adapter to allow the use of ordinary
+// function as CoreCert mutator.
+type CoreCertFunc func(context.Context, *ent.CoreCertMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CoreCertFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CoreCertMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CoreCertMutation", m)
+}
+
 // The CoreDataRelationshipFunc type is an adapter to allow the use of ordinary
 // function as CoreDataRelationship mutator.
 type CoreDataRelationshipFunc func(context.Context, *ent.CoreDataRelationshipMutation) (ent.Value, error)
@@ -31,6 +43,42 @@ func (f CoreGatewayClusterFunc) Mutate(ctx context.Context, m ent.Mutation) (ent
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CoreGatewayClusterMutation", m)
+}
+
+// The CoreGatewayHttpRouteFunc type is an adapter to allow the use of ordinary
+// function as CoreGatewayHttpRoute mutator.
+type CoreGatewayHttpRouteFunc func(context.Context, *ent.CoreGatewayHttpRouteMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CoreGatewayHttpRouteFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CoreGatewayHttpRouteMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CoreGatewayHttpRouteMutation", m)
+}
+
+// The CoreGatewayL4ListenerFunc type is an adapter to allow the use of ordinary
+// function as CoreGatewayL4Listener mutator.
+type CoreGatewayL4ListenerFunc func(context.Context, *ent.CoreGatewayL4ListenerMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CoreGatewayL4ListenerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CoreGatewayL4ListenerMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CoreGatewayL4ListenerMutation", m)
+}
+
+// The CoreGatewayL7ListenerFunc type is an adapter to allow the use of ordinary
+// function as CoreGatewayL7Listener mutator.
+type CoreGatewayL7ListenerFunc func(context.Context, *ent.CoreGatewayL7ListenerMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CoreGatewayL7ListenerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CoreGatewayL7ListenerMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CoreGatewayL7ListenerMutation", m)
 }
 
 // The CoreGatewayNodeFunc type is an adapter to allow the use of ordinary
@@ -91,6 +139,30 @@ func (f CoreRoleFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CoreRoleMutation", m)
+}
+
+// The CoreUpstreamFunc type is an adapter to allow the use of ordinary
+// function as CoreUpstream mutator.
+type CoreUpstreamFunc func(context.Context, *ent.CoreUpstreamMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CoreUpstreamFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CoreUpstreamMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CoreUpstreamMutation", m)
+}
+
+// The CoreUpstreamHostFunc type is an adapter to allow the use of ordinary
+// function as CoreUpstreamHost mutator.
+type CoreUpstreamHostFunc func(context.Context, *ent.CoreUpstreamHostMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CoreUpstreamHostFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CoreUpstreamHostMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CoreUpstreamHostMutation", m)
 }
 
 // The CoreUserFunc type is an adapter to allow the use of ordinary

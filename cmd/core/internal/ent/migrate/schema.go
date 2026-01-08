@@ -9,6 +9,55 @@ import (
 )
 
 var (
+	// QuebecCoreCertColumns holds the columns for the "quebec_core_cert" table.
+	QuebecCoreCertColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 64, Comment: "主键ID"},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "name", Type: field.TypeString, Nullable: true, Comment: "证书名称"},
+		{Name: "serial_number", Type: field.TypeString, Nullable: true, Comment: "证书序列号"},
+		{Name: "issuer_cn", Type: field.TypeString, Nullable: true, Comment: "颁发者CN"},
+		{Name: "subject_cn", Type: field.TypeString, Nullable: true, Comment: "主题CN"},
+		{Name: "not_before", Type: field.TypeInt64, Nullable: true, Comment: "有效期开始时间"},
+		{Name: "not_after", Type: field.TypeInt64, Nullable: true, Comment: "有效期结束时间"},
+		{Name: "secret_type", Type: field.TypeInt8, Nullable: true, Comment: "证书类型: 1-服务证书 2-根证书", Default: 1},
+		{Name: "certificate_hash", Type: field.TypeString, Nullable: true, Comment: "证书SHA256哈希"},
+		{Name: "certificate", Type: field.TypeString, Nullable: true, Comment: "证书PEM格式", SchemaType: map[string]string{"mysql": "text", "postgres": "text", "sqlite3": "text"}},
+		{Name: "private_key_hash", Type: field.TypeString, Nullable: true, Comment: "私钥SHA256哈希"},
+		{Name: "private_key", Type: field.TypeString, Nullable: true, Comment: "私钥PEM格式", SchemaType: map[string]string{"mysql": "text", "postgres": "text", "sqlite3": "text"}},
+		{Name: "status", Type: field.TypeInt8, Nullable: true, Comment: "是否可用 [1: 是, 2: 否]", Default: 1},
+		{Name: "is_default", Type: field.TypeInt8, Nullable: true, Comment: "是否为默认证书 [1: 是, 2: 否]", Default: 1},
+	}
+	// QuebecCoreCertTable holds the schema information for the "quebec_core_cert" table.
+	QuebecCoreCertTable = &schema.Table{
+		Name:       "quebec_core_cert",
+		Comment:    "证书信息表",
+		Columns:    QuebecCoreCertColumns,
+		PrimaryKey: []*schema.Column{QuebecCoreCertColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "corecert_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreCertColumns[1]},
+			},
+			{
+				Name:    "corecert_updated_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreCertColumns[2]},
+			},
+			{
+				Name:    "corecert_deleted_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreCertColumns[3]},
+			},
+			{
+				Name:    "corecert_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreCertColumns[0]},
+			},
+		},
+	}
 	// QuebecCoreDataRelationshipColumns holds the columns for the "quebec_core_data_relationship" table.
 	QuebecCoreDataRelationshipColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 64, Comment: "主键ID"},
@@ -105,6 +154,202 @@ var (
 				Name:    "coregatewaycluster_gateway_id",
 				Unique:  false,
 				Columns: []*schema.Column{QuebecCoreGatewayClusterColumns[5]},
+			},
+		},
+	}
+	// QuebecCoreGatewayHTTPRouteColumns holds the columns for the "quebec_core_gateway_http_route" table.
+	QuebecCoreGatewayHTTPRouteColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 64, Comment: "主键ID"},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "name", Type: field.TypeString, Nullable: true, Comment: "路由名称"},
+		{Name: "description", Type: field.TypeString, Nullable: true, Comment: "路由描述"},
+		{Name: "match_type", Type: field.TypeInt8, Nullable: true, Comment: "匹配类型: 1-前缀 2-精确 3-正则", Default: 1},
+		{Name: "match_pattern", Type: field.TypeString, Nullable: true, Comment: "匹配规则，如 /api/v1/*"},
+		{Name: "timeout_ms", Type: field.TypeInt, Nullable: true, Comment: "路由超时(毫秒，默认15000=15秒)，包括所有重试", Default: 15000},
+		{Name: "enable_path_rewrite", Type: field.TypeInt8, Nullable: true, Comment: "是否启用路径重写 [1-启用 2-禁用]", Default: 2},
+		{Name: "path_rewrite", Type: field.TypeString, Nullable: true, Comment: "路径重写规则，如 /api/v1/* /v1/*"},
+		{Name: "enable_redirect", Type: field.TypeInt8, Nullable: true, Comment: "是否启用重定向 [1-启用 2-禁用]", Default: 2},
+		{Name: "redirect_url", Type: field.TypeString, Nullable: true, Comment: "重定向URL"},
+		{Name: "redirect_code", Type: field.TypeInt, Nullable: true, Comment: "重定向状态码", Default: 301},
+		{Name: "status", Type: field.TypeInt8, Nullable: true, Comment: "状态  [1-启用 2-禁用]", Default: 1},
+	}
+	// QuebecCoreGatewayHTTPRouteTable holds the schema information for the "quebec_core_gateway_http_route" table.
+	QuebecCoreGatewayHTTPRouteTable = &schema.Table{
+		Name:       "quebec_core_gateway_http_route",
+		Comment:    "L7 HTTP路由规则表",
+		Columns:    QuebecCoreGatewayHTTPRouteColumns,
+		PrimaryKey: []*schema.Column{QuebecCoreGatewayHTTPRouteColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "coregatewayhttproute_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayHTTPRouteColumns[1]},
+			},
+			{
+				Name:    "coregatewayhttproute_updated_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayHTTPRouteColumns[2]},
+			},
+			{
+				Name:    "coregatewayhttproute_deleted_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayHTTPRouteColumns[3]},
+			},
+			{
+				Name:    "coregatewayhttproute_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayHTTPRouteColumns[0]},
+			},
+			{
+				Name:    "coregatewayhttproute_match_type",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayHTTPRouteColumns[6]},
+			},
+			{
+				Name:    "coregatewayhttproute_timeout_ms",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayHTTPRouteColumns[8]},
+			},
+			{
+				Name:    "coregatewayhttproute_enable_path_rewrite",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayHTTPRouteColumns[9]},
+			},
+			{
+				Name:    "coregatewayhttproute_enable_redirect",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayHTTPRouteColumns[11]},
+			},
+			{
+				Name:    "coregatewayhttproute_status",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayHTTPRouteColumns[14]},
+			},
+		},
+	}
+	// QuebecCoreGatewayL4ListenerColumns holds the columns for the "quebec_core_gateway_l4_listener" table.
+	QuebecCoreGatewayL4ListenerColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 64, Comment: "主键ID"},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "name", Type: field.TypeString, Nullable: true, Comment: "监听器名称"},
+		{Name: "description", Type: field.TypeString, Nullable: true, Comment: "监听器描述"},
+		{Name: "port", Type: field.TypeUint16, Nullable: true, Comment: "监听端口"},
+		{Name: "host", Type: field.TypeString, Nullable: true, Comment: "监听地址", Default: "0.0.0.0"},
+		{Name: "protocol", Type: field.TypeInt8, Nullable: true, Comment: "协议类型: 1-TCP 2-UDP", Default: 1},
+		{Name: "status", Type: field.TypeInt8, Nullable: true, Comment: "是否可用 [1: 启用, 2: 禁用]", Default: 1},
+	}
+	// QuebecCoreGatewayL4ListenerTable holds the schema information for the "quebec_core_gateway_l4_listener" table.
+	QuebecCoreGatewayL4ListenerTable = &schema.Table{
+		Name:       "quebec_core_gateway_l4_listener",
+		Comment:    "L4 TCP/UDP监听器表",
+		Columns:    QuebecCoreGatewayL4ListenerColumns,
+		PrimaryKey: []*schema.Column{QuebecCoreGatewayL4ListenerColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "coregatewayl4listener_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayL4ListenerColumns[1]},
+			},
+			{
+				Name:    "coregatewayl4listener_updated_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayL4ListenerColumns[2]},
+			},
+			{
+				Name:    "coregatewayl4listener_deleted_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayL4ListenerColumns[3]},
+			},
+			{
+				Name:    "coregatewayl4listener_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayL4ListenerColumns[0]},
+			},
+			{
+				Name:    "coregatewayl4listener_host",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayL4ListenerColumns[7]},
+			},
+			{
+				Name:    "coregatewayl4listener_port",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayL4ListenerColumns[6]},
+			},
+			{
+				Name:    "coregatewayl4listener_protocol",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayL4ListenerColumns[8]},
+			},
+			{
+				Name:    "coregatewayl4listener_status",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayL4ListenerColumns[9]},
+			},
+		},
+	}
+	// QuebecCoreGatewayL7ListenerColumns holds the columns for the "quebec_core_gateway_l7_listener" table.
+	QuebecCoreGatewayL7ListenerColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 64, Comment: "主键ID"},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "name", Type: field.TypeString, Nullable: true, Comment: "监听器名称"},
+		{Name: "description", Type: field.TypeString, Nullable: true, Comment: "监听器描述"},
+		{Name: "port", Type: field.TypeUint16, Nullable: true, Comment: "监听端口"},
+		{Name: "host", Type: field.TypeString, Nullable: true, Comment: "监听地址", Default: "0.0.0.0"},
+		{Name: "enable_tls", Type: field.TypeInt8, Nullable: true, Comment: "是否启用TLS [1: 启用, 2: 禁用]", Default: 2},
+		{Name: "status", Type: field.TypeInt8, Nullable: true, Comment: "是否启用 [1: 启用, 2: 禁用]", Default: 1},
+	}
+	// QuebecCoreGatewayL7ListenerTable holds the schema information for the "quebec_core_gateway_l7_listener" table.
+	QuebecCoreGatewayL7ListenerTable = &schema.Table{
+		Name:       "quebec_core_gateway_l7_listener",
+		Comment:    "L7 HTTP监听器表",
+		Columns:    QuebecCoreGatewayL7ListenerColumns,
+		PrimaryKey: []*schema.Column{QuebecCoreGatewayL7ListenerColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "coregatewayl7listener_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayL7ListenerColumns[1]},
+			},
+			{
+				Name:    "coregatewayl7listener_updated_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayL7ListenerColumns[2]},
+			},
+			{
+				Name:    "coregatewayl7listener_deleted_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayL7ListenerColumns[3]},
+			},
+			{
+				Name:    "coregatewayl7listener_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayL7ListenerColumns[0]},
+			},
+			{
+				Name:    "coregatewayl7listener_host",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayL7ListenerColumns[7]},
+			},
+			{
+				Name:    "coregatewayl7listener_port",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayL7ListenerColumns[6]},
+			},
+			{
+				Name:    "coregatewayl7listener_enable_tls",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayL7ListenerColumns[8]},
+			},
+			{
+				Name:    "coregatewayl7listener_status",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreGatewayL7ListenerColumns[9]},
 			},
 		},
 	}
@@ -462,6 +707,146 @@ var (
 			},
 		},
 	}
+	// QuebecCoreUpstreamColumns holds the columns for the "quebec_core_upstream" table.
+	QuebecCoreUpstreamColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 64, Comment: "主键ID"},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "name", Type: field.TypeString, Nullable: true, Comment: "上游服务名称"},
+		{Name: "description", Type: field.TypeString, Nullable: true, Comment: "上游服务描述"},
+		{Name: "lb_policy", Type: field.TypeInt8, Nullable: true, Comment: "负载均衡策略: 1-ROUND_ROBIN 2-LEAST_REQUEST 3-RANDOM 4-RING_HASH 5-MAGLEV", Default: 5},
+		{Name: "connect_timeout_ms", Type: field.TypeInt, Nullable: true, Comment: "连接超时(毫秒)", Default: 5000},
+		{Name: "max_connections", Type: field.TypeInt, Nullable: true, Comment: "最大连接数", Default: 1024},
+		{Name: "max_pending_requests", Type: field.TypeInt, Nullable: true, Comment: "最大等待请求数", Default: 1024},
+		{Name: "max_requests", Type: field.TypeInt, Nullable: true, Comment: "最大请求数", Default: 1024},
+		{Name: "max_retries", Type: field.TypeInt, Nullable: true, Comment: "最大重试次数", Default: 3},
+		{Name: "status", Type: field.TypeInt8, Nullable: true, Comment: "状态 [1-启用 2-禁用]", Default: 1},
+	}
+	// QuebecCoreUpstreamTable holds the schema information for the "quebec_core_upstream" table.
+	QuebecCoreUpstreamTable = &schema.Table{
+		Name:       "quebec_core_upstream",
+		Comment:    "上游服务信息表",
+		Columns:    QuebecCoreUpstreamColumns,
+		PrimaryKey: []*schema.Column{QuebecCoreUpstreamColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "coreupstream_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUpstreamColumns[1]},
+			},
+			{
+				Name:    "coreupstream_updated_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUpstreamColumns[2]},
+			},
+			{
+				Name:    "coreupstream_deleted_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUpstreamColumns[3]},
+			},
+			{
+				Name:    "coreupstream_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUpstreamColumns[0]},
+			},
+			{
+				Name:    "coreupstream_lb_policy",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUpstreamColumns[6]},
+			},
+			{
+				Name:    "coreupstream_connect_timeout_ms",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUpstreamColumns[7]},
+			},
+			{
+				Name:    "coreupstream_max_connections",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUpstreamColumns[8]},
+			},
+			{
+				Name:    "coreupstream_max_pending_requests",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUpstreamColumns[9]},
+			},
+			{
+				Name:    "coreupstream_max_requests",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUpstreamColumns[10]},
+			},
+			{
+				Name:    "coreupstream_max_retries",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUpstreamColumns[11]},
+			},
+			{
+				Name:    "coreupstream_status",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUpstreamColumns[12]},
+			},
+		},
+	}
+	// QuebecCoreUpstreamHostColumns holds the columns for the "quebec_core_upstream_host" table.
+	QuebecCoreUpstreamHostColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 64, Comment: "主键ID"},
+		{Name: "created_at", Type: field.TypeTime, Comment: "创建时间"},
+		{Name: "updated_at", Type: field.TypeTime, Comment: "更新时间"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true, Comment: "删除时间"},
+		{Name: "address", Type: field.TypeString, Nullable: true, Comment: "后端地址IP"},
+		{Name: "weight", Type: field.TypeInt, Nullable: true, Comment: "权重(相对权重)", Default: 1},
+		{Name: "port", Type: field.TypeInt, Nullable: true, Comment: "后端端口"},
+		{Name: "enabled", Type: field.TypeInt8, Nullable: true, Comment: "是否可用 [1: 是, 2: 否]", Default: 1},
+	}
+	// QuebecCoreUpstreamHostTable holds the schema information for the "quebec_core_upstream_host" table.
+	QuebecCoreUpstreamHostTable = &schema.Table{
+		Name:       "quebec_core_upstream_host",
+		Comment:    "上游服务后端地址表",
+		Columns:    QuebecCoreUpstreamHostColumns,
+		PrimaryKey: []*schema.Column{QuebecCoreUpstreamHostColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "coreupstreamhost_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUpstreamHostColumns[1]},
+			},
+			{
+				Name:    "coreupstreamhost_updated_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUpstreamHostColumns[2]},
+			},
+			{
+				Name:    "coreupstreamhost_deleted_at",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUpstreamHostColumns[3]},
+			},
+			{
+				Name:    "coreupstreamhost_id",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUpstreamHostColumns[0]},
+			},
+			{
+				Name:    "coreupstreamhost_address",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUpstreamHostColumns[4]},
+			},
+			{
+				Name:    "coreupstreamhost_port",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUpstreamHostColumns[6]},
+			},
+			{
+				Name:    "coreupstreamhost_weight",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUpstreamHostColumns[5]},
+			},
+			{
+				Name:    "coreupstreamhost_enabled",
+				Unique:  false,
+				Columns: []*schema.Column{QuebecCoreUpstreamHostColumns[7]},
+			},
+		},
+	}
 	// QuebecCoreUserColumns holds the columns for the "quebec_core_user" table.
 	QuebecCoreUserColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 64, Comment: "主键ID"},
@@ -597,13 +982,19 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		QuebecCoreCertTable,
 		QuebecCoreDataRelationshipTable,
 		QuebecCoreGatewayClusterTable,
+		QuebecCoreGatewayHTTPRouteTable,
+		QuebecCoreGatewayL4ListenerTable,
+		QuebecCoreGatewayL7ListenerTable,
 		QuebecCoreGatewayNodeTable,
 		QuebecCoreMenuTable,
 		QuebecCoreOnLineUserTable,
 		QuebecOperationLogTable,
 		QuebecCoreRoleTable,
+		QuebecCoreUpstreamTable,
+		QuebecCoreUpstreamHostTable,
 		QuebecCoreUserTable,
 		CoreDataRelationshipMenuTable,
 		CoreDataRelationshipRoleTable,
@@ -611,6 +1002,11 @@ var (
 )
 
 func init() {
+	QuebecCoreCertTable.Annotation = &entsql.Annotation{
+		Table:     "quebec_core_cert",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_general_ci",
+	}
 	QuebecCoreDataRelationshipTable.Annotation = &entsql.Annotation{
 		Table:     "quebec_core_data_relationship",
 		Charset:   "utf8mb4",
@@ -618,6 +1014,21 @@ func init() {
 	}
 	QuebecCoreGatewayClusterTable.Annotation = &entsql.Annotation{
 		Table:     "quebec_core_gateway_cluster",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_general_ci",
+	}
+	QuebecCoreGatewayHTTPRouteTable.Annotation = &entsql.Annotation{
+		Table:     "quebec_core_gateway_http_route",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_general_ci",
+	}
+	QuebecCoreGatewayL4ListenerTable.Annotation = &entsql.Annotation{
+		Table:     "quebec_core_gateway_l4_listener",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_general_ci",
+	}
+	QuebecCoreGatewayL7ListenerTable.Annotation = &entsql.Annotation{
+		Table:     "quebec_core_gateway_l7_listener",
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_general_ci",
 	}
@@ -647,6 +1058,16 @@ func init() {
 	}
 	QuebecCoreRoleTable.Annotation = &entsql.Annotation{
 		Table:     "quebec_core_role",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_general_ci",
+	}
+	QuebecCoreUpstreamTable.Annotation = &entsql.Annotation{
+		Table:     "quebec_core_upstream",
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_general_ci",
+	}
+	QuebecCoreUpstreamHostTable.Annotation = &entsql.Annotation{
+		Table:     "quebec_core_upstream_host",
 		Charset:   "utf8mb4",
 		Collation: "utf8mb4_general_ci",
 	}

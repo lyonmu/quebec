@@ -12,13 +12,19 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/lyonmu/quebec/cmd/core/internal/common"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/corecert"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coredatarelationship"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewaycluster"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewayhttproute"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewayl4listener"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewayl7listener"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewaynode"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreonlineuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreoperationlog"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreupstream"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreupstreamhost"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/predicate"
 	"github.com/lyonmu/quebec/pkg/constant"
@@ -33,15 +39,1605 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeCoreDataRelationship = "CoreDataRelationship"
-	TypeCoreGatewayCluster   = "CoreGatewayCluster"
-	TypeCoreGatewayNode      = "CoreGatewayNode"
-	TypeCoreMenu             = "CoreMenu"
-	TypeCoreOnLineUser       = "CoreOnLineUser"
-	TypeCoreOperationLog     = "CoreOperationLog"
-	TypeCoreRole             = "CoreRole"
-	TypeCoreUser             = "CoreUser"
+	TypeCoreCert              = "CoreCert"
+	TypeCoreDataRelationship  = "CoreDataRelationship"
+	TypeCoreGatewayCluster    = "CoreGatewayCluster"
+	TypeCoreGatewayHttpRoute  = "CoreGatewayHttpRoute"
+	TypeCoreGatewayL4Listener = "CoreGatewayL4Listener"
+	TypeCoreGatewayL7Listener = "CoreGatewayL7Listener"
+	TypeCoreGatewayNode       = "CoreGatewayNode"
+	TypeCoreMenu              = "CoreMenu"
+	TypeCoreOnLineUser        = "CoreOnLineUser"
+	TypeCoreOperationLog      = "CoreOperationLog"
+	TypeCoreRole              = "CoreRole"
+	TypeCoreUpstream          = "CoreUpstream"
+	TypeCoreUpstreamHost      = "CoreUpstreamHost"
+	TypeCoreUser              = "CoreUser"
 )
+
+// CoreCertMutation represents an operation that mutates the CoreCert nodes in the graph.
+type CoreCertMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *string
+	created_at       *time.Time
+	updated_at       *time.Time
+	deleted_at       *time.Time
+	name             *string
+	serial_number    *string
+	issuer_cn        *string
+	subject_cn       *string
+	not_before       *int64
+	addnot_before    *int64
+	not_after        *int64
+	addnot_after     *int64
+	secret_type      *constant.CertType
+	addsecret_type   *constant.CertType
+	certificate_hash *string
+	certificate      *string
+	private_key_hash *string
+	private_key      *string
+	status           *constant.YesOrNo
+	addstatus        *constant.YesOrNo
+	is_default       *constant.YesOrNo
+	addis_default    *constant.YesOrNo
+	clearedFields    map[string]struct{}
+	done             bool
+	oldValue         func(context.Context) (*CoreCert, error)
+	predicates       []predicate.CoreCert
+}
+
+var _ ent.Mutation = (*CoreCertMutation)(nil)
+
+// corecertOption allows management of the mutation configuration using functional options.
+type corecertOption func(*CoreCertMutation)
+
+// newCoreCertMutation creates new mutation for the CoreCert entity.
+func newCoreCertMutation(c config, op Op, opts ...corecertOption) *CoreCertMutation {
+	m := &CoreCertMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCoreCert,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCoreCertID sets the ID field of the mutation.
+func withCoreCertID(id string) corecertOption {
+	return func(m *CoreCertMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CoreCert
+		)
+		m.oldValue = func(ctx context.Context) (*CoreCert, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CoreCert.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCoreCert sets the old CoreCert of the mutation.
+func withCoreCert(node *CoreCert) corecertOption {
+	return func(m *CoreCertMutation) {
+		m.oldValue = func(context.Context) (*CoreCert, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CoreCertMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CoreCertMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of CoreCert entities.
+func (m *CoreCertMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CoreCertMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CoreCertMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CoreCert.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *CoreCertMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *CoreCertMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the CoreCert entity.
+// If the CoreCert object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreCertMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *CoreCertMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *CoreCertMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *CoreCertMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the CoreCert entity.
+// If the CoreCert object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreCertMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *CoreCertMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *CoreCertMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *CoreCertMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the CoreCert entity.
+// If the CoreCert object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreCertMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *CoreCertMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[corecert.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *CoreCertMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[corecert.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *CoreCertMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, corecert.FieldDeletedAt)
+}
+
+// SetName sets the "name" field.
+func (m *CoreCertMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *CoreCertMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the CoreCert entity.
+// If the CoreCert object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreCertMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ClearName clears the value of the "name" field.
+func (m *CoreCertMutation) ClearName() {
+	m.name = nil
+	m.clearedFields[corecert.FieldName] = struct{}{}
+}
+
+// NameCleared returns if the "name" field was cleared in this mutation.
+func (m *CoreCertMutation) NameCleared() bool {
+	_, ok := m.clearedFields[corecert.FieldName]
+	return ok
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *CoreCertMutation) ResetName() {
+	m.name = nil
+	delete(m.clearedFields, corecert.FieldName)
+}
+
+// SetSerialNumber sets the "serial_number" field.
+func (m *CoreCertMutation) SetSerialNumber(s string) {
+	m.serial_number = &s
+}
+
+// SerialNumber returns the value of the "serial_number" field in the mutation.
+func (m *CoreCertMutation) SerialNumber() (r string, exists bool) {
+	v := m.serial_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSerialNumber returns the old "serial_number" field's value of the CoreCert entity.
+// If the CoreCert object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreCertMutation) OldSerialNumber(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSerialNumber is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSerialNumber requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSerialNumber: %w", err)
+	}
+	return oldValue.SerialNumber, nil
+}
+
+// ClearSerialNumber clears the value of the "serial_number" field.
+func (m *CoreCertMutation) ClearSerialNumber() {
+	m.serial_number = nil
+	m.clearedFields[corecert.FieldSerialNumber] = struct{}{}
+}
+
+// SerialNumberCleared returns if the "serial_number" field was cleared in this mutation.
+func (m *CoreCertMutation) SerialNumberCleared() bool {
+	_, ok := m.clearedFields[corecert.FieldSerialNumber]
+	return ok
+}
+
+// ResetSerialNumber resets all changes to the "serial_number" field.
+func (m *CoreCertMutation) ResetSerialNumber() {
+	m.serial_number = nil
+	delete(m.clearedFields, corecert.FieldSerialNumber)
+}
+
+// SetIssuerCn sets the "issuer_cn" field.
+func (m *CoreCertMutation) SetIssuerCn(s string) {
+	m.issuer_cn = &s
+}
+
+// IssuerCn returns the value of the "issuer_cn" field in the mutation.
+func (m *CoreCertMutation) IssuerCn() (r string, exists bool) {
+	v := m.issuer_cn
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIssuerCn returns the old "issuer_cn" field's value of the CoreCert entity.
+// If the CoreCert object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreCertMutation) OldIssuerCn(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIssuerCn is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIssuerCn requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIssuerCn: %w", err)
+	}
+	return oldValue.IssuerCn, nil
+}
+
+// ClearIssuerCn clears the value of the "issuer_cn" field.
+func (m *CoreCertMutation) ClearIssuerCn() {
+	m.issuer_cn = nil
+	m.clearedFields[corecert.FieldIssuerCn] = struct{}{}
+}
+
+// IssuerCnCleared returns if the "issuer_cn" field was cleared in this mutation.
+func (m *CoreCertMutation) IssuerCnCleared() bool {
+	_, ok := m.clearedFields[corecert.FieldIssuerCn]
+	return ok
+}
+
+// ResetIssuerCn resets all changes to the "issuer_cn" field.
+func (m *CoreCertMutation) ResetIssuerCn() {
+	m.issuer_cn = nil
+	delete(m.clearedFields, corecert.FieldIssuerCn)
+}
+
+// SetSubjectCn sets the "subject_cn" field.
+func (m *CoreCertMutation) SetSubjectCn(s string) {
+	m.subject_cn = &s
+}
+
+// SubjectCn returns the value of the "subject_cn" field in the mutation.
+func (m *CoreCertMutation) SubjectCn() (r string, exists bool) {
+	v := m.subject_cn
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubjectCn returns the old "subject_cn" field's value of the CoreCert entity.
+// If the CoreCert object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreCertMutation) OldSubjectCn(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSubjectCn is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSubjectCn requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubjectCn: %w", err)
+	}
+	return oldValue.SubjectCn, nil
+}
+
+// ClearSubjectCn clears the value of the "subject_cn" field.
+func (m *CoreCertMutation) ClearSubjectCn() {
+	m.subject_cn = nil
+	m.clearedFields[corecert.FieldSubjectCn] = struct{}{}
+}
+
+// SubjectCnCleared returns if the "subject_cn" field was cleared in this mutation.
+func (m *CoreCertMutation) SubjectCnCleared() bool {
+	_, ok := m.clearedFields[corecert.FieldSubjectCn]
+	return ok
+}
+
+// ResetSubjectCn resets all changes to the "subject_cn" field.
+func (m *CoreCertMutation) ResetSubjectCn() {
+	m.subject_cn = nil
+	delete(m.clearedFields, corecert.FieldSubjectCn)
+}
+
+// SetNotBefore sets the "not_before" field.
+func (m *CoreCertMutation) SetNotBefore(i int64) {
+	m.not_before = &i
+	m.addnot_before = nil
+}
+
+// NotBefore returns the value of the "not_before" field in the mutation.
+func (m *CoreCertMutation) NotBefore() (r int64, exists bool) {
+	v := m.not_before
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNotBefore returns the old "not_before" field's value of the CoreCert entity.
+// If the CoreCert object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreCertMutation) OldNotBefore(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNotBefore is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNotBefore requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNotBefore: %w", err)
+	}
+	return oldValue.NotBefore, nil
+}
+
+// AddNotBefore adds i to the "not_before" field.
+func (m *CoreCertMutation) AddNotBefore(i int64) {
+	if m.addnot_before != nil {
+		*m.addnot_before += i
+	} else {
+		m.addnot_before = &i
+	}
+}
+
+// AddedNotBefore returns the value that was added to the "not_before" field in this mutation.
+func (m *CoreCertMutation) AddedNotBefore() (r int64, exists bool) {
+	v := m.addnot_before
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearNotBefore clears the value of the "not_before" field.
+func (m *CoreCertMutation) ClearNotBefore() {
+	m.not_before = nil
+	m.addnot_before = nil
+	m.clearedFields[corecert.FieldNotBefore] = struct{}{}
+}
+
+// NotBeforeCleared returns if the "not_before" field was cleared in this mutation.
+func (m *CoreCertMutation) NotBeforeCleared() bool {
+	_, ok := m.clearedFields[corecert.FieldNotBefore]
+	return ok
+}
+
+// ResetNotBefore resets all changes to the "not_before" field.
+func (m *CoreCertMutation) ResetNotBefore() {
+	m.not_before = nil
+	m.addnot_before = nil
+	delete(m.clearedFields, corecert.FieldNotBefore)
+}
+
+// SetNotAfter sets the "not_after" field.
+func (m *CoreCertMutation) SetNotAfter(i int64) {
+	m.not_after = &i
+	m.addnot_after = nil
+}
+
+// NotAfter returns the value of the "not_after" field in the mutation.
+func (m *CoreCertMutation) NotAfter() (r int64, exists bool) {
+	v := m.not_after
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNotAfter returns the old "not_after" field's value of the CoreCert entity.
+// If the CoreCert object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreCertMutation) OldNotAfter(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNotAfter is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNotAfter requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNotAfter: %w", err)
+	}
+	return oldValue.NotAfter, nil
+}
+
+// AddNotAfter adds i to the "not_after" field.
+func (m *CoreCertMutation) AddNotAfter(i int64) {
+	if m.addnot_after != nil {
+		*m.addnot_after += i
+	} else {
+		m.addnot_after = &i
+	}
+}
+
+// AddedNotAfter returns the value that was added to the "not_after" field in this mutation.
+func (m *CoreCertMutation) AddedNotAfter() (r int64, exists bool) {
+	v := m.addnot_after
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearNotAfter clears the value of the "not_after" field.
+func (m *CoreCertMutation) ClearNotAfter() {
+	m.not_after = nil
+	m.addnot_after = nil
+	m.clearedFields[corecert.FieldNotAfter] = struct{}{}
+}
+
+// NotAfterCleared returns if the "not_after" field was cleared in this mutation.
+func (m *CoreCertMutation) NotAfterCleared() bool {
+	_, ok := m.clearedFields[corecert.FieldNotAfter]
+	return ok
+}
+
+// ResetNotAfter resets all changes to the "not_after" field.
+func (m *CoreCertMutation) ResetNotAfter() {
+	m.not_after = nil
+	m.addnot_after = nil
+	delete(m.clearedFields, corecert.FieldNotAfter)
+}
+
+// SetSecretType sets the "secret_type" field.
+func (m *CoreCertMutation) SetSecretType(ct constant.CertType) {
+	m.secret_type = &ct
+	m.addsecret_type = nil
+}
+
+// SecretType returns the value of the "secret_type" field in the mutation.
+func (m *CoreCertMutation) SecretType() (r constant.CertType, exists bool) {
+	v := m.secret_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSecretType returns the old "secret_type" field's value of the CoreCert entity.
+// If the CoreCert object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreCertMutation) OldSecretType(ctx context.Context) (v constant.CertType, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSecretType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSecretType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSecretType: %w", err)
+	}
+	return oldValue.SecretType, nil
+}
+
+// AddSecretType adds ct to the "secret_type" field.
+func (m *CoreCertMutation) AddSecretType(ct constant.CertType) {
+	if m.addsecret_type != nil {
+		*m.addsecret_type += ct
+	} else {
+		m.addsecret_type = &ct
+	}
+}
+
+// AddedSecretType returns the value that was added to the "secret_type" field in this mutation.
+func (m *CoreCertMutation) AddedSecretType() (r constant.CertType, exists bool) {
+	v := m.addsecret_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearSecretType clears the value of the "secret_type" field.
+func (m *CoreCertMutation) ClearSecretType() {
+	m.secret_type = nil
+	m.addsecret_type = nil
+	m.clearedFields[corecert.FieldSecretType] = struct{}{}
+}
+
+// SecretTypeCleared returns if the "secret_type" field was cleared in this mutation.
+func (m *CoreCertMutation) SecretTypeCleared() bool {
+	_, ok := m.clearedFields[corecert.FieldSecretType]
+	return ok
+}
+
+// ResetSecretType resets all changes to the "secret_type" field.
+func (m *CoreCertMutation) ResetSecretType() {
+	m.secret_type = nil
+	m.addsecret_type = nil
+	delete(m.clearedFields, corecert.FieldSecretType)
+}
+
+// SetCertificateHash sets the "certificate_hash" field.
+func (m *CoreCertMutation) SetCertificateHash(s string) {
+	m.certificate_hash = &s
+}
+
+// CertificateHash returns the value of the "certificate_hash" field in the mutation.
+func (m *CoreCertMutation) CertificateHash() (r string, exists bool) {
+	v := m.certificate_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCertificateHash returns the old "certificate_hash" field's value of the CoreCert entity.
+// If the CoreCert object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreCertMutation) OldCertificateHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCertificateHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCertificateHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCertificateHash: %w", err)
+	}
+	return oldValue.CertificateHash, nil
+}
+
+// ClearCertificateHash clears the value of the "certificate_hash" field.
+func (m *CoreCertMutation) ClearCertificateHash() {
+	m.certificate_hash = nil
+	m.clearedFields[corecert.FieldCertificateHash] = struct{}{}
+}
+
+// CertificateHashCleared returns if the "certificate_hash" field was cleared in this mutation.
+func (m *CoreCertMutation) CertificateHashCleared() bool {
+	_, ok := m.clearedFields[corecert.FieldCertificateHash]
+	return ok
+}
+
+// ResetCertificateHash resets all changes to the "certificate_hash" field.
+func (m *CoreCertMutation) ResetCertificateHash() {
+	m.certificate_hash = nil
+	delete(m.clearedFields, corecert.FieldCertificateHash)
+}
+
+// SetCertificate sets the "certificate" field.
+func (m *CoreCertMutation) SetCertificate(s string) {
+	m.certificate = &s
+}
+
+// Certificate returns the value of the "certificate" field in the mutation.
+func (m *CoreCertMutation) Certificate() (r string, exists bool) {
+	v := m.certificate
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCertificate returns the old "certificate" field's value of the CoreCert entity.
+// If the CoreCert object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreCertMutation) OldCertificate(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCertificate is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCertificate requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCertificate: %w", err)
+	}
+	return oldValue.Certificate, nil
+}
+
+// ClearCertificate clears the value of the "certificate" field.
+func (m *CoreCertMutation) ClearCertificate() {
+	m.certificate = nil
+	m.clearedFields[corecert.FieldCertificate] = struct{}{}
+}
+
+// CertificateCleared returns if the "certificate" field was cleared in this mutation.
+func (m *CoreCertMutation) CertificateCleared() bool {
+	_, ok := m.clearedFields[corecert.FieldCertificate]
+	return ok
+}
+
+// ResetCertificate resets all changes to the "certificate" field.
+func (m *CoreCertMutation) ResetCertificate() {
+	m.certificate = nil
+	delete(m.clearedFields, corecert.FieldCertificate)
+}
+
+// SetPrivateKeyHash sets the "private_key_hash" field.
+func (m *CoreCertMutation) SetPrivateKeyHash(s string) {
+	m.private_key_hash = &s
+}
+
+// PrivateKeyHash returns the value of the "private_key_hash" field in the mutation.
+func (m *CoreCertMutation) PrivateKeyHash() (r string, exists bool) {
+	v := m.private_key_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPrivateKeyHash returns the old "private_key_hash" field's value of the CoreCert entity.
+// If the CoreCert object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreCertMutation) OldPrivateKeyHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPrivateKeyHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPrivateKeyHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPrivateKeyHash: %w", err)
+	}
+	return oldValue.PrivateKeyHash, nil
+}
+
+// ClearPrivateKeyHash clears the value of the "private_key_hash" field.
+func (m *CoreCertMutation) ClearPrivateKeyHash() {
+	m.private_key_hash = nil
+	m.clearedFields[corecert.FieldPrivateKeyHash] = struct{}{}
+}
+
+// PrivateKeyHashCleared returns if the "private_key_hash" field was cleared in this mutation.
+func (m *CoreCertMutation) PrivateKeyHashCleared() bool {
+	_, ok := m.clearedFields[corecert.FieldPrivateKeyHash]
+	return ok
+}
+
+// ResetPrivateKeyHash resets all changes to the "private_key_hash" field.
+func (m *CoreCertMutation) ResetPrivateKeyHash() {
+	m.private_key_hash = nil
+	delete(m.clearedFields, corecert.FieldPrivateKeyHash)
+}
+
+// SetPrivateKey sets the "private_key" field.
+func (m *CoreCertMutation) SetPrivateKey(s string) {
+	m.private_key = &s
+}
+
+// PrivateKey returns the value of the "private_key" field in the mutation.
+func (m *CoreCertMutation) PrivateKey() (r string, exists bool) {
+	v := m.private_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPrivateKey returns the old "private_key" field's value of the CoreCert entity.
+// If the CoreCert object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreCertMutation) OldPrivateKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPrivateKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPrivateKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPrivateKey: %w", err)
+	}
+	return oldValue.PrivateKey, nil
+}
+
+// ClearPrivateKey clears the value of the "private_key" field.
+func (m *CoreCertMutation) ClearPrivateKey() {
+	m.private_key = nil
+	m.clearedFields[corecert.FieldPrivateKey] = struct{}{}
+}
+
+// PrivateKeyCleared returns if the "private_key" field was cleared in this mutation.
+func (m *CoreCertMutation) PrivateKeyCleared() bool {
+	_, ok := m.clearedFields[corecert.FieldPrivateKey]
+	return ok
+}
+
+// ResetPrivateKey resets all changes to the "private_key" field.
+func (m *CoreCertMutation) ResetPrivateKey() {
+	m.private_key = nil
+	delete(m.clearedFields, corecert.FieldPrivateKey)
+}
+
+// SetStatus sets the "status" field.
+func (m *CoreCertMutation) SetStatus(con constant.YesOrNo) {
+	m.status = &con
+	m.addstatus = nil
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *CoreCertMutation) Status() (r constant.YesOrNo, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the CoreCert entity.
+// If the CoreCert object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreCertMutation) OldStatus(ctx context.Context) (v constant.YesOrNo, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// AddStatus adds con to the "status" field.
+func (m *CoreCertMutation) AddStatus(con constant.YesOrNo) {
+	if m.addstatus != nil {
+		*m.addstatus += con
+	} else {
+		m.addstatus = &con
+	}
+}
+
+// AddedStatus returns the value that was added to the "status" field in this mutation.
+func (m *CoreCertMutation) AddedStatus() (r constant.YesOrNo, exists bool) {
+	v := m.addstatus
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearStatus clears the value of the "status" field.
+func (m *CoreCertMutation) ClearStatus() {
+	m.status = nil
+	m.addstatus = nil
+	m.clearedFields[corecert.FieldStatus] = struct{}{}
+}
+
+// StatusCleared returns if the "status" field was cleared in this mutation.
+func (m *CoreCertMutation) StatusCleared() bool {
+	_, ok := m.clearedFields[corecert.FieldStatus]
+	return ok
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *CoreCertMutation) ResetStatus() {
+	m.status = nil
+	m.addstatus = nil
+	delete(m.clearedFields, corecert.FieldStatus)
+}
+
+// SetIsDefault sets the "is_default" field.
+func (m *CoreCertMutation) SetIsDefault(con constant.YesOrNo) {
+	m.is_default = &con
+	m.addis_default = nil
+}
+
+// IsDefault returns the value of the "is_default" field in the mutation.
+func (m *CoreCertMutation) IsDefault() (r constant.YesOrNo, exists bool) {
+	v := m.is_default
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsDefault returns the old "is_default" field's value of the CoreCert entity.
+// If the CoreCert object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreCertMutation) OldIsDefault(ctx context.Context) (v constant.YesOrNo, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsDefault is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsDefault requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsDefault: %w", err)
+	}
+	return oldValue.IsDefault, nil
+}
+
+// AddIsDefault adds con to the "is_default" field.
+func (m *CoreCertMutation) AddIsDefault(con constant.YesOrNo) {
+	if m.addis_default != nil {
+		*m.addis_default += con
+	} else {
+		m.addis_default = &con
+	}
+}
+
+// AddedIsDefault returns the value that was added to the "is_default" field in this mutation.
+func (m *CoreCertMutation) AddedIsDefault() (r constant.YesOrNo, exists bool) {
+	v := m.addis_default
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearIsDefault clears the value of the "is_default" field.
+func (m *CoreCertMutation) ClearIsDefault() {
+	m.is_default = nil
+	m.addis_default = nil
+	m.clearedFields[corecert.FieldIsDefault] = struct{}{}
+}
+
+// IsDefaultCleared returns if the "is_default" field was cleared in this mutation.
+func (m *CoreCertMutation) IsDefaultCleared() bool {
+	_, ok := m.clearedFields[corecert.FieldIsDefault]
+	return ok
+}
+
+// ResetIsDefault resets all changes to the "is_default" field.
+func (m *CoreCertMutation) ResetIsDefault() {
+	m.is_default = nil
+	m.addis_default = nil
+	delete(m.clearedFields, corecert.FieldIsDefault)
+}
+
+// Where appends a list predicates to the CoreCertMutation builder.
+func (m *CoreCertMutation) Where(ps ...predicate.CoreCert) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CoreCertMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CoreCertMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CoreCert, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CoreCertMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CoreCertMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CoreCert).
+func (m *CoreCertMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CoreCertMutation) Fields() []string {
+	fields := make([]string, 0, 16)
+	if m.created_at != nil {
+		fields = append(fields, corecert.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, corecert.FieldUpdatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, corecert.FieldDeletedAt)
+	}
+	if m.name != nil {
+		fields = append(fields, corecert.FieldName)
+	}
+	if m.serial_number != nil {
+		fields = append(fields, corecert.FieldSerialNumber)
+	}
+	if m.issuer_cn != nil {
+		fields = append(fields, corecert.FieldIssuerCn)
+	}
+	if m.subject_cn != nil {
+		fields = append(fields, corecert.FieldSubjectCn)
+	}
+	if m.not_before != nil {
+		fields = append(fields, corecert.FieldNotBefore)
+	}
+	if m.not_after != nil {
+		fields = append(fields, corecert.FieldNotAfter)
+	}
+	if m.secret_type != nil {
+		fields = append(fields, corecert.FieldSecretType)
+	}
+	if m.certificate_hash != nil {
+		fields = append(fields, corecert.FieldCertificateHash)
+	}
+	if m.certificate != nil {
+		fields = append(fields, corecert.FieldCertificate)
+	}
+	if m.private_key_hash != nil {
+		fields = append(fields, corecert.FieldPrivateKeyHash)
+	}
+	if m.private_key != nil {
+		fields = append(fields, corecert.FieldPrivateKey)
+	}
+	if m.status != nil {
+		fields = append(fields, corecert.FieldStatus)
+	}
+	if m.is_default != nil {
+		fields = append(fields, corecert.FieldIsDefault)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CoreCertMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case corecert.FieldCreatedAt:
+		return m.CreatedAt()
+	case corecert.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case corecert.FieldDeletedAt:
+		return m.DeletedAt()
+	case corecert.FieldName:
+		return m.Name()
+	case corecert.FieldSerialNumber:
+		return m.SerialNumber()
+	case corecert.FieldIssuerCn:
+		return m.IssuerCn()
+	case corecert.FieldSubjectCn:
+		return m.SubjectCn()
+	case corecert.FieldNotBefore:
+		return m.NotBefore()
+	case corecert.FieldNotAfter:
+		return m.NotAfter()
+	case corecert.FieldSecretType:
+		return m.SecretType()
+	case corecert.FieldCertificateHash:
+		return m.CertificateHash()
+	case corecert.FieldCertificate:
+		return m.Certificate()
+	case corecert.FieldPrivateKeyHash:
+		return m.PrivateKeyHash()
+	case corecert.FieldPrivateKey:
+		return m.PrivateKey()
+	case corecert.FieldStatus:
+		return m.Status()
+	case corecert.FieldIsDefault:
+		return m.IsDefault()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CoreCertMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case corecert.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case corecert.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case corecert.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
+	case corecert.FieldName:
+		return m.OldName(ctx)
+	case corecert.FieldSerialNumber:
+		return m.OldSerialNumber(ctx)
+	case corecert.FieldIssuerCn:
+		return m.OldIssuerCn(ctx)
+	case corecert.FieldSubjectCn:
+		return m.OldSubjectCn(ctx)
+	case corecert.FieldNotBefore:
+		return m.OldNotBefore(ctx)
+	case corecert.FieldNotAfter:
+		return m.OldNotAfter(ctx)
+	case corecert.FieldSecretType:
+		return m.OldSecretType(ctx)
+	case corecert.FieldCertificateHash:
+		return m.OldCertificateHash(ctx)
+	case corecert.FieldCertificate:
+		return m.OldCertificate(ctx)
+	case corecert.FieldPrivateKeyHash:
+		return m.OldPrivateKeyHash(ctx)
+	case corecert.FieldPrivateKey:
+		return m.OldPrivateKey(ctx)
+	case corecert.FieldStatus:
+		return m.OldStatus(ctx)
+	case corecert.FieldIsDefault:
+		return m.OldIsDefault(ctx)
+	}
+	return nil, fmt.Errorf("unknown CoreCert field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoreCertMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case corecert.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case corecert.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case corecert.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
+	case corecert.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case corecert.FieldSerialNumber:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSerialNumber(v)
+		return nil
+	case corecert.FieldIssuerCn:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIssuerCn(v)
+		return nil
+	case corecert.FieldSubjectCn:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubjectCn(v)
+		return nil
+	case corecert.FieldNotBefore:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNotBefore(v)
+		return nil
+	case corecert.FieldNotAfter:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNotAfter(v)
+		return nil
+	case corecert.FieldSecretType:
+		v, ok := value.(constant.CertType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSecretType(v)
+		return nil
+	case corecert.FieldCertificateHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCertificateHash(v)
+		return nil
+	case corecert.FieldCertificate:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCertificate(v)
+		return nil
+	case corecert.FieldPrivateKeyHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPrivateKeyHash(v)
+		return nil
+	case corecert.FieldPrivateKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPrivateKey(v)
+		return nil
+	case corecert.FieldStatus:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case corecert.FieldIsDefault:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsDefault(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CoreCert field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CoreCertMutation) AddedFields() []string {
+	var fields []string
+	if m.addnot_before != nil {
+		fields = append(fields, corecert.FieldNotBefore)
+	}
+	if m.addnot_after != nil {
+		fields = append(fields, corecert.FieldNotAfter)
+	}
+	if m.addsecret_type != nil {
+		fields = append(fields, corecert.FieldSecretType)
+	}
+	if m.addstatus != nil {
+		fields = append(fields, corecert.FieldStatus)
+	}
+	if m.addis_default != nil {
+		fields = append(fields, corecert.FieldIsDefault)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CoreCertMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case corecert.FieldNotBefore:
+		return m.AddedNotBefore()
+	case corecert.FieldNotAfter:
+		return m.AddedNotAfter()
+	case corecert.FieldSecretType:
+		return m.AddedSecretType()
+	case corecert.FieldStatus:
+		return m.AddedStatus()
+	case corecert.FieldIsDefault:
+		return m.AddedIsDefault()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoreCertMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case corecert.FieldNotBefore:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddNotBefore(v)
+		return nil
+	case corecert.FieldNotAfter:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddNotAfter(v)
+		return nil
+	case corecert.FieldSecretType:
+		v, ok := value.(constant.CertType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSecretType(v)
+		return nil
+	case corecert.FieldStatus:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStatus(v)
+		return nil
+	case corecert.FieldIsDefault:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddIsDefault(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CoreCert numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CoreCertMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(corecert.FieldDeletedAt) {
+		fields = append(fields, corecert.FieldDeletedAt)
+	}
+	if m.FieldCleared(corecert.FieldName) {
+		fields = append(fields, corecert.FieldName)
+	}
+	if m.FieldCleared(corecert.FieldSerialNumber) {
+		fields = append(fields, corecert.FieldSerialNumber)
+	}
+	if m.FieldCleared(corecert.FieldIssuerCn) {
+		fields = append(fields, corecert.FieldIssuerCn)
+	}
+	if m.FieldCleared(corecert.FieldSubjectCn) {
+		fields = append(fields, corecert.FieldSubjectCn)
+	}
+	if m.FieldCleared(corecert.FieldNotBefore) {
+		fields = append(fields, corecert.FieldNotBefore)
+	}
+	if m.FieldCleared(corecert.FieldNotAfter) {
+		fields = append(fields, corecert.FieldNotAfter)
+	}
+	if m.FieldCleared(corecert.FieldSecretType) {
+		fields = append(fields, corecert.FieldSecretType)
+	}
+	if m.FieldCleared(corecert.FieldCertificateHash) {
+		fields = append(fields, corecert.FieldCertificateHash)
+	}
+	if m.FieldCleared(corecert.FieldCertificate) {
+		fields = append(fields, corecert.FieldCertificate)
+	}
+	if m.FieldCleared(corecert.FieldPrivateKeyHash) {
+		fields = append(fields, corecert.FieldPrivateKeyHash)
+	}
+	if m.FieldCleared(corecert.FieldPrivateKey) {
+		fields = append(fields, corecert.FieldPrivateKey)
+	}
+	if m.FieldCleared(corecert.FieldStatus) {
+		fields = append(fields, corecert.FieldStatus)
+	}
+	if m.FieldCleared(corecert.FieldIsDefault) {
+		fields = append(fields, corecert.FieldIsDefault)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CoreCertMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CoreCertMutation) ClearField(name string) error {
+	switch name {
+	case corecert.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	case corecert.FieldName:
+		m.ClearName()
+		return nil
+	case corecert.FieldSerialNumber:
+		m.ClearSerialNumber()
+		return nil
+	case corecert.FieldIssuerCn:
+		m.ClearIssuerCn()
+		return nil
+	case corecert.FieldSubjectCn:
+		m.ClearSubjectCn()
+		return nil
+	case corecert.FieldNotBefore:
+		m.ClearNotBefore()
+		return nil
+	case corecert.FieldNotAfter:
+		m.ClearNotAfter()
+		return nil
+	case corecert.FieldSecretType:
+		m.ClearSecretType()
+		return nil
+	case corecert.FieldCertificateHash:
+		m.ClearCertificateHash()
+		return nil
+	case corecert.FieldCertificate:
+		m.ClearCertificate()
+		return nil
+	case corecert.FieldPrivateKeyHash:
+		m.ClearPrivateKeyHash()
+		return nil
+	case corecert.FieldPrivateKey:
+		m.ClearPrivateKey()
+		return nil
+	case corecert.FieldStatus:
+		m.ClearStatus()
+		return nil
+	case corecert.FieldIsDefault:
+		m.ClearIsDefault()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreCert nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CoreCertMutation) ResetField(name string) error {
+	switch name {
+	case corecert.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case corecert.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case corecert.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
+	case corecert.FieldName:
+		m.ResetName()
+		return nil
+	case corecert.FieldSerialNumber:
+		m.ResetSerialNumber()
+		return nil
+	case corecert.FieldIssuerCn:
+		m.ResetIssuerCn()
+		return nil
+	case corecert.FieldSubjectCn:
+		m.ResetSubjectCn()
+		return nil
+	case corecert.FieldNotBefore:
+		m.ResetNotBefore()
+		return nil
+	case corecert.FieldNotAfter:
+		m.ResetNotAfter()
+		return nil
+	case corecert.FieldSecretType:
+		m.ResetSecretType()
+		return nil
+	case corecert.FieldCertificateHash:
+		m.ResetCertificateHash()
+		return nil
+	case corecert.FieldCertificate:
+		m.ResetCertificate()
+		return nil
+	case corecert.FieldPrivateKeyHash:
+		m.ResetPrivateKeyHash()
+		return nil
+	case corecert.FieldPrivateKey:
+		m.ResetPrivateKey()
+		return nil
+	case corecert.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case corecert.FieldIsDefault:
+		m.ResetIsDefault()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreCert field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CoreCertMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CoreCertMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CoreCertMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CoreCertMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CoreCertMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CoreCertMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CoreCertMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown CoreCert unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CoreCertMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown CoreCert edge %s", name)
+}
 
 // CoreDataRelationshipMutation represents an operation that mutates the CoreDataRelationship nodes in the graph.
 type CoreDataRelationshipMutation struct {
@@ -1887,6 +3483,3488 @@ func (m *CoreGatewayClusterMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown CoreGatewayCluster edge %s", name)
+}
+
+// CoreGatewayHttpRouteMutation represents an operation that mutates the CoreGatewayHttpRoute nodes in the graph.
+type CoreGatewayHttpRouteMutation struct {
+	config
+	op                     Op
+	typ                    string
+	id                     *string
+	created_at             *time.Time
+	updated_at             *time.Time
+	deleted_at             *time.Time
+	name                   *string
+	description            *string
+	match_type             *constant.ProxyHttpRouteMatchType
+	addmatch_type          *constant.ProxyHttpRouteMatchType
+	match_pattern          *string
+	timeout_ms             *int
+	addtimeout_ms          *int
+	enable_path_rewrite    *constant.YesOrNo
+	addenable_path_rewrite *constant.YesOrNo
+	path_rewrite           *string
+	enable_redirect        *constant.YesOrNo
+	addenable_redirect     *constant.YesOrNo
+	redirect_url           *string
+	redirect_code          *int
+	addredirect_code       *int
+	status                 *constant.YesOrNo
+	addstatus              *constant.YesOrNo
+	clearedFields          map[string]struct{}
+	done                   bool
+	oldValue               func(context.Context) (*CoreGatewayHttpRoute, error)
+	predicates             []predicate.CoreGatewayHttpRoute
+}
+
+var _ ent.Mutation = (*CoreGatewayHttpRouteMutation)(nil)
+
+// coregatewayhttprouteOption allows management of the mutation configuration using functional options.
+type coregatewayhttprouteOption func(*CoreGatewayHttpRouteMutation)
+
+// newCoreGatewayHttpRouteMutation creates new mutation for the CoreGatewayHttpRoute entity.
+func newCoreGatewayHttpRouteMutation(c config, op Op, opts ...coregatewayhttprouteOption) *CoreGatewayHttpRouteMutation {
+	m := &CoreGatewayHttpRouteMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCoreGatewayHttpRoute,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCoreGatewayHttpRouteID sets the ID field of the mutation.
+func withCoreGatewayHttpRouteID(id string) coregatewayhttprouteOption {
+	return func(m *CoreGatewayHttpRouteMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CoreGatewayHttpRoute
+		)
+		m.oldValue = func(ctx context.Context) (*CoreGatewayHttpRoute, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CoreGatewayHttpRoute.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCoreGatewayHttpRoute sets the old CoreGatewayHttpRoute of the mutation.
+func withCoreGatewayHttpRoute(node *CoreGatewayHttpRoute) coregatewayhttprouteOption {
+	return func(m *CoreGatewayHttpRouteMutation) {
+		m.oldValue = func(context.Context) (*CoreGatewayHttpRoute, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CoreGatewayHttpRouteMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CoreGatewayHttpRouteMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of CoreGatewayHttpRoute entities.
+func (m *CoreGatewayHttpRouteMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CoreGatewayHttpRouteMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CoreGatewayHttpRouteMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CoreGatewayHttpRoute.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *CoreGatewayHttpRouteMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *CoreGatewayHttpRouteMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the CoreGatewayHttpRoute entity.
+// If the CoreGatewayHttpRoute object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayHttpRouteMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *CoreGatewayHttpRouteMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *CoreGatewayHttpRouteMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *CoreGatewayHttpRouteMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the CoreGatewayHttpRoute entity.
+// If the CoreGatewayHttpRoute object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayHttpRouteMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *CoreGatewayHttpRouteMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *CoreGatewayHttpRouteMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *CoreGatewayHttpRouteMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the CoreGatewayHttpRoute entity.
+// If the CoreGatewayHttpRoute object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayHttpRouteMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *CoreGatewayHttpRouteMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[coregatewayhttproute.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *CoreGatewayHttpRouteMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[coregatewayhttproute.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *CoreGatewayHttpRouteMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, coregatewayhttproute.FieldDeletedAt)
+}
+
+// SetName sets the "name" field.
+func (m *CoreGatewayHttpRouteMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *CoreGatewayHttpRouteMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the CoreGatewayHttpRoute entity.
+// If the CoreGatewayHttpRoute object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayHttpRouteMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ClearName clears the value of the "name" field.
+func (m *CoreGatewayHttpRouteMutation) ClearName() {
+	m.name = nil
+	m.clearedFields[coregatewayhttproute.FieldName] = struct{}{}
+}
+
+// NameCleared returns if the "name" field was cleared in this mutation.
+func (m *CoreGatewayHttpRouteMutation) NameCleared() bool {
+	_, ok := m.clearedFields[coregatewayhttproute.FieldName]
+	return ok
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *CoreGatewayHttpRouteMutation) ResetName() {
+	m.name = nil
+	delete(m.clearedFields, coregatewayhttproute.FieldName)
+}
+
+// SetDescription sets the "description" field.
+func (m *CoreGatewayHttpRouteMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *CoreGatewayHttpRouteMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the CoreGatewayHttpRoute entity.
+// If the CoreGatewayHttpRoute object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayHttpRouteMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ClearDescription clears the value of the "description" field.
+func (m *CoreGatewayHttpRouteMutation) ClearDescription() {
+	m.description = nil
+	m.clearedFields[coregatewayhttproute.FieldDescription] = struct{}{}
+}
+
+// DescriptionCleared returns if the "description" field was cleared in this mutation.
+func (m *CoreGatewayHttpRouteMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[coregatewayhttproute.FieldDescription]
+	return ok
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *CoreGatewayHttpRouteMutation) ResetDescription() {
+	m.description = nil
+	delete(m.clearedFields, coregatewayhttproute.FieldDescription)
+}
+
+// SetMatchType sets the "match_type" field.
+func (m *CoreGatewayHttpRouteMutation) SetMatchType(chrmt constant.ProxyHttpRouteMatchType) {
+	m.match_type = &chrmt
+	m.addmatch_type = nil
+}
+
+// MatchType returns the value of the "match_type" field in the mutation.
+func (m *CoreGatewayHttpRouteMutation) MatchType() (r constant.ProxyHttpRouteMatchType, exists bool) {
+	v := m.match_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMatchType returns the old "match_type" field's value of the CoreGatewayHttpRoute entity.
+// If the CoreGatewayHttpRoute object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayHttpRouteMutation) OldMatchType(ctx context.Context) (v constant.ProxyHttpRouteMatchType, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMatchType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMatchType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMatchType: %w", err)
+	}
+	return oldValue.MatchType, nil
+}
+
+// AddMatchType adds chrmt to the "match_type" field.
+func (m *CoreGatewayHttpRouteMutation) AddMatchType(chrmt constant.ProxyHttpRouteMatchType) {
+	if m.addmatch_type != nil {
+		*m.addmatch_type += chrmt
+	} else {
+		m.addmatch_type = &chrmt
+	}
+}
+
+// AddedMatchType returns the value that was added to the "match_type" field in this mutation.
+func (m *CoreGatewayHttpRouteMutation) AddedMatchType() (r constant.ProxyHttpRouteMatchType, exists bool) {
+	v := m.addmatch_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearMatchType clears the value of the "match_type" field.
+func (m *CoreGatewayHttpRouteMutation) ClearMatchType() {
+	m.match_type = nil
+	m.addmatch_type = nil
+	m.clearedFields[coregatewayhttproute.FieldMatchType] = struct{}{}
+}
+
+// MatchTypeCleared returns if the "match_type" field was cleared in this mutation.
+func (m *CoreGatewayHttpRouteMutation) MatchTypeCleared() bool {
+	_, ok := m.clearedFields[coregatewayhttproute.FieldMatchType]
+	return ok
+}
+
+// ResetMatchType resets all changes to the "match_type" field.
+func (m *CoreGatewayHttpRouteMutation) ResetMatchType() {
+	m.match_type = nil
+	m.addmatch_type = nil
+	delete(m.clearedFields, coregatewayhttproute.FieldMatchType)
+}
+
+// SetMatchPattern sets the "match_pattern" field.
+func (m *CoreGatewayHttpRouteMutation) SetMatchPattern(s string) {
+	m.match_pattern = &s
+}
+
+// MatchPattern returns the value of the "match_pattern" field in the mutation.
+func (m *CoreGatewayHttpRouteMutation) MatchPattern() (r string, exists bool) {
+	v := m.match_pattern
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMatchPattern returns the old "match_pattern" field's value of the CoreGatewayHttpRoute entity.
+// If the CoreGatewayHttpRoute object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayHttpRouteMutation) OldMatchPattern(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMatchPattern is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMatchPattern requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMatchPattern: %w", err)
+	}
+	return oldValue.MatchPattern, nil
+}
+
+// ClearMatchPattern clears the value of the "match_pattern" field.
+func (m *CoreGatewayHttpRouteMutation) ClearMatchPattern() {
+	m.match_pattern = nil
+	m.clearedFields[coregatewayhttproute.FieldMatchPattern] = struct{}{}
+}
+
+// MatchPatternCleared returns if the "match_pattern" field was cleared in this mutation.
+func (m *CoreGatewayHttpRouteMutation) MatchPatternCleared() bool {
+	_, ok := m.clearedFields[coregatewayhttproute.FieldMatchPattern]
+	return ok
+}
+
+// ResetMatchPattern resets all changes to the "match_pattern" field.
+func (m *CoreGatewayHttpRouteMutation) ResetMatchPattern() {
+	m.match_pattern = nil
+	delete(m.clearedFields, coregatewayhttproute.FieldMatchPattern)
+}
+
+// SetTimeoutMs sets the "timeout_ms" field.
+func (m *CoreGatewayHttpRouteMutation) SetTimeoutMs(i int) {
+	m.timeout_ms = &i
+	m.addtimeout_ms = nil
+}
+
+// TimeoutMs returns the value of the "timeout_ms" field in the mutation.
+func (m *CoreGatewayHttpRouteMutation) TimeoutMs() (r int, exists bool) {
+	v := m.timeout_ms
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTimeoutMs returns the old "timeout_ms" field's value of the CoreGatewayHttpRoute entity.
+// If the CoreGatewayHttpRoute object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayHttpRouteMutation) OldTimeoutMs(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTimeoutMs is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTimeoutMs requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTimeoutMs: %w", err)
+	}
+	return oldValue.TimeoutMs, nil
+}
+
+// AddTimeoutMs adds i to the "timeout_ms" field.
+func (m *CoreGatewayHttpRouteMutation) AddTimeoutMs(i int) {
+	if m.addtimeout_ms != nil {
+		*m.addtimeout_ms += i
+	} else {
+		m.addtimeout_ms = &i
+	}
+}
+
+// AddedTimeoutMs returns the value that was added to the "timeout_ms" field in this mutation.
+func (m *CoreGatewayHttpRouteMutation) AddedTimeoutMs() (r int, exists bool) {
+	v := m.addtimeout_ms
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearTimeoutMs clears the value of the "timeout_ms" field.
+func (m *CoreGatewayHttpRouteMutation) ClearTimeoutMs() {
+	m.timeout_ms = nil
+	m.addtimeout_ms = nil
+	m.clearedFields[coregatewayhttproute.FieldTimeoutMs] = struct{}{}
+}
+
+// TimeoutMsCleared returns if the "timeout_ms" field was cleared in this mutation.
+func (m *CoreGatewayHttpRouteMutation) TimeoutMsCleared() bool {
+	_, ok := m.clearedFields[coregatewayhttproute.FieldTimeoutMs]
+	return ok
+}
+
+// ResetTimeoutMs resets all changes to the "timeout_ms" field.
+func (m *CoreGatewayHttpRouteMutation) ResetTimeoutMs() {
+	m.timeout_ms = nil
+	m.addtimeout_ms = nil
+	delete(m.clearedFields, coregatewayhttproute.FieldTimeoutMs)
+}
+
+// SetEnablePathRewrite sets the "enable_path_rewrite" field.
+func (m *CoreGatewayHttpRouteMutation) SetEnablePathRewrite(con constant.YesOrNo) {
+	m.enable_path_rewrite = &con
+	m.addenable_path_rewrite = nil
+}
+
+// EnablePathRewrite returns the value of the "enable_path_rewrite" field in the mutation.
+func (m *CoreGatewayHttpRouteMutation) EnablePathRewrite() (r constant.YesOrNo, exists bool) {
+	v := m.enable_path_rewrite
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEnablePathRewrite returns the old "enable_path_rewrite" field's value of the CoreGatewayHttpRoute entity.
+// If the CoreGatewayHttpRoute object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayHttpRouteMutation) OldEnablePathRewrite(ctx context.Context) (v constant.YesOrNo, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEnablePathRewrite is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEnablePathRewrite requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEnablePathRewrite: %w", err)
+	}
+	return oldValue.EnablePathRewrite, nil
+}
+
+// AddEnablePathRewrite adds con to the "enable_path_rewrite" field.
+func (m *CoreGatewayHttpRouteMutation) AddEnablePathRewrite(con constant.YesOrNo) {
+	if m.addenable_path_rewrite != nil {
+		*m.addenable_path_rewrite += con
+	} else {
+		m.addenable_path_rewrite = &con
+	}
+}
+
+// AddedEnablePathRewrite returns the value that was added to the "enable_path_rewrite" field in this mutation.
+func (m *CoreGatewayHttpRouteMutation) AddedEnablePathRewrite() (r constant.YesOrNo, exists bool) {
+	v := m.addenable_path_rewrite
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearEnablePathRewrite clears the value of the "enable_path_rewrite" field.
+func (m *CoreGatewayHttpRouteMutation) ClearEnablePathRewrite() {
+	m.enable_path_rewrite = nil
+	m.addenable_path_rewrite = nil
+	m.clearedFields[coregatewayhttproute.FieldEnablePathRewrite] = struct{}{}
+}
+
+// EnablePathRewriteCleared returns if the "enable_path_rewrite" field was cleared in this mutation.
+func (m *CoreGatewayHttpRouteMutation) EnablePathRewriteCleared() bool {
+	_, ok := m.clearedFields[coregatewayhttproute.FieldEnablePathRewrite]
+	return ok
+}
+
+// ResetEnablePathRewrite resets all changes to the "enable_path_rewrite" field.
+func (m *CoreGatewayHttpRouteMutation) ResetEnablePathRewrite() {
+	m.enable_path_rewrite = nil
+	m.addenable_path_rewrite = nil
+	delete(m.clearedFields, coregatewayhttproute.FieldEnablePathRewrite)
+}
+
+// SetPathRewrite sets the "path_rewrite" field.
+func (m *CoreGatewayHttpRouteMutation) SetPathRewrite(s string) {
+	m.path_rewrite = &s
+}
+
+// PathRewrite returns the value of the "path_rewrite" field in the mutation.
+func (m *CoreGatewayHttpRouteMutation) PathRewrite() (r string, exists bool) {
+	v := m.path_rewrite
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPathRewrite returns the old "path_rewrite" field's value of the CoreGatewayHttpRoute entity.
+// If the CoreGatewayHttpRoute object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayHttpRouteMutation) OldPathRewrite(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPathRewrite is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPathRewrite requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPathRewrite: %w", err)
+	}
+	return oldValue.PathRewrite, nil
+}
+
+// ClearPathRewrite clears the value of the "path_rewrite" field.
+func (m *CoreGatewayHttpRouteMutation) ClearPathRewrite() {
+	m.path_rewrite = nil
+	m.clearedFields[coregatewayhttproute.FieldPathRewrite] = struct{}{}
+}
+
+// PathRewriteCleared returns if the "path_rewrite" field was cleared in this mutation.
+func (m *CoreGatewayHttpRouteMutation) PathRewriteCleared() bool {
+	_, ok := m.clearedFields[coregatewayhttproute.FieldPathRewrite]
+	return ok
+}
+
+// ResetPathRewrite resets all changes to the "path_rewrite" field.
+func (m *CoreGatewayHttpRouteMutation) ResetPathRewrite() {
+	m.path_rewrite = nil
+	delete(m.clearedFields, coregatewayhttproute.FieldPathRewrite)
+}
+
+// SetEnableRedirect sets the "enable_redirect" field.
+func (m *CoreGatewayHttpRouteMutation) SetEnableRedirect(con constant.YesOrNo) {
+	m.enable_redirect = &con
+	m.addenable_redirect = nil
+}
+
+// EnableRedirect returns the value of the "enable_redirect" field in the mutation.
+func (m *CoreGatewayHttpRouteMutation) EnableRedirect() (r constant.YesOrNo, exists bool) {
+	v := m.enable_redirect
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEnableRedirect returns the old "enable_redirect" field's value of the CoreGatewayHttpRoute entity.
+// If the CoreGatewayHttpRoute object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayHttpRouteMutation) OldEnableRedirect(ctx context.Context) (v constant.YesOrNo, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEnableRedirect is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEnableRedirect requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEnableRedirect: %w", err)
+	}
+	return oldValue.EnableRedirect, nil
+}
+
+// AddEnableRedirect adds con to the "enable_redirect" field.
+func (m *CoreGatewayHttpRouteMutation) AddEnableRedirect(con constant.YesOrNo) {
+	if m.addenable_redirect != nil {
+		*m.addenable_redirect += con
+	} else {
+		m.addenable_redirect = &con
+	}
+}
+
+// AddedEnableRedirect returns the value that was added to the "enable_redirect" field in this mutation.
+func (m *CoreGatewayHttpRouteMutation) AddedEnableRedirect() (r constant.YesOrNo, exists bool) {
+	v := m.addenable_redirect
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearEnableRedirect clears the value of the "enable_redirect" field.
+func (m *CoreGatewayHttpRouteMutation) ClearEnableRedirect() {
+	m.enable_redirect = nil
+	m.addenable_redirect = nil
+	m.clearedFields[coregatewayhttproute.FieldEnableRedirect] = struct{}{}
+}
+
+// EnableRedirectCleared returns if the "enable_redirect" field was cleared in this mutation.
+func (m *CoreGatewayHttpRouteMutation) EnableRedirectCleared() bool {
+	_, ok := m.clearedFields[coregatewayhttproute.FieldEnableRedirect]
+	return ok
+}
+
+// ResetEnableRedirect resets all changes to the "enable_redirect" field.
+func (m *CoreGatewayHttpRouteMutation) ResetEnableRedirect() {
+	m.enable_redirect = nil
+	m.addenable_redirect = nil
+	delete(m.clearedFields, coregatewayhttproute.FieldEnableRedirect)
+}
+
+// SetRedirectURL sets the "redirect_url" field.
+func (m *CoreGatewayHttpRouteMutation) SetRedirectURL(s string) {
+	m.redirect_url = &s
+}
+
+// RedirectURL returns the value of the "redirect_url" field in the mutation.
+func (m *CoreGatewayHttpRouteMutation) RedirectURL() (r string, exists bool) {
+	v := m.redirect_url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRedirectURL returns the old "redirect_url" field's value of the CoreGatewayHttpRoute entity.
+// If the CoreGatewayHttpRoute object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayHttpRouteMutation) OldRedirectURL(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRedirectURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRedirectURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRedirectURL: %w", err)
+	}
+	return oldValue.RedirectURL, nil
+}
+
+// ClearRedirectURL clears the value of the "redirect_url" field.
+func (m *CoreGatewayHttpRouteMutation) ClearRedirectURL() {
+	m.redirect_url = nil
+	m.clearedFields[coregatewayhttproute.FieldRedirectURL] = struct{}{}
+}
+
+// RedirectURLCleared returns if the "redirect_url" field was cleared in this mutation.
+func (m *CoreGatewayHttpRouteMutation) RedirectURLCleared() bool {
+	_, ok := m.clearedFields[coregatewayhttproute.FieldRedirectURL]
+	return ok
+}
+
+// ResetRedirectURL resets all changes to the "redirect_url" field.
+func (m *CoreGatewayHttpRouteMutation) ResetRedirectURL() {
+	m.redirect_url = nil
+	delete(m.clearedFields, coregatewayhttproute.FieldRedirectURL)
+}
+
+// SetRedirectCode sets the "redirect_code" field.
+func (m *CoreGatewayHttpRouteMutation) SetRedirectCode(i int) {
+	m.redirect_code = &i
+	m.addredirect_code = nil
+}
+
+// RedirectCode returns the value of the "redirect_code" field in the mutation.
+func (m *CoreGatewayHttpRouteMutation) RedirectCode() (r int, exists bool) {
+	v := m.redirect_code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRedirectCode returns the old "redirect_code" field's value of the CoreGatewayHttpRoute entity.
+// If the CoreGatewayHttpRoute object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayHttpRouteMutation) OldRedirectCode(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRedirectCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRedirectCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRedirectCode: %w", err)
+	}
+	return oldValue.RedirectCode, nil
+}
+
+// AddRedirectCode adds i to the "redirect_code" field.
+func (m *CoreGatewayHttpRouteMutation) AddRedirectCode(i int) {
+	if m.addredirect_code != nil {
+		*m.addredirect_code += i
+	} else {
+		m.addredirect_code = &i
+	}
+}
+
+// AddedRedirectCode returns the value that was added to the "redirect_code" field in this mutation.
+func (m *CoreGatewayHttpRouteMutation) AddedRedirectCode() (r int, exists bool) {
+	v := m.addredirect_code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearRedirectCode clears the value of the "redirect_code" field.
+func (m *CoreGatewayHttpRouteMutation) ClearRedirectCode() {
+	m.redirect_code = nil
+	m.addredirect_code = nil
+	m.clearedFields[coregatewayhttproute.FieldRedirectCode] = struct{}{}
+}
+
+// RedirectCodeCleared returns if the "redirect_code" field was cleared in this mutation.
+func (m *CoreGatewayHttpRouteMutation) RedirectCodeCleared() bool {
+	_, ok := m.clearedFields[coregatewayhttproute.FieldRedirectCode]
+	return ok
+}
+
+// ResetRedirectCode resets all changes to the "redirect_code" field.
+func (m *CoreGatewayHttpRouteMutation) ResetRedirectCode() {
+	m.redirect_code = nil
+	m.addredirect_code = nil
+	delete(m.clearedFields, coregatewayhttproute.FieldRedirectCode)
+}
+
+// SetStatus sets the "status" field.
+func (m *CoreGatewayHttpRouteMutation) SetStatus(con constant.YesOrNo) {
+	m.status = &con
+	m.addstatus = nil
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *CoreGatewayHttpRouteMutation) Status() (r constant.YesOrNo, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the CoreGatewayHttpRoute entity.
+// If the CoreGatewayHttpRoute object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayHttpRouteMutation) OldStatus(ctx context.Context) (v constant.YesOrNo, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// AddStatus adds con to the "status" field.
+func (m *CoreGatewayHttpRouteMutation) AddStatus(con constant.YesOrNo) {
+	if m.addstatus != nil {
+		*m.addstatus += con
+	} else {
+		m.addstatus = &con
+	}
+}
+
+// AddedStatus returns the value that was added to the "status" field in this mutation.
+func (m *CoreGatewayHttpRouteMutation) AddedStatus() (r constant.YesOrNo, exists bool) {
+	v := m.addstatus
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearStatus clears the value of the "status" field.
+func (m *CoreGatewayHttpRouteMutation) ClearStatus() {
+	m.status = nil
+	m.addstatus = nil
+	m.clearedFields[coregatewayhttproute.FieldStatus] = struct{}{}
+}
+
+// StatusCleared returns if the "status" field was cleared in this mutation.
+func (m *CoreGatewayHttpRouteMutation) StatusCleared() bool {
+	_, ok := m.clearedFields[coregatewayhttproute.FieldStatus]
+	return ok
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *CoreGatewayHttpRouteMutation) ResetStatus() {
+	m.status = nil
+	m.addstatus = nil
+	delete(m.clearedFields, coregatewayhttproute.FieldStatus)
+}
+
+// Where appends a list predicates to the CoreGatewayHttpRouteMutation builder.
+func (m *CoreGatewayHttpRouteMutation) Where(ps ...predicate.CoreGatewayHttpRoute) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CoreGatewayHttpRouteMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CoreGatewayHttpRouteMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CoreGatewayHttpRoute, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CoreGatewayHttpRouteMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CoreGatewayHttpRouteMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CoreGatewayHttpRoute).
+func (m *CoreGatewayHttpRouteMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CoreGatewayHttpRouteMutation) Fields() []string {
+	fields := make([]string, 0, 14)
+	if m.created_at != nil {
+		fields = append(fields, coregatewayhttproute.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, coregatewayhttproute.FieldUpdatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, coregatewayhttproute.FieldDeletedAt)
+	}
+	if m.name != nil {
+		fields = append(fields, coregatewayhttproute.FieldName)
+	}
+	if m.description != nil {
+		fields = append(fields, coregatewayhttproute.FieldDescription)
+	}
+	if m.match_type != nil {
+		fields = append(fields, coregatewayhttproute.FieldMatchType)
+	}
+	if m.match_pattern != nil {
+		fields = append(fields, coregatewayhttproute.FieldMatchPattern)
+	}
+	if m.timeout_ms != nil {
+		fields = append(fields, coregatewayhttproute.FieldTimeoutMs)
+	}
+	if m.enable_path_rewrite != nil {
+		fields = append(fields, coregatewayhttproute.FieldEnablePathRewrite)
+	}
+	if m.path_rewrite != nil {
+		fields = append(fields, coregatewayhttproute.FieldPathRewrite)
+	}
+	if m.enable_redirect != nil {
+		fields = append(fields, coregatewayhttproute.FieldEnableRedirect)
+	}
+	if m.redirect_url != nil {
+		fields = append(fields, coregatewayhttproute.FieldRedirectURL)
+	}
+	if m.redirect_code != nil {
+		fields = append(fields, coregatewayhttproute.FieldRedirectCode)
+	}
+	if m.status != nil {
+		fields = append(fields, coregatewayhttproute.FieldStatus)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CoreGatewayHttpRouteMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case coregatewayhttproute.FieldCreatedAt:
+		return m.CreatedAt()
+	case coregatewayhttproute.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case coregatewayhttproute.FieldDeletedAt:
+		return m.DeletedAt()
+	case coregatewayhttproute.FieldName:
+		return m.Name()
+	case coregatewayhttproute.FieldDescription:
+		return m.Description()
+	case coregatewayhttproute.FieldMatchType:
+		return m.MatchType()
+	case coregatewayhttproute.FieldMatchPattern:
+		return m.MatchPattern()
+	case coregatewayhttproute.FieldTimeoutMs:
+		return m.TimeoutMs()
+	case coregatewayhttproute.FieldEnablePathRewrite:
+		return m.EnablePathRewrite()
+	case coregatewayhttproute.FieldPathRewrite:
+		return m.PathRewrite()
+	case coregatewayhttproute.FieldEnableRedirect:
+		return m.EnableRedirect()
+	case coregatewayhttproute.FieldRedirectURL:
+		return m.RedirectURL()
+	case coregatewayhttproute.FieldRedirectCode:
+		return m.RedirectCode()
+	case coregatewayhttproute.FieldStatus:
+		return m.Status()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CoreGatewayHttpRouteMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case coregatewayhttproute.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case coregatewayhttproute.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case coregatewayhttproute.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
+	case coregatewayhttproute.FieldName:
+		return m.OldName(ctx)
+	case coregatewayhttproute.FieldDescription:
+		return m.OldDescription(ctx)
+	case coregatewayhttproute.FieldMatchType:
+		return m.OldMatchType(ctx)
+	case coregatewayhttproute.FieldMatchPattern:
+		return m.OldMatchPattern(ctx)
+	case coregatewayhttproute.FieldTimeoutMs:
+		return m.OldTimeoutMs(ctx)
+	case coregatewayhttproute.FieldEnablePathRewrite:
+		return m.OldEnablePathRewrite(ctx)
+	case coregatewayhttproute.FieldPathRewrite:
+		return m.OldPathRewrite(ctx)
+	case coregatewayhttproute.FieldEnableRedirect:
+		return m.OldEnableRedirect(ctx)
+	case coregatewayhttproute.FieldRedirectURL:
+		return m.OldRedirectURL(ctx)
+	case coregatewayhttproute.FieldRedirectCode:
+		return m.OldRedirectCode(ctx)
+	case coregatewayhttproute.FieldStatus:
+		return m.OldStatus(ctx)
+	}
+	return nil, fmt.Errorf("unknown CoreGatewayHttpRoute field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoreGatewayHttpRouteMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case coregatewayhttproute.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case coregatewayhttproute.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case coregatewayhttproute.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
+	case coregatewayhttproute.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case coregatewayhttproute.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case coregatewayhttproute.FieldMatchType:
+		v, ok := value.(constant.ProxyHttpRouteMatchType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMatchType(v)
+		return nil
+	case coregatewayhttproute.FieldMatchPattern:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMatchPattern(v)
+		return nil
+	case coregatewayhttproute.FieldTimeoutMs:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTimeoutMs(v)
+		return nil
+	case coregatewayhttproute.FieldEnablePathRewrite:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEnablePathRewrite(v)
+		return nil
+	case coregatewayhttproute.FieldPathRewrite:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPathRewrite(v)
+		return nil
+	case coregatewayhttproute.FieldEnableRedirect:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEnableRedirect(v)
+		return nil
+	case coregatewayhttproute.FieldRedirectURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRedirectURL(v)
+		return nil
+	case coregatewayhttproute.FieldRedirectCode:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRedirectCode(v)
+		return nil
+	case coregatewayhttproute.FieldStatus:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CoreGatewayHttpRoute field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CoreGatewayHttpRouteMutation) AddedFields() []string {
+	var fields []string
+	if m.addmatch_type != nil {
+		fields = append(fields, coregatewayhttproute.FieldMatchType)
+	}
+	if m.addtimeout_ms != nil {
+		fields = append(fields, coregatewayhttproute.FieldTimeoutMs)
+	}
+	if m.addenable_path_rewrite != nil {
+		fields = append(fields, coregatewayhttproute.FieldEnablePathRewrite)
+	}
+	if m.addenable_redirect != nil {
+		fields = append(fields, coregatewayhttproute.FieldEnableRedirect)
+	}
+	if m.addredirect_code != nil {
+		fields = append(fields, coregatewayhttproute.FieldRedirectCode)
+	}
+	if m.addstatus != nil {
+		fields = append(fields, coregatewayhttproute.FieldStatus)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CoreGatewayHttpRouteMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case coregatewayhttproute.FieldMatchType:
+		return m.AddedMatchType()
+	case coregatewayhttproute.FieldTimeoutMs:
+		return m.AddedTimeoutMs()
+	case coregatewayhttproute.FieldEnablePathRewrite:
+		return m.AddedEnablePathRewrite()
+	case coregatewayhttproute.FieldEnableRedirect:
+		return m.AddedEnableRedirect()
+	case coregatewayhttproute.FieldRedirectCode:
+		return m.AddedRedirectCode()
+	case coregatewayhttproute.FieldStatus:
+		return m.AddedStatus()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoreGatewayHttpRouteMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case coregatewayhttproute.FieldMatchType:
+		v, ok := value.(constant.ProxyHttpRouteMatchType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMatchType(v)
+		return nil
+	case coregatewayhttproute.FieldTimeoutMs:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTimeoutMs(v)
+		return nil
+	case coregatewayhttproute.FieldEnablePathRewrite:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddEnablePathRewrite(v)
+		return nil
+	case coregatewayhttproute.FieldEnableRedirect:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddEnableRedirect(v)
+		return nil
+	case coregatewayhttproute.FieldRedirectCode:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRedirectCode(v)
+		return nil
+	case coregatewayhttproute.FieldStatus:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStatus(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CoreGatewayHttpRoute numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CoreGatewayHttpRouteMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(coregatewayhttproute.FieldDeletedAt) {
+		fields = append(fields, coregatewayhttproute.FieldDeletedAt)
+	}
+	if m.FieldCleared(coregatewayhttproute.FieldName) {
+		fields = append(fields, coregatewayhttproute.FieldName)
+	}
+	if m.FieldCleared(coregatewayhttproute.FieldDescription) {
+		fields = append(fields, coregatewayhttproute.FieldDescription)
+	}
+	if m.FieldCleared(coregatewayhttproute.FieldMatchType) {
+		fields = append(fields, coregatewayhttproute.FieldMatchType)
+	}
+	if m.FieldCleared(coregatewayhttproute.FieldMatchPattern) {
+		fields = append(fields, coregatewayhttproute.FieldMatchPattern)
+	}
+	if m.FieldCleared(coregatewayhttproute.FieldTimeoutMs) {
+		fields = append(fields, coregatewayhttproute.FieldTimeoutMs)
+	}
+	if m.FieldCleared(coregatewayhttproute.FieldEnablePathRewrite) {
+		fields = append(fields, coregatewayhttproute.FieldEnablePathRewrite)
+	}
+	if m.FieldCleared(coregatewayhttproute.FieldPathRewrite) {
+		fields = append(fields, coregatewayhttproute.FieldPathRewrite)
+	}
+	if m.FieldCleared(coregatewayhttproute.FieldEnableRedirect) {
+		fields = append(fields, coregatewayhttproute.FieldEnableRedirect)
+	}
+	if m.FieldCleared(coregatewayhttproute.FieldRedirectURL) {
+		fields = append(fields, coregatewayhttproute.FieldRedirectURL)
+	}
+	if m.FieldCleared(coregatewayhttproute.FieldRedirectCode) {
+		fields = append(fields, coregatewayhttproute.FieldRedirectCode)
+	}
+	if m.FieldCleared(coregatewayhttproute.FieldStatus) {
+		fields = append(fields, coregatewayhttproute.FieldStatus)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CoreGatewayHttpRouteMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CoreGatewayHttpRouteMutation) ClearField(name string) error {
+	switch name {
+	case coregatewayhttproute.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	case coregatewayhttproute.FieldName:
+		m.ClearName()
+		return nil
+	case coregatewayhttproute.FieldDescription:
+		m.ClearDescription()
+		return nil
+	case coregatewayhttproute.FieldMatchType:
+		m.ClearMatchType()
+		return nil
+	case coregatewayhttproute.FieldMatchPattern:
+		m.ClearMatchPattern()
+		return nil
+	case coregatewayhttproute.FieldTimeoutMs:
+		m.ClearTimeoutMs()
+		return nil
+	case coregatewayhttproute.FieldEnablePathRewrite:
+		m.ClearEnablePathRewrite()
+		return nil
+	case coregatewayhttproute.FieldPathRewrite:
+		m.ClearPathRewrite()
+		return nil
+	case coregatewayhttproute.FieldEnableRedirect:
+		m.ClearEnableRedirect()
+		return nil
+	case coregatewayhttproute.FieldRedirectURL:
+		m.ClearRedirectURL()
+		return nil
+	case coregatewayhttproute.FieldRedirectCode:
+		m.ClearRedirectCode()
+		return nil
+	case coregatewayhttproute.FieldStatus:
+		m.ClearStatus()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreGatewayHttpRoute nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CoreGatewayHttpRouteMutation) ResetField(name string) error {
+	switch name {
+	case coregatewayhttproute.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case coregatewayhttproute.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case coregatewayhttproute.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
+	case coregatewayhttproute.FieldName:
+		m.ResetName()
+		return nil
+	case coregatewayhttproute.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case coregatewayhttproute.FieldMatchType:
+		m.ResetMatchType()
+		return nil
+	case coregatewayhttproute.FieldMatchPattern:
+		m.ResetMatchPattern()
+		return nil
+	case coregatewayhttproute.FieldTimeoutMs:
+		m.ResetTimeoutMs()
+		return nil
+	case coregatewayhttproute.FieldEnablePathRewrite:
+		m.ResetEnablePathRewrite()
+		return nil
+	case coregatewayhttproute.FieldPathRewrite:
+		m.ResetPathRewrite()
+		return nil
+	case coregatewayhttproute.FieldEnableRedirect:
+		m.ResetEnableRedirect()
+		return nil
+	case coregatewayhttproute.FieldRedirectURL:
+		m.ResetRedirectURL()
+		return nil
+	case coregatewayhttproute.FieldRedirectCode:
+		m.ResetRedirectCode()
+		return nil
+	case coregatewayhttproute.FieldStatus:
+		m.ResetStatus()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreGatewayHttpRoute field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CoreGatewayHttpRouteMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CoreGatewayHttpRouteMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CoreGatewayHttpRouteMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CoreGatewayHttpRouteMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CoreGatewayHttpRouteMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CoreGatewayHttpRouteMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CoreGatewayHttpRouteMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown CoreGatewayHttpRoute unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CoreGatewayHttpRouteMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown CoreGatewayHttpRoute edge %s", name)
+}
+
+// CoreGatewayL4ListenerMutation represents an operation that mutates the CoreGatewayL4Listener nodes in the graph.
+type CoreGatewayL4ListenerMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *string
+	created_at    *time.Time
+	updated_at    *time.Time
+	deleted_at    *time.Time
+	name          *string
+	description   *string
+	port          *uint16
+	addport       *int16
+	host          *string
+	protocol      *constant.ProxyProtocolType
+	addprotocol   *constant.ProxyProtocolType
+	status        *constant.YesOrNo
+	addstatus     *constant.YesOrNo
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*CoreGatewayL4Listener, error)
+	predicates    []predicate.CoreGatewayL4Listener
+}
+
+var _ ent.Mutation = (*CoreGatewayL4ListenerMutation)(nil)
+
+// coregatewayl4listenerOption allows management of the mutation configuration using functional options.
+type coregatewayl4listenerOption func(*CoreGatewayL4ListenerMutation)
+
+// newCoreGatewayL4ListenerMutation creates new mutation for the CoreGatewayL4Listener entity.
+func newCoreGatewayL4ListenerMutation(c config, op Op, opts ...coregatewayl4listenerOption) *CoreGatewayL4ListenerMutation {
+	m := &CoreGatewayL4ListenerMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCoreGatewayL4Listener,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCoreGatewayL4ListenerID sets the ID field of the mutation.
+func withCoreGatewayL4ListenerID(id string) coregatewayl4listenerOption {
+	return func(m *CoreGatewayL4ListenerMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CoreGatewayL4Listener
+		)
+		m.oldValue = func(ctx context.Context) (*CoreGatewayL4Listener, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CoreGatewayL4Listener.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCoreGatewayL4Listener sets the old CoreGatewayL4Listener of the mutation.
+func withCoreGatewayL4Listener(node *CoreGatewayL4Listener) coregatewayl4listenerOption {
+	return func(m *CoreGatewayL4ListenerMutation) {
+		m.oldValue = func(context.Context) (*CoreGatewayL4Listener, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CoreGatewayL4ListenerMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CoreGatewayL4ListenerMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of CoreGatewayL4Listener entities.
+func (m *CoreGatewayL4ListenerMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CoreGatewayL4ListenerMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CoreGatewayL4ListenerMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CoreGatewayL4Listener.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *CoreGatewayL4ListenerMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *CoreGatewayL4ListenerMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the CoreGatewayL4Listener entity.
+// If the CoreGatewayL4Listener object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayL4ListenerMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *CoreGatewayL4ListenerMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *CoreGatewayL4ListenerMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *CoreGatewayL4ListenerMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the CoreGatewayL4Listener entity.
+// If the CoreGatewayL4Listener object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayL4ListenerMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *CoreGatewayL4ListenerMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *CoreGatewayL4ListenerMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *CoreGatewayL4ListenerMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the CoreGatewayL4Listener entity.
+// If the CoreGatewayL4Listener object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayL4ListenerMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *CoreGatewayL4ListenerMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[coregatewayl4listener.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *CoreGatewayL4ListenerMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[coregatewayl4listener.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *CoreGatewayL4ListenerMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, coregatewayl4listener.FieldDeletedAt)
+}
+
+// SetName sets the "name" field.
+func (m *CoreGatewayL4ListenerMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *CoreGatewayL4ListenerMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the CoreGatewayL4Listener entity.
+// If the CoreGatewayL4Listener object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayL4ListenerMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ClearName clears the value of the "name" field.
+func (m *CoreGatewayL4ListenerMutation) ClearName() {
+	m.name = nil
+	m.clearedFields[coregatewayl4listener.FieldName] = struct{}{}
+}
+
+// NameCleared returns if the "name" field was cleared in this mutation.
+func (m *CoreGatewayL4ListenerMutation) NameCleared() bool {
+	_, ok := m.clearedFields[coregatewayl4listener.FieldName]
+	return ok
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *CoreGatewayL4ListenerMutation) ResetName() {
+	m.name = nil
+	delete(m.clearedFields, coregatewayl4listener.FieldName)
+}
+
+// SetDescription sets the "description" field.
+func (m *CoreGatewayL4ListenerMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *CoreGatewayL4ListenerMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the CoreGatewayL4Listener entity.
+// If the CoreGatewayL4Listener object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayL4ListenerMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ClearDescription clears the value of the "description" field.
+func (m *CoreGatewayL4ListenerMutation) ClearDescription() {
+	m.description = nil
+	m.clearedFields[coregatewayl4listener.FieldDescription] = struct{}{}
+}
+
+// DescriptionCleared returns if the "description" field was cleared in this mutation.
+func (m *CoreGatewayL4ListenerMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[coregatewayl4listener.FieldDescription]
+	return ok
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *CoreGatewayL4ListenerMutation) ResetDescription() {
+	m.description = nil
+	delete(m.clearedFields, coregatewayl4listener.FieldDescription)
+}
+
+// SetPort sets the "port" field.
+func (m *CoreGatewayL4ListenerMutation) SetPort(u uint16) {
+	m.port = &u
+	m.addport = nil
+}
+
+// Port returns the value of the "port" field in the mutation.
+func (m *CoreGatewayL4ListenerMutation) Port() (r uint16, exists bool) {
+	v := m.port
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPort returns the old "port" field's value of the CoreGatewayL4Listener entity.
+// If the CoreGatewayL4Listener object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayL4ListenerMutation) OldPort(ctx context.Context) (v uint16, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPort is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPort requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPort: %w", err)
+	}
+	return oldValue.Port, nil
+}
+
+// AddPort adds u to the "port" field.
+func (m *CoreGatewayL4ListenerMutation) AddPort(u int16) {
+	if m.addport != nil {
+		*m.addport += u
+	} else {
+		m.addport = &u
+	}
+}
+
+// AddedPort returns the value that was added to the "port" field in this mutation.
+func (m *CoreGatewayL4ListenerMutation) AddedPort() (r int16, exists bool) {
+	v := m.addport
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearPort clears the value of the "port" field.
+func (m *CoreGatewayL4ListenerMutation) ClearPort() {
+	m.port = nil
+	m.addport = nil
+	m.clearedFields[coregatewayl4listener.FieldPort] = struct{}{}
+}
+
+// PortCleared returns if the "port" field was cleared in this mutation.
+func (m *CoreGatewayL4ListenerMutation) PortCleared() bool {
+	_, ok := m.clearedFields[coregatewayl4listener.FieldPort]
+	return ok
+}
+
+// ResetPort resets all changes to the "port" field.
+func (m *CoreGatewayL4ListenerMutation) ResetPort() {
+	m.port = nil
+	m.addport = nil
+	delete(m.clearedFields, coregatewayl4listener.FieldPort)
+}
+
+// SetHost sets the "host" field.
+func (m *CoreGatewayL4ListenerMutation) SetHost(s string) {
+	m.host = &s
+}
+
+// Host returns the value of the "host" field in the mutation.
+func (m *CoreGatewayL4ListenerMutation) Host() (r string, exists bool) {
+	v := m.host
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHost returns the old "host" field's value of the CoreGatewayL4Listener entity.
+// If the CoreGatewayL4Listener object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayL4ListenerMutation) OldHost(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHost is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHost requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHost: %w", err)
+	}
+	return oldValue.Host, nil
+}
+
+// ClearHost clears the value of the "host" field.
+func (m *CoreGatewayL4ListenerMutation) ClearHost() {
+	m.host = nil
+	m.clearedFields[coregatewayl4listener.FieldHost] = struct{}{}
+}
+
+// HostCleared returns if the "host" field was cleared in this mutation.
+func (m *CoreGatewayL4ListenerMutation) HostCleared() bool {
+	_, ok := m.clearedFields[coregatewayl4listener.FieldHost]
+	return ok
+}
+
+// ResetHost resets all changes to the "host" field.
+func (m *CoreGatewayL4ListenerMutation) ResetHost() {
+	m.host = nil
+	delete(m.clearedFields, coregatewayl4listener.FieldHost)
+}
+
+// SetProtocol sets the "protocol" field.
+func (m *CoreGatewayL4ListenerMutation) SetProtocol(cpt constant.ProxyProtocolType) {
+	m.protocol = &cpt
+	m.addprotocol = nil
+}
+
+// Protocol returns the value of the "protocol" field in the mutation.
+func (m *CoreGatewayL4ListenerMutation) Protocol() (r constant.ProxyProtocolType, exists bool) {
+	v := m.protocol
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProtocol returns the old "protocol" field's value of the CoreGatewayL4Listener entity.
+// If the CoreGatewayL4Listener object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayL4ListenerMutation) OldProtocol(ctx context.Context) (v constant.ProxyProtocolType, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProtocol is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProtocol requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProtocol: %w", err)
+	}
+	return oldValue.Protocol, nil
+}
+
+// AddProtocol adds cpt to the "protocol" field.
+func (m *CoreGatewayL4ListenerMutation) AddProtocol(cpt constant.ProxyProtocolType) {
+	if m.addprotocol != nil {
+		*m.addprotocol += cpt
+	} else {
+		m.addprotocol = &cpt
+	}
+}
+
+// AddedProtocol returns the value that was added to the "protocol" field in this mutation.
+func (m *CoreGatewayL4ListenerMutation) AddedProtocol() (r constant.ProxyProtocolType, exists bool) {
+	v := m.addprotocol
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearProtocol clears the value of the "protocol" field.
+func (m *CoreGatewayL4ListenerMutation) ClearProtocol() {
+	m.protocol = nil
+	m.addprotocol = nil
+	m.clearedFields[coregatewayl4listener.FieldProtocol] = struct{}{}
+}
+
+// ProtocolCleared returns if the "protocol" field was cleared in this mutation.
+func (m *CoreGatewayL4ListenerMutation) ProtocolCleared() bool {
+	_, ok := m.clearedFields[coregatewayl4listener.FieldProtocol]
+	return ok
+}
+
+// ResetProtocol resets all changes to the "protocol" field.
+func (m *CoreGatewayL4ListenerMutation) ResetProtocol() {
+	m.protocol = nil
+	m.addprotocol = nil
+	delete(m.clearedFields, coregatewayl4listener.FieldProtocol)
+}
+
+// SetStatus sets the "status" field.
+func (m *CoreGatewayL4ListenerMutation) SetStatus(con constant.YesOrNo) {
+	m.status = &con
+	m.addstatus = nil
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *CoreGatewayL4ListenerMutation) Status() (r constant.YesOrNo, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the CoreGatewayL4Listener entity.
+// If the CoreGatewayL4Listener object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayL4ListenerMutation) OldStatus(ctx context.Context) (v constant.YesOrNo, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// AddStatus adds con to the "status" field.
+func (m *CoreGatewayL4ListenerMutation) AddStatus(con constant.YesOrNo) {
+	if m.addstatus != nil {
+		*m.addstatus += con
+	} else {
+		m.addstatus = &con
+	}
+}
+
+// AddedStatus returns the value that was added to the "status" field in this mutation.
+func (m *CoreGatewayL4ListenerMutation) AddedStatus() (r constant.YesOrNo, exists bool) {
+	v := m.addstatus
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearStatus clears the value of the "status" field.
+func (m *CoreGatewayL4ListenerMutation) ClearStatus() {
+	m.status = nil
+	m.addstatus = nil
+	m.clearedFields[coregatewayl4listener.FieldStatus] = struct{}{}
+}
+
+// StatusCleared returns if the "status" field was cleared in this mutation.
+func (m *CoreGatewayL4ListenerMutation) StatusCleared() bool {
+	_, ok := m.clearedFields[coregatewayl4listener.FieldStatus]
+	return ok
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *CoreGatewayL4ListenerMutation) ResetStatus() {
+	m.status = nil
+	m.addstatus = nil
+	delete(m.clearedFields, coregatewayl4listener.FieldStatus)
+}
+
+// Where appends a list predicates to the CoreGatewayL4ListenerMutation builder.
+func (m *CoreGatewayL4ListenerMutation) Where(ps ...predicate.CoreGatewayL4Listener) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CoreGatewayL4ListenerMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CoreGatewayL4ListenerMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CoreGatewayL4Listener, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CoreGatewayL4ListenerMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CoreGatewayL4ListenerMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CoreGatewayL4Listener).
+func (m *CoreGatewayL4ListenerMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CoreGatewayL4ListenerMutation) Fields() []string {
+	fields := make([]string, 0, 9)
+	if m.created_at != nil {
+		fields = append(fields, coregatewayl4listener.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, coregatewayl4listener.FieldUpdatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, coregatewayl4listener.FieldDeletedAt)
+	}
+	if m.name != nil {
+		fields = append(fields, coregatewayl4listener.FieldName)
+	}
+	if m.description != nil {
+		fields = append(fields, coregatewayl4listener.FieldDescription)
+	}
+	if m.port != nil {
+		fields = append(fields, coregatewayl4listener.FieldPort)
+	}
+	if m.host != nil {
+		fields = append(fields, coregatewayl4listener.FieldHost)
+	}
+	if m.protocol != nil {
+		fields = append(fields, coregatewayl4listener.FieldProtocol)
+	}
+	if m.status != nil {
+		fields = append(fields, coregatewayl4listener.FieldStatus)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CoreGatewayL4ListenerMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case coregatewayl4listener.FieldCreatedAt:
+		return m.CreatedAt()
+	case coregatewayl4listener.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case coregatewayl4listener.FieldDeletedAt:
+		return m.DeletedAt()
+	case coregatewayl4listener.FieldName:
+		return m.Name()
+	case coregatewayl4listener.FieldDescription:
+		return m.Description()
+	case coregatewayl4listener.FieldPort:
+		return m.Port()
+	case coregatewayl4listener.FieldHost:
+		return m.Host()
+	case coregatewayl4listener.FieldProtocol:
+		return m.Protocol()
+	case coregatewayl4listener.FieldStatus:
+		return m.Status()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CoreGatewayL4ListenerMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case coregatewayl4listener.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case coregatewayl4listener.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case coregatewayl4listener.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
+	case coregatewayl4listener.FieldName:
+		return m.OldName(ctx)
+	case coregatewayl4listener.FieldDescription:
+		return m.OldDescription(ctx)
+	case coregatewayl4listener.FieldPort:
+		return m.OldPort(ctx)
+	case coregatewayl4listener.FieldHost:
+		return m.OldHost(ctx)
+	case coregatewayl4listener.FieldProtocol:
+		return m.OldProtocol(ctx)
+	case coregatewayl4listener.FieldStatus:
+		return m.OldStatus(ctx)
+	}
+	return nil, fmt.Errorf("unknown CoreGatewayL4Listener field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoreGatewayL4ListenerMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case coregatewayl4listener.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case coregatewayl4listener.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case coregatewayl4listener.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
+	case coregatewayl4listener.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case coregatewayl4listener.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case coregatewayl4listener.FieldPort:
+		v, ok := value.(uint16)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPort(v)
+		return nil
+	case coregatewayl4listener.FieldHost:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHost(v)
+		return nil
+	case coregatewayl4listener.FieldProtocol:
+		v, ok := value.(constant.ProxyProtocolType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProtocol(v)
+		return nil
+	case coregatewayl4listener.FieldStatus:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CoreGatewayL4Listener field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CoreGatewayL4ListenerMutation) AddedFields() []string {
+	var fields []string
+	if m.addport != nil {
+		fields = append(fields, coregatewayl4listener.FieldPort)
+	}
+	if m.addprotocol != nil {
+		fields = append(fields, coregatewayl4listener.FieldProtocol)
+	}
+	if m.addstatus != nil {
+		fields = append(fields, coregatewayl4listener.FieldStatus)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CoreGatewayL4ListenerMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case coregatewayl4listener.FieldPort:
+		return m.AddedPort()
+	case coregatewayl4listener.FieldProtocol:
+		return m.AddedProtocol()
+	case coregatewayl4listener.FieldStatus:
+		return m.AddedStatus()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoreGatewayL4ListenerMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case coregatewayl4listener.FieldPort:
+		v, ok := value.(int16)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPort(v)
+		return nil
+	case coregatewayl4listener.FieldProtocol:
+		v, ok := value.(constant.ProxyProtocolType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddProtocol(v)
+		return nil
+	case coregatewayl4listener.FieldStatus:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStatus(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CoreGatewayL4Listener numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CoreGatewayL4ListenerMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(coregatewayl4listener.FieldDeletedAt) {
+		fields = append(fields, coregatewayl4listener.FieldDeletedAt)
+	}
+	if m.FieldCleared(coregatewayl4listener.FieldName) {
+		fields = append(fields, coregatewayl4listener.FieldName)
+	}
+	if m.FieldCleared(coregatewayl4listener.FieldDescription) {
+		fields = append(fields, coregatewayl4listener.FieldDescription)
+	}
+	if m.FieldCleared(coregatewayl4listener.FieldPort) {
+		fields = append(fields, coregatewayl4listener.FieldPort)
+	}
+	if m.FieldCleared(coregatewayl4listener.FieldHost) {
+		fields = append(fields, coregatewayl4listener.FieldHost)
+	}
+	if m.FieldCleared(coregatewayl4listener.FieldProtocol) {
+		fields = append(fields, coregatewayl4listener.FieldProtocol)
+	}
+	if m.FieldCleared(coregatewayl4listener.FieldStatus) {
+		fields = append(fields, coregatewayl4listener.FieldStatus)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CoreGatewayL4ListenerMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CoreGatewayL4ListenerMutation) ClearField(name string) error {
+	switch name {
+	case coregatewayl4listener.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	case coregatewayl4listener.FieldName:
+		m.ClearName()
+		return nil
+	case coregatewayl4listener.FieldDescription:
+		m.ClearDescription()
+		return nil
+	case coregatewayl4listener.FieldPort:
+		m.ClearPort()
+		return nil
+	case coregatewayl4listener.FieldHost:
+		m.ClearHost()
+		return nil
+	case coregatewayl4listener.FieldProtocol:
+		m.ClearProtocol()
+		return nil
+	case coregatewayl4listener.FieldStatus:
+		m.ClearStatus()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreGatewayL4Listener nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CoreGatewayL4ListenerMutation) ResetField(name string) error {
+	switch name {
+	case coregatewayl4listener.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case coregatewayl4listener.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case coregatewayl4listener.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
+	case coregatewayl4listener.FieldName:
+		m.ResetName()
+		return nil
+	case coregatewayl4listener.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case coregatewayl4listener.FieldPort:
+		m.ResetPort()
+		return nil
+	case coregatewayl4listener.FieldHost:
+		m.ResetHost()
+		return nil
+	case coregatewayl4listener.FieldProtocol:
+		m.ResetProtocol()
+		return nil
+	case coregatewayl4listener.FieldStatus:
+		m.ResetStatus()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreGatewayL4Listener field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CoreGatewayL4ListenerMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CoreGatewayL4ListenerMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CoreGatewayL4ListenerMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CoreGatewayL4ListenerMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CoreGatewayL4ListenerMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CoreGatewayL4ListenerMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CoreGatewayL4ListenerMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown CoreGatewayL4Listener unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CoreGatewayL4ListenerMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown CoreGatewayL4Listener edge %s", name)
+}
+
+// CoreGatewayL7ListenerMutation represents an operation that mutates the CoreGatewayL7Listener nodes in the graph.
+type CoreGatewayL7ListenerMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *string
+	created_at    *time.Time
+	updated_at    *time.Time
+	deleted_at    *time.Time
+	name          *string
+	description   *string
+	port          *uint16
+	addport       *int16
+	host          *string
+	enable_tls    *constant.YesOrNo
+	addenable_tls *constant.YesOrNo
+	status        *constant.YesOrNo
+	addstatus     *constant.YesOrNo
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*CoreGatewayL7Listener, error)
+	predicates    []predicate.CoreGatewayL7Listener
+}
+
+var _ ent.Mutation = (*CoreGatewayL7ListenerMutation)(nil)
+
+// coregatewayl7listenerOption allows management of the mutation configuration using functional options.
+type coregatewayl7listenerOption func(*CoreGatewayL7ListenerMutation)
+
+// newCoreGatewayL7ListenerMutation creates new mutation for the CoreGatewayL7Listener entity.
+func newCoreGatewayL7ListenerMutation(c config, op Op, opts ...coregatewayl7listenerOption) *CoreGatewayL7ListenerMutation {
+	m := &CoreGatewayL7ListenerMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCoreGatewayL7Listener,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCoreGatewayL7ListenerID sets the ID field of the mutation.
+func withCoreGatewayL7ListenerID(id string) coregatewayl7listenerOption {
+	return func(m *CoreGatewayL7ListenerMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CoreGatewayL7Listener
+		)
+		m.oldValue = func(ctx context.Context) (*CoreGatewayL7Listener, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CoreGatewayL7Listener.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCoreGatewayL7Listener sets the old CoreGatewayL7Listener of the mutation.
+func withCoreGatewayL7Listener(node *CoreGatewayL7Listener) coregatewayl7listenerOption {
+	return func(m *CoreGatewayL7ListenerMutation) {
+		m.oldValue = func(context.Context) (*CoreGatewayL7Listener, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CoreGatewayL7ListenerMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CoreGatewayL7ListenerMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of CoreGatewayL7Listener entities.
+func (m *CoreGatewayL7ListenerMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CoreGatewayL7ListenerMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CoreGatewayL7ListenerMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CoreGatewayL7Listener.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *CoreGatewayL7ListenerMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *CoreGatewayL7ListenerMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the CoreGatewayL7Listener entity.
+// If the CoreGatewayL7Listener object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayL7ListenerMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *CoreGatewayL7ListenerMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *CoreGatewayL7ListenerMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *CoreGatewayL7ListenerMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the CoreGatewayL7Listener entity.
+// If the CoreGatewayL7Listener object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayL7ListenerMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *CoreGatewayL7ListenerMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *CoreGatewayL7ListenerMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *CoreGatewayL7ListenerMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the CoreGatewayL7Listener entity.
+// If the CoreGatewayL7Listener object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayL7ListenerMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *CoreGatewayL7ListenerMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[coregatewayl7listener.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *CoreGatewayL7ListenerMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[coregatewayl7listener.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *CoreGatewayL7ListenerMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, coregatewayl7listener.FieldDeletedAt)
+}
+
+// SetName sets the "name" field.
+func (m *CoreGatewayL7ListenerMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *CoreGatewayL7ListenerMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the CoreGatewayL7Listener entity.
+// If the CoreGatewayL7Listener object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayL7ListenerMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ClearName clears the value of the "name" field.
+func (m *CoreGatewayL7ListenerMutation) ClearName() {
+	m.name = nil
+	m.clearedFields[coregatewayl7listener.FieldName] = struct{}{}
+}
+
+// NameCleared returns if the "name" field was cleared in this mutation.
+func (m *CoreGatewayL7ListenerMutation) NameCleared() bool {
+	_, ok := m.clearedFields[coregatewayl7listener.FieldName]
+	return ok
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *CoreGatewayL7ListenerMutation) ResetName() {
+	m.name = nil
+	delete(m.clearedFields, coregatewayl7listener.FieldName)
+}
+
+// SetDescription sets the "description" field.
+func (m *CoreGatewayL7ListenerMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *CoreGatewayL7ListenerMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the CoreGatewayL7Listener entity.
+// If the CoreGatewayL7Listener object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayL7ListenerMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ClearDescription clears the value of the "description" field.
+func (m *CoreGatewayL7ListenerMutation) ClearDescription() {
+	m.description = nil
+	m.clearedFields[coregatewayl7listener.FieldDescription] = struct{}{}
+}
+
+// DescriptionCleared returns if the "description" field was cleared in this mutation.
+func (m *CoreGatewayL7ListenerMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[coregatewayl7listener.FieldDescription]
+	return ok
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *CoreGatewayL7ListenerMutation) ResetDescription() {
+	m.description = nil
+	delete(m.clearedFields, coregatewayl7listener.FieldDescription)
+}
+
+// SetPort sets the "port" field.
+func (m *CoreGatewayL7ListenerMutation) SetPort(u uint16) {
+	m.port = &u
+	m.addport = nil
+}
+
+// Port returns the value of the "port" field in the mutation.
+func (m *CoreGatewayL7ListenerMutation) Port() (r uint16, exists bool) {
+	v := m.port
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPort returns the old "port" field's value of the CoreGatewayL7Listener entity.
+// If the CoreGatewayL7Listener object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayL7ListenerMutation) OldPort(ctx context.Context) (v uint16, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPort is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPort requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPort: %w", err)
+	}
+	return oldValue.Port, nil
+}
+
+// AddPort adds u to the "port" field.
+func (m *CoreGatewayL7ListenerMutation) AddPort(u int16) {
+	if m.addport != nil {
+		*m.addport += u
+	} else {
+		m.addport = &u
+	}
+}
+
+// AddedPort returns the value that was added to the "port" field in this mutation.
+func (m *CoreGatewayL7ListenerMutation) AddedPort() (r int16, exists bool) {
+	v := m.addport
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearPort clears the value of the "port" field.
+func (m *CoreGatewayL7ListenerMutation) ClearPort() {
+	m.port = nil
+	m.addport = nil
+	m.clearedFields[coregatewayl7listener.FieldPort] = struct{}{}
+}
+
+// PortCleared returns if the "port" field was cleared in this mutation.
+func (m *CoreGatewayL7ListenerMutation) PortCleared() bool {
+	_, ok := m.clearedFields[coregatewayl7listener.FieldPort]
+	return ok
+}
+
+// ResetPort resets all changes to the "port" field.
+func (m *CoreGatewayL7ListenerMutation) ResetPort() {
+	m.port = nil
+	m.addport = nil
+	delete(m.clearedFields, coregatewayl7listener.FieldPort)
+}
+
+// SetHost sets the "host" field.
+func (m *CoreGatewayL7ListenerMutation) SetHost(s string) {
+	m.host = &s
+}
+
+// Host returns the value of the "host" field in the mutation.
+func (m *CoreGatewayL7ListenerMutation) Host() (r string, exists bool) {
+	v := m.host
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHost returns the old "host" field's value of the CoreGatewayL7Listener entity.
+// If the CoreGatewayL7Listener object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayL7ListenerMutation) OldHost(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHost is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHost requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHost: %w", err)
+	}
+	return oldValue.Host, nil
+}
+
+// ClearHost clears the value of the "host" field.
+func (m *CoreGatewayL7ListenerMutation) ClearHost() {
+	m.host = nil
+	m.clearedFields[coregatewayl7listener.FieldHost] = struct{}{}
+}
+
+// HostCleared returns if the "host" field was cleared in this mutation.
+func (m *CoreGatewayL7ListenerMutation) HostCleared() bool {
+	_, ok := m.clearedFields[coregatewayl7listener.FieldHost]
+	return ok
+}
+
+// ResetHost resets all changes to the "host" field.
+func (m *CoreGatewayL7ListenerMutation) ResetHost() {
+	m.host = nil
+	delete(m.clearedFields, coregatewayl7listener.FieldHost)
+}
+
+// SetEnableTLS sets the "enable_tls" field.
+func (m *CoreGatewayL7ListenerMutation) SetEnableTLS(con constant.YesOrNo) {
+	m.enable_tls = &con
+	m.addenable_tls = nil
+}
+
+// EnableTLS returns the value of the "enable_tls" field in the mutation.
+func (m *CoreGatewayL7ListenerMutation) EnableTLS() (r constant.YesOrNo, exists bool) {
+	v := m.enable_tls
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEnableTLS returns the old "enable_tls" field's value of the CoreGatewayL7Listener entity.
+// If the CoreGatewayL7Listener object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayL7ListenerMutation) OldEnableTLS(ctx context.Context) (v constant.YesOrNo, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEnableTLS is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEnableTLS requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEnableTLS: %w", err)
+	}
+	return oldValue.EnableTLS, nil
+}
+
+// AddEnableTLS adds con to the "enable_tls" field.
+func (m *CoreGatewayL7ListenerMutation) AddEnableTLS(con constant.YesOrNo) {
+	if m.addenable_tls != nil {
+		*m.addenable_tls += con
+	} else {
+		m.addenable_tls = &con
+	}
+}
+
+// AddedEnableTLS returns the value that was added to the "enable_tls" field in this mutation.
+func (m *CoreGatewayL7ListenerMutation) AddedEnableTLS() (r constant.YesOrNo, exists bool) {
+	v := m.addenable_tls
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearEnableTLS clears the value of the "enable_tls" field.
+func (m *CoreGatewayL7ListenerMutation) ClearEnableTLS() {
+	m.enable_tls = nil
+	m.addenable_tls = nil
+	m.clearedFields[coregatewayl7listener.FieldEnableTLS] = struct{}{}
+}
+
+// EnableTLSCleared returns if the "enable_tls" field was cleared in this mutation.
+func (m *CoreGatewayL7ListenerMutation) EnableTLSCleared() bool {
+	_, ok := m.clearedFields[coregatewayl7listener.FieldEnableTLS]
+	return ok
+}
+
+// ResetEnableTLS resets all changes to the "enable_tls" field.
+func (m *CoreGatewayL7ListenerMutation) ResetEnableTLS() {
+	m.enable_tls = nil
+	m.addenable_tls = nil
+	delete(m.clearedFields, coregatewayl7listener.FieldEnableTLS)
+}
+
+// SetStatus sets the "status" field.
+func (m *CoreGatewayL7ListenerMutation) SetStatus(con constant.YesOrNo) {
+	m.status = &con
+	m.addstatus = nil
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *CoreGatewayL7ListenerMutation) Status() (r constant.YesOrNo, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the CoreGatewayL7Listener entity.
+// If the CoreGatewayL7Listener object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreGatewayL7ListenerMutation) OldStatus(ctx context.Context) (v constant.YesOrNo, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// AddStatus adds con to the "status" field.
+func (m *CoreGatewayL7ListenerMutation) AddStatus(con constant.YesOrNo) {
+	if m.addstatus != nil {
+		*m.addstatus += con
+	} else {
+		m.addstatus = &con
+	}
+}
+
+// AddedStatus returns the value that was added to the "status" field in this mutation.
+func (m *CoreGatewayL7ListenerMutation) AddedStatus() (r constant.YesOrNo, exists bool) {
+	v := m.addstatus
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearStatus clears the value of the "status" field.
+func (m *CoreGatewayL7ListenerMutation) ClearStatus() {
+	m.status = nil
+	m.addstatus = nil
+	m.clearedFields[coregatewayl7listener.FieldStatus] = struct{}{}
+}
+
+// StatusCleared returns if the "status" field was cleared in this mutation.
+func (m *CoreGatewayL7ListenerMutation) StatusCleared() bool {
+	_, ok := m.clearedFields[coregatewayl7listener.FieldStatus]
+	return ok
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *CoreGatewayL7ListenerMutation) ResetStatus() {
+	m.status = nil
+	m.addstatus = nil
+	delete(m.clearedFields, coregatewayl7listener.FieldStatus)
+}
+
+// Where appends a list predicates to the CoreGatewayL7ListenerMutation builder.
+func (m *CoreGatewayL7ListenerMutation) Where(ps ...predicate.CoreGatewayL7Listener) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CoreGatewayL7ListenerMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CoreGatewayL7ListenerMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CoreGatewayL7Listener, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CoreGatewayL7ListenerMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CoreGatewayL7ListenerMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CoreGatewayL7Listener).
+func (m *CoreGatewayL7ListenerMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CoreGatewayL7ListenerMutation) Fields() []string {
+	fields := make([]string, 0, 9)
+	if m.created_at != nil {
+		fields = append(fields, coregatewayl7listener.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, coregatewayl7listener.FieldUpdatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, coregatewayl7listener.FieldDeletedAt)
+	}
+	if m.name != nil {
+		fields = append(fields, coregatewayl7listener.FieldName)
+	}
+	if m.description != nil {
+		fields = append(fields, coregatewayl7listener.FieldDescription)
+	}
+	if m.port != nil {
+		fields = append(fields, coregatewayl7listener.FieldPort)
+	}
+	if m.host != nil {
+		fields = append(fields, coregatewayl7listener.FieldHost)
+	}
+	if m.enable_tls != nil {
+		fields = append(fields, coregatewayl7listener.FieldEnableTLS)
+	}
+	if m.status != nil {
+		fields = append(fields, coregatewayl7listener.FieldStatus)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CoreGatewayL7ListenerMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case coregatewayl7listener.FieldCreatedAt:
+		return m.CreatedAt()
+	case coregatewayl7listener.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case coregatewayl7listener.FieldDeletedAt:
+		return m.DeletedAt()
+	case coregatewayl7listener.FieldName:
+		return m.Name()
+	case coregatewayl7listener.FieldDescription:
+		return m.Description()
+	case coregatewayl7listener.FieldPort:
+		return m.Port()
+	case coregatewayl7listener.FieldHost:
+		return m.Host()
+	case coregatewayl7listener.FieldEnableTLS:
+		return m.EnableTLS()
+	case coregatewayl7listener.FieldStatus:
+		return m.Status()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CoreGatewayL7ListenerMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case coregatewayl7listener.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case coregatewayl7listener.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case coregatewayl7listener.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
+	case coregatewayl7listener.FieldName:
+		return m.OldName(ctx)
+	case coregatewayl7listener.FieldDescription:
+		return m.OldDescription(ctx)
+	case coregatewayl7listener.FieldPort:
+		return m.OldPort(ctx)
+	case coregatewayl7listener.FieldHost:
+		return m.OldHost(ctx)
+	case coregatewayl7listener.FieldEnableTLS:
+		return m.OldEnableTLS(ctx)
+	case coregatewayl7listener.FieldStatus:
+		return m.OldStatus(ctx)
+	}
+	return nil, fmt.Errorf("unknown CoreGatewayL7Listener field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoreGatewayL7ListenerMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case coregatewayl7listener.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case coregatewayl7listener.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case coregatewayl7listener.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
+	case coregatewayl7listener.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case coregatewayl7listener.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case coregatewayl7listener.FieldPort:
+		v, ok := value.(uint16)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPort(v)
+		return nil
+	case coregatewayl7listener.FieldHost:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHost(v)
+		return nil
+	case coregatewayl7listener.FieldEnableTLS:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEnableTLS(v)
+		return nil
+	case coregatewayl7listener.FieldStatus:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CoreGatewayL7Listener field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CoreGatewayL7ListenerMutation) AddedFields() []string {
+	var fields []string
+	if m.addport != nil {
+		fields = append(fields, coregatewayl7listener.FieldPort)
+	}
+	if m.addenable_tls != nil {
+		fields = append(fields, coregatewayl7listener.FieldEnableTLS)
+	}
+	if m.addstatus != nil {
+		fields = append(fields, coregatewayl7listener.FieldStatus)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CoreGatewayL7ListenerMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case coregatewayl7listener.FieldPort:
+		return m.AddedPort()
+	case coregatewayl7listener.FieldEnableTLS:
+		return m.AddedEnableTLS()
+	case coregatewayl7listener.FieldStatus:
+		return m.AddedStatus()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoreGatewayL7ListenerMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case coregatewayl7listener.FieldPort:
+		v, ok := value.(int16)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPort(v)
+		return nil
+	case coregatewayl7listener.FieldEnableTLS:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddEnableTLS(v)
+		return nil
+	case coregatewayl7listener.FieldStatus:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStatus(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CoreGatewayL7Listener numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CoreGatewayL7ListenerMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(coregatewayl7listener.FieldDeletedAt) {
+		fields = append(fields, coregatewayl7listener.FieldDeletedAt)
+	}
+	if m.FieldCleared(coregatewayl7listener.FieldName) {
+		fields = append(fields, coregatewayl7listener.FieldName)
+	}
+	if m.FieldCleared(coregatewayl7listener.FieldDescription) {
+		fields = append(fields, coregatewayl7listener.FieldDescription)
+	}
+	if m.FieldCleared(coregatewayl7listener.FieldPort) {
+		fields = append(fields, coregatewayl7listener.FieldPort)
+	}
+	if m.FieldCleared(coregatewayl7listener.FieldHost) {
+		fields = append(fields, coregatewayl7listener.FieldHost)
+	}
+	if m.FieldCleared(coregatewayl7listener.FieldEnableTLS) {
+		fields = append(fields, coregatewayl7listener.FieldEnableTLS)
+	}
+	if m.FieldCleared(coregatewayl7listener.FieldStatus) {
+		fields = append(fields, coregatewayl7listener.FieldStatus)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CoreGatewayL7ListenerMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CoreGatewayL7ListenerMutation) ClearField(name string) error {
+	switch name {
+	case coregatewayl7listener.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	case coregatewayl7listener.FieldName:
+		m.ClearName()
+		return nil
+	case coregatewayl7listener.FieldDescription:
+		m.ClearDescription()
+		return nil
+	case coregatewayl7listener.FieldPort:
+		m.ClearPort()
+		return nil
+	case coregatewayl7listener.FieldHost:
+		m.ClearHost()
+		return nil
+	case coregatewayl7listener.FieldEnableTLS:
+		m.ClearEnableTLS()
+		return nil
+	case coregatewayl7listener.FieldStatus:
+		m.ClearStatus()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreGatewayL7Listener nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CoreGatewayL7ListenerMutation) ResetField(name string) error {
+	switch name {
+	case coregatewayl7listener.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case coregatewayl7listener.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case coregatewayl7listener.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
+	case coregatewayl7listener.FieldName:
+		m.ResetName()
+		return nil
+	case coregatewayl7listener.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case coregatewayl7listener.FieldPort:
+		m.ResetPort()
+		return nil
+	case coregatewayl7listener.FieldHost:
+		m.ResetHost()
+		return nil
+	case coregatewayl7listener.FieldEnableTLS:
+		m.ResetEnableTLS()
+		return nil
+	case coregatewayl7listener.FieldStatus:
+		m.ResetStatus()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreGatewayL7Listener field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CoreGatewayL7ListenerMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CoreGatewayL7ListenerMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CoreGatewayL7ListenerMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CoreGatewayL7ListenerMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CoreGatewayL7ListenerMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CoreGatewayL7ListenerMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CoreGatewayL7ListenerMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown CoreGatewayL7Listener unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CoreGatewayL7ListenerMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown CoreGatewayL7Listener edge %s", name)
 }
 
 // CoreGatewayNodeMutation represents an operation that mutates the CoreGatewayNode nodes in the graph.
@@ -7933,6 +13011,2225 @@ func (m *CoreRoleMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown CoreRole edge %s", name)
+}
+
+// CoreUpstreamMutation represents an operation that mutates the CoreUpstream nodes in the graph.
+type CoreUpstreamMutation struct {
+	config
+	op                      Op
+	typ                     string
+	id                      *string
+	created_at              *time.Time
+	updated_at              *time.Time
+	deleted_at              *time.Time
+	name                    *string
+	description             *string
+	lb_policy               *constant.ProxyLbPolicy
+	addlb_policy            *constant.ProxyLbPolicy
+	connect_timeout_ms      *int
+	addconnect_timeout_ms   *int
+	max_connections         *int
+	addmax_connections      *int
+	max_pending_requests    *int
+	addmax_pending_requests *int
+	max_requests            *int
+	addmax_requests         *int
+	max_retries             *int
+	addmax_retries          *int
+	status                  *constant.YesOrNo
+	addstatus               *constant.YesOrNo
+	clearedFields           map[string]struct{}
+	done                    bool
+	oldValue                func(context.Context) (*CoreUpstream, error)
+	predicates              []predicate.CoreUpstream
+}
+
+var _ ent.Mutation = (*CoreUpstreamMutation)(nil)
+
+// coreupstreamOption allows management of the mutation configuration using functional options.
+type coreupstreamOption func(*CoreUpstreamMutation)
+
+// newCoreUpstreamMutation creates new mutation for the CoreUpstream entity.
+func newCoreUpstreamMutation(c config, op Op, opts ...coreupstreamOption) *CoreUpstreamMutation {
+	m := &CoreUpstreamMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCoreUpstream,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCoreUpstreamID sets the ID field of the mutation.
+func withCoreUpstreamID(id string) coreupstreamOption {
+	return func(m *CoreUpstreamMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CoreUpstream
+		)
+		m.oldValue = func(ctx context.Context) (*CoreUpstream, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CoreUpstream.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCoreUpstream sets the old CoreUpstream of the mutation.
+func withCoreUpstream(node *CoreUpstream) coreupstreamOption {
+	return func(m *CoreUpstreamMutation) {
+		m.oldValue = func(context.Context) (*CoreUpstream, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CoreUpstreamMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CoreUpstreamMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of CoreUpstream entities.
+func (m *CoreUpstreamMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CoreUpstreamMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CoreUpstreamMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CoreUpstream.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *CoreUpstreamMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *CoreUpstreamMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the CoreUpstream entity.
+// If the CoreUpstream object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUpstreamMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *CoreUpstreamMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *CoreUpstreamMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *CoreUpstreamMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the CoreUpstream entity.
+// If the CoreUpstream object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUpstreamMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *CoreUpstreamMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *CoreUpstreamMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *CoreUpstreamMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the CoreUpstream entity.
+// If the CoreUpstream object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUpstreamMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *CoreUpstreamMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[coreupstream.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *CoreUpstreamMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[coreupstream.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *CoreUpstreamMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, coreupstream.FieldDeletedAt)
+}
+
+// SetName sets the "name" field.
+func (m *CoreUpstreamMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *CoreUpstreamMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the CoreUpstream entity.
+// If the CoreUpstream object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUpstreamMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ClearName clears the value of the "name" field.
+func (m *CoreUpstreamMutation) ClearName() {
+	m.name = nil
+	m.clearedFields[coreupstream.FieldName] = struct{}{}
+}
+
+// NameCleared returns if the "name" field was cleared in this mutation.
+func (m *CoreUpstreamMutation) NameCleared() bool {
+	_, ok := m.clearedFields[coreupstream.FieldName]
+	return ok
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *CoreUpstreamMutation) ResetName() {
+	m.name = nil
+	delete(m.clearedFields, coreupstream.FieldName)
+}
+
+// SetDescription sets the "description" field.
+func (m *CoreUpstreamMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *CoreUpstreamMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the CoreUpstream entity.
+// If the CoreUpstream object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUpstreamMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ClearDescription clears the value of the "description" field.
+func (m *CoreUpstreamMutation) ClearDescription() {
+	m.description = nil
+	m.clearedFields[coreupstream.FieldDescription] = struct{}{}
+}
+
+// DescriptionCleared returns if the "description" field was cleared in this mutation.
+func (m *CoreUpstreamMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[coreupstream.FieldDescription]
+	return ok
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *CoreUpstreamMutation) ResetDescription() {
+	m.description = nil
+	delete(m.clearedFields, coreupstream.FieldDescription)
+}
+
+// SetLbPolicy sets the "lb_policy" field.
+func (m *CoreUpstreamMutation) SetLbPolicy(clp constant.ProxyLbPolicy) {
+	m.lb_policy = &clp
+	m.addlb_policy = nil
+}
+
+// LbPolicy returns the value of the "lb_policy" field in the mutation.
+func (m *CoreUpstreamMutation) LbPolicy() (r constant.ProxyLbPolicy, exists bool) {
+	v := m.lb_policy
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLbPolicy returns the old "lb_policy" field's value of the CoreUpstream entity.
+// If the CoreUpstream object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUpstreamMutation) OldLbPolicy(ctx context.Context) (v constant.ProxyLbPolicy, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLbPolicy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLbPolicy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLbPolicy: %w", err)
+	}
+	return oldValue.LbPolicy, nil
+}
+
+// AddLbPolicy adds clp to the "lb_policy" field.
+func (m *CoreUpstreamMutation) AddLbPolicy(clp constant.ProxyLbPolicy) {
+	if m.addlb_policy != nil {
+		*m.addlb_policy += clp
+	} else {
+		m.addlb_policy = &clp
+	}
+}
+
+// AddedLbPolicy returns the value that was added to the "lb_policy" field in this mutation.
+func (m *CoreUpstreamMutation) AddedLbPolicy() (r constant.ProxyLbPolicy, exists bool) {
+	v := m.addlb_policy
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearLbPolicy clears the value of the "lb_policy" field.
+func (m *CoreUpstreamMutation) ClearLbPolicy() {
+	m.lb_policy = nil
+	m.addlb_policy = nil
+	m.clearedFields[coreupstream.FieldLbPolicy] = struct{}{}
+}
+
+// LbPolicyCleared returns if the "lb_policy" field was cleared in this mutation.
+func (m *CoreUpstreamMutation) LbPolicyCleared() bool {
+	_, ok := m.clearedFields[coreupstream.FieldLbPolicy]
+	return ok
+}
+
+// ResetLbPolicy resets all changes to the "lb_policy" field.
+func (m *CoreUpstreamMutation) ResetLbPolicy() {
+	m.lb_policy = nil
+	m.addlb_policy = nil
+	delete(m.clearedFields, coreupstream.FieldLbPolicy)
+}
+
+// SetConnectTimeoutMs sets the "connect_timeout_ms" field.
+func (m *CoreUpstreamMutation) SetConnectTimeoutMs(i int) {
+	m.connect_timeout_ms = &i
+	m.addconnect_timeout_ms = nil
+}
+
+// ConnectTimeoutMs returns the value of the "connect_timeout_ms" field in the mutation.
+func (m *CoreUpstreamMutation) ConnectTimeoutMs() (r int, exists bool) {
+	v := m.connect_timeout_ms
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldConnectTimeoutMs returns the old "connect_timeout_ms" field's value of the CoreUpstream entity.
+// If the CoreUpstream object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUpstreamMutation) OldConnectTimeoutMs(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldConnectTimeoutMs is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldConnectTimeoutMs requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldConnectTimeoutMs: %w", err)
+	}
+	return oldValue.ConnectTimeoutMs, nil
+}
+
+// AddConnectTimeoutMs adds i to the "connect_timeout_ms" field.
+func (m *CoreUpstreamMutation) AddConnectTimeoutMs(i int) {
+	if m.addconnect_timeout_ms != nil {
+		*m.addconnect_timeout_ms += i
+	} else {
+		m.addconnect_timeout_ms = &i
+	}
+}
+
+// AddedConnectTimeoutMs returns the value that was added to the "connect_timeout_ms" field in this mutation.
+func (m *CoreUpstreamMutation) AddedConnectTimeoutMs() (r int, exists bool) {
+	v := m.addconnect_timeout_ms
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearConnectTimeoutMs clears the value of the "connect_timeout_ms" field.
+func (m *CoreUpstreamMutation) ClearConnectTimeoutMs() {
+	m.connect_timeout_ms = nil
+	m.addconnect_timeout_ms = nil
+	m.clearedFields[coreupstream.FieldConnectTimeoutMs] = struct{}{}
+}
+
+// ConnectTimeoutMsCleared returns if the "connect_timeout_ms" field was cleared in this mutation.
+func (m *CoreUpstreamMutation) ConnectTimeoutMsCleared() bool {
+	_, ok := m.clearedFields[coreupstream.FieldConnectTimeoutMs]
+	return ok
+}
+
+// ResetConnectTimeoutMs resets all changes to the "connect_timeout_ms" field.
+func (m *CoreUpstreamMutation) ResetConnectTimeoutMs() {
+	m.connect_timeout_ms = nil
+	m.addconnect_timeout_ms = nil
+	delete(m.clearedFields, coreupstream.FieldConnectTimeoutMs)
+}
+
+// SetMaxConnections sets the "max_connections" field.
+func (m *CoreUpstreamMutation) SetMaxConnections(i int) {
+	m.max_connections = &i
+	m.addmax_connections = nil
+}
+
+// MaxConnections returns the value of the "max_connections" field in the mutation.
+func (m *CoreUpstreamMutation) MaxConnections() (r int, exists bool) {
+	v := m.max_connections
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMaxConnections returns the old "max_connections" field's value of the CoreUpstream entity.
+// If the CoreUpstream object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUpstreamMutation) OldMaxConnections(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMaxConnections is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMaxConnections requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMaxConnections: %w", err)
+	}
+	return oldValue.MaxConnections, nil
+}
+
+// AddMaxConnections adds i to the "max_connections" field.
+func (m *CoreUpstreamMutation) AddMaxConnections(i int) {
+	if m.addmax_connections != nil {
+		*m.addmax_connections += i
+	} else {
+		m.addmax_connections = &i
+	}
+}
+
+// AddedMaxConnections returns the value that was added to the "max_connections" field in this mutation.
+func (m *CoreUpstreamMutation) AddedMaxConnections() (r int, exists bool) {
+	v := m.addmax_connections
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearMaxConnections clears the value of the "max_connections" field.
+func (m *CoreUpstreamMutation) ClearMaxConnections() {
+	m.max_connections = nil
+	m.addmax_connections = nil
+	m.clearedFields[coreupstream.FieldMaxConnections] = struct{}{}
+}
+
+// MaxConnectionsCleared returns if the "max_connections" field was cleared in this mutation.
+func (m *CoreUpstreamMutation) MaxConnectionsCleared() bool {
+	_, ok := m.clearedFields[coreupstream.FieldMaxConnections]
+	return ok
+}
+
+// ResetMaxConnections resets all changes to the "max_connections" field.
+func (m *CoreUpstreamMutation) ResetMaxConnections() {
+	m.max_connections = nil
+	m.addmax_connections = nil
+	delete(m.clearedFields, coreupstream.FieldMaxConnections)
+}
+
+// SetMaxPendingRequests sets the "max_pending_requests" field.
+func (m *CoreUpstreamMutation) SetMaxPendingRequests(i int) {
+	m.max_pending_requests = &i
+	m.addmax_pending_requests = nil
+}
+
+// MaxPendingRequests returns the value of the "max_pending_requests" field in the mutation.
+func (m *CoreUpstreamMutation) MaxPendingRequests() (r int, exists bool) {
+	v := m.max_pending_requests
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMaxPendingRequests returns the old "max_pending_requests" field's value of the CoreUpstream entity.
+// If the CoreUpstream object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUpstreamMutation) OldMaxPendingRequests(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMaxPendingRequests is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMaxPendingRequests requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMaxPendingRequests: %w", err)
+	}
+	return oldValue.MaxPendingRequests, nil
+}
+
+// AddMaxPendingRequests adds i to the "max_pending_requests" field.
+func (m *CoreUpstreamMutation) AddMaxPendingRequests(i int) {
+	if m.addmax_pending_requests != nil {
+		*m.addmax_pending_requests += i
+	} else {
+		m.addmax_pending_requests = &i
+	}
+}
+
+// AddedMaxPendingRequests returns the value that was added to the "max_pending_requests" field in this mutation.
+func (m *CoreUpstreamMutation) AddedMaxPendingRequests() (r int, exists bool) {
+	v := m.addmax_pending_requests
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearMaxPendingRequests clears the value of the "max_pending_requests" field.
+func (m *CoreUpstreamMutation) ClearMaxPendingRequests() {
+	m.max_pending_requests = nil
+	m.addmax_pending_requests = nil
+	m.clearedFields[coreupstream.FieldMaxPendingRequests] = struct{}{}
+}
+
+// MaxPendingRequestsCleared returns if the "max_pending_requests" field was cleared in this mutation.
+func (m *CoreUpstreamMutation) MaxPendingRequestsCleared() bool {
+	_, ok := m.clearedFields[coreupstream.FieldMaxPendingRequests]
+	return ok
+}
+
+// ResetMaxPendingRequests resets all changes to the "max_pending_requests" field.
+func (m *CoreUpstreamMutation) ResetMaxPendingRequests() {
+	m.max_pending_requests = nil
+	m.addmax_pending_requests = nil
+	delete(m.clearedFields, coreupstream.FieldMaxPendingRequests)
+}
+
+// SetMaxRequests sets the "max_requests" field.
+func (m *CoreUpstreamMutation) SetMaxRequests(i int) {
+	m.max_requests = &i
+	m.addmax_requests = nil
+}
+
+// MaxRequests returns the value of the "max_requests" field in the mutation.
+func (m *CoreUpstreamMutation) MaxRequests() (r int, exists bool) {
+	v := m.max_requests
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMaxRequests returns the old "max_requests" field's value of the CoreUpstream entity.
+// If the CoreUpstream object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUpstreamMutation) OldMaxRequests(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMaxRequests is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMaxRequests requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMaxRequests: %w", err)
+	}
+	return oldValue.MaxRequests, nil
+}
+
+// AddMaxRequests adds i to the "max_requests" field.
+func (m *CoreUpstreamMutation) AddMaxRequests(i int) {
+	if m.addmax_requests != nil {
+		*m.addmax_requests += i
+	} else {
+		m.addmax_requests = &i
+	}
+}
+
+// AddedMaxRequests returns the value that was added to the "max_requests" field in this mutation.
+func (m *CoreUpstreamMutation) AddedMaxRequests() (r int, exists bool) {
+	v := m.addmax_requests
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearMaxRequests clears the value of the "max_requests" field.
+func (m *CoreUpstreamMutation) ClearMaxRequests() {
+	m.max_requests = nil
+	m.addmax_requests = nil
+	m.clearedFields[coreupstream.FieldMaxRequests] = struct{}{}
+}
+
+// MaxRequestsCleared returns if the "max_requests" field was cleared in this mutation.
+func (m *CoreUpstreamMutation) MaxRequestsCleared() bool {
+	_, ok := m.clearedFields[coreupstream.FieldMaxRequests]
+	return ok
+}
+
+// ResetMaxRequests resets all changes to the "max_requests" field.
+func (m *CoreUpstreamMutation) ResetMaxRequests() {
+	m.max_requests = nil
+	m.addmax_requests = nil
+	delete(m.clearedFields, coreupstream.FieldMaxRequests)
+}
+
+// SetMaxRetries sets the "max_retries" field.
+func (m *CoreUpstreamMutation) SetMaxRetries(i int) {
+	m.max_retries = &i
+	m.addmax_retries = nil
+}
+
+// MaxRetries returns the value of the "max_retries" field in the mutation.
+func (m *CoreUpstreamMutation) MaxRetries() (r int, exists bool) {
+	v := m.max_retries
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMaxRetries returns the old "max_retries" field's value of the CoreUpstream entity.
+// If the CoreUpstream object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUpstreamMutation) OldMaxRetries(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMaxRetries is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMaxRetries requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMaxRetries: %w", err)
+	}
+	return oldValue.MaxRetries, nil
+}
+
+// AddMaxRetries adds i to the "max_retries" field.
+func (m *CoreUpstreamMutation) AddMaxRetries(i int) {
+	if m.addmax_retries != nil {
+		*m.addmax_retries += i
+	} else {
+		m.addmax_retries = &i
+	}
+}
+
+// AddedMaxRetries returns the value that was added to the "max_retries" field in this mutation.
+func (m *CoreUpstreamMutation) AddedMaxRetries() (r int, exists bool) {
+	v := m.addmax_retries
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearMaxRetries clears the value of the "max_retries" field.
+func (m *CoreUpstreamMutation) ClearMaxRetries() {
+	m.max_retries = nil
+	m.addmax_retries = nil
+	m.clearedFields[coreupstream.FieldMaxRetries] = struct{}{}
+}
+
+// MaxRetriesCleared returns if the "max_retries" field was cleared in this mutation.
+func (m *CoreUpstreamMutation) MaxRetriesCleared() bool {
+	_, ok := m.clearedFields[coreupstream.FieldMaxRetries]
+	return ok
+}
+
+// ResetMaxRetries resets all changes to the "max_retries" field.
+func (m *CoreUpstreamMutation) ResetMaxRetries() {
+	m.max_retries = nil
+	m.addmax_retries = nil
+	delete(m.clearedFields, coreupstream.FieldMaxRetries)
+}
+
+// SetStatus sets the "status" field.
+func (m *CoreUpstreamMutation) SetStatus(con constant.YesOrNo) {
+	m.status = &con
+	m.addstatus = nil
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *CoreUpstreamMutation) Status() (r constant.YesOrNo, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the CoreUpstream entity.
+// If the CoreUpstream object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUpstreamMutation) OldStatus(ctx context.Context) (v constant.YesOrNo, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// AddStatus adds con to the "status" field.
+func (m *CoreUpstreamMutation) AddStatus(con constant.YesOrNo) {
+	if m.addstatus != nil {
+		*m.addstatus += con
+	} else {
+		m.addstatus = &con
+	}
+}
+
+// AddedStatus returns the value that was added to the "status" field in this mutation.
+func (m *CoreUpstreamMutation) AddedStatus() (r constant.YesOrNo, exists bool) {
+	v := m.addstatus
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearStatus clears the value of the "status" field.
+func (m *CoreUpstreamMutation) ClearStatus() {
+	m.status = nil
+	m.addstatus = nil
+	m.clearedFields[coreupstream.FieldStatus] = struct{}{}
+}
+
+// StatusCleared returns if the "status" field was cleared in this mutation.
+func (m *CoreUpstreamMutation) StatusCleared() bool {
+	_, ok := m.clearedFields[coreupstream.FieldStatus]
+	return ok
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *CoreUpstreamMutation) ResetStatus() {
+	m.status = nil
+	m.addstatus = nil
+	delete(m.clearedFields, coreupstream.FieldStatus)
+}
+
+// Where appends a list predicates to the CoreUpstreamMutation builder.
+func (m *CoreUpstreamMutation) Where(ps ...predicate.CoreUpstream) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CoreUpstreamMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CoreUpstreamMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CoreUpstream, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CoreUpstreamMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CoreUpstreamMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CoreUpstream).
+func (m *CoreUpstreamMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CoreUpstreamMutation) Fields() []string {
+	fields := make([]string, 0, 12)
+	if m.created_at != nil {
+		fields = append(fields, coreupstream.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, coreupstream.FieldUpdatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, coreupstream.FieldDeletedAt)
+	}
+	if m.name != nil {
+		fields = append(fields, coreupstream.FieldName)
+	}
+	if m.description != nil {
+		fields = append(fields, coreupstream.FieldDescription)
+	}
+	if m.lb_policy != nil {
+		fields = append(fields, coreupstream.FieldLbPolicy)
+	}
+	if m.connect_timeout_ms != nil {
+		fields = append(fields, coreupstream.FieldConnectTimeoutMs)
+	}
+	if m.max_connections != nil {
+		fields = append(fields, coreupstream.FieldMaxConnections)
+	}
+	if m.max_pending_requests != nil {
+		fields = append(fields, coreupstream.FieldMaxPendingRequests)
+	}
+	if m.max_requests != nil {
+		fields = append(fields, coreupstream.FieldMaxRequests)
+	}
+	if m.max_retries != nil {
+		fields = append(fields, coreupstream.FieldMaxRetries)
+	}
+	if m.status != nil {
+		fields = append(fields, coreupstream.FieldStatus)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CoreUpstreamMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case coreupstream.FieldCreatedAt:
+		return m.CreatedAt()
+	case coreupstream.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case coreupstream.FieldDeletedAt:
+		return m.DeletedAt()
+	case coreupstream.FieldName:
+		return m.Name()
+	case coreupstream.FieldDescription:
+		return m.Description()
+	case coreupstream.FieldLbPolicy:
+		return m.LbPolicy()
+	case coreupstream.FieldConnectTimeoutMs:
+		return m.ConnectTimeoutMs()
+	case coreupstream.FieldMaxConnections:
+		return m.MaxConnections()
+	case coreupstream.FieldMaxPendingRequests:
+		return m.MaxPendingRequests()
+	case coreupstream.FieldMaxRequests:
+		return m.MaxRequests()
+	case coreupstream.FieldMaxRetries:
+		return m.MaxRetries()
+	case coreupstream.FieldStatus:
+		return m.Status()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CoreUpstreamMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case coreupstream.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case coreupstream.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case coreupstream.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
+	case coreupstream.FieldName:
+		return m.OldName(ctx)
+	case coreupstream.FieldDescription:
+		return m.OldDescription(ctx)
+	case coreupstream.FieldLbPolicy:
+		return m.OldLbPolicy(ctx)
+	case coreupstream.FieldConnectTimeoutMs:
+		return m.OldConnectTimeoutMs(ctx)
+	case coreupstream.FieldMaxConnections:
+		return m.OldMaxConnections(ctx)
+	case coreupstream.FieldMaxPendingRequests:
+		return m.OldMaxPendingRequests(ctx)
+	case coreupstream.FieldMaxRequests:
+		return m.OldMaxRequests(ctx)
+	case coreupstream.FieldMaxRetries:
+		return m.OldMaxRetries(ctx)
+	case coreupstream.FieldStatus:
+		return m.OldStatus(ctx)
+	}
+	return nil, fmt.Errorf("unknown CoreUpstream field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoreUpstreamMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case coreupstream.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case coreupstream.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case coreupstream.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
+	case coreupstream.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case coreupstream.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case coreupstream.FieldLbPolicy:
+		v, ok := value.(constant.ProxyLbPolicy)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLbPolicy(v)
+		return nil
+	case coreupstream.FieldConnectTimeoutMs:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetConnectTimeoutMs(v)
+		return nil
+	case coreupstream.FieldMaxConnections:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMaxConnections(v)
+		return nil
+	case coreupstream.FieldMaxPendingRequests:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMaxPendingRequests(v)
+		return nil
+	case coreupstream.FieldMaxRequests:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMaxRequests(v)
+		return nil
+	case coreupstream.FieldMaxRetries:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMaxRetries(v)
+		return nil
+	case coreupstream.FieldStatus:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CoreUpstream field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CoreUpstreamMutation) AddedFields() []string {
+	var fields []string
+	if m.addlb_policy != nil {
+		fields = append(fields, coreupstream.FieldLbPolicy)
+	}
+	if m.addconnect_timeout_ms != nil {
+		fields = append(fields, coreupstream.FieldConnectTimeoutMs)
+	}
+	if m.addmax_connections != nil {
+		fields = append(fields, coreupstream.FieldMaxConnections)
+	}
+	if m.addmax_pending_requests != nil {
+		fields = append(fields, coreupstream.FieldMaxPendingRequests)
+	}
+	if m.addmax_requests != nil {
+		fields = append(fields, coreupstream.FieldMaxRequests)
+	}
+	if m.addmax_retries != nil {
+		fields = append(fields, coreupstream.FieldMaxRetries)
+	}
+	if m.addstatus != nil {
+		fields = append(fields, coreupstream.FieldStatus)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CoreUpstreamMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case coreupstream.FieldLbPolicy:
+		return m.AddedLbPolicy()
+	case coreupstream.FieldConnectTimeoutMs:
+		return m.AddedConnectTimeoutMs()
+	case coreupstream.FieldMaxConnections:
+		return m.AddedMaxConnections()
+	case coreupstream.FieldMaxPendingRequests:
+		return m.AddedMaxPendingRequests()
+	case coreupstream.FieldMaxRequests:
+		return m.AddedMaxRequests()
+	case coreupstream.FieldMaxRetries:
+		return m.AddedMaxRetries()
+	case coreupstream.FieldStatus:
+		return m.AddedStatus()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoreUpstreamMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case coreupstream.FieldLbPolicy:
+		v, ok := value.(constant.ProxyLbPolicy)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLbPolicy(v)
+		return nil
+	case coreupstream.FieldConnectTimeoutMs:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddConnectTimeoutMs(v)
+		return nil
+	case coreupstream.FieldMaxConnections:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMaxConnections(v)
+		return nil
+	case coreupstream.FieldMaxPendingRequests:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMaxPendingRequests(v)
+		return nil
+	case coreupstream.FieldMaxRequests:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMaxRequests(v)
+		return nil
+	case coreupstream.FieldMaxRetries:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMaxRetries(v)
+		return nil
+	case coreupstream.FieldStatus:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStatus(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CoreUpstream numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CoreUpstreamMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(coreupstream.FieldDeletedAt) {
+		fields = append(fields, coreupstream.FieldDeletedAt)
+	}
+	if m.FieldCleared(coreupstream.FieldName) {
+		fields = append(fields, coreupstream.FieldName)
+	}
+	if m.FieldCleared(coreupstream.FieldDescription) {
+		fields = append(fields, coreupstream.FieldDescription)
+	}
+	if m.FieldCleared(coreupstream.FieldLbPolicy) {
+		fields = append(fields, coreupstream.FieldLbPolicy)
+	}
+	if m.FieldCleared(coreupstream.FieldConnectTimeoutMs) {
+		fields = append(fields, coreupstream.FieldConnectTimeoutMs)
+	}
+	if m.FieldCleared(coreupstream.FieldMaxConnections) {
+		fields = append(fields, coreupstream.FieldMaxConnections)
+	}
+	if m.FieldCleared(coreupstream.FieldMaxPendingRequests) {
+		fields = append(fields, coreupstream.FieldMaxPendingRequests)
+	}
+	if m.FieldCleared(coreupstream.FieldMaxRequests) {
+		fields = append(fields, coreupstream.FieldMaxRequests)
+	}
+	if m.FieldCleared(coreupstream.FieldMaxRetries) {
+		fields = append(fields, coreupstream.FieldMaxRetries)
+	}
+	if m.FieldCleared(coreupstream.FieldStatus) {
+		fields = append(fields, coreupstream.FieldStatus)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CoreUpstreamMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CoreUpstreamMutation) ClearField(name string) error {
+	switch name {
+	case coreupstream.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	case coreupstream.FieldName:
+		m.ClearName()
+		return nil
+	case coreupstream.FieldDescription:
+		m.ClearDescription()
+		return nil
+	case coreupstream.FieldLbPolicy:
+		m.ClearLbPolicy()
+		return nil
+	case coreupstream.FieldConnectTimeoutMs:
+		m.ClearConnectTimeoutMs()
+		return nil
+	case coreupstream.FieldMaxConnections:
+		m.ClearMaxConnections()
+		return nil
+	case coreupstream.FieldMaxPendingRequests:
+		m.ClearMaxPendingRequests()
+		return nil
+	case coreupstream.FieldMaxRequests:
+		m.ClearMaxRequests()
+		return nil
+	case coreupstream.FieldMaxRetries:
+		m.ClearMaxRetries()
+		return nil
+	case coreupstream.FieldStatus:
+		m.ClearStatus()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreUpstream nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CoreUpstreamMutation) ResetField(name string) error {
+	switch name {
+	case coreupstream.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case coreupstream.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case coreupstream.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
+	case coreupstream.FieldName:
+		m.ResetName()
+		return nil
+	case coreupstream.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case coreupstream.FieldLbPolicy:
+		m.ResetLbPolicy()
+		return nil
+	case coreupstream.FieldConnectTimeoutMs:
+		m.ResetConnectTimeoutMs()
+		return nil
+	case coreupstream.FieldMaxConnections:
+		m.ResetMaxConnections()
+		return nil
+	case coreupstream.FieldMaxPendingRequests:
+		m.ResetMaxPendingRequests()
+		return nil
+	case coreupstream.FieldMaxRequests:
+		m.ResetMaxRequests()
+		return nil
+	case coreupstream.FieldMaxRetries:
+		m.ResetMaxRetries()
+		return nil
+	case coreupstream.FieldStatus:
+		m.ResetStatus()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreUpstream field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CoreUpstreamMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CoreUpstreamMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CoreUpstreamMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CoreUpstreamMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CoreUpstreamMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CoreUpstreamMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CoreUpstreamMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown CoreUpstream unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CoreUpstreamMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown CoreUpstream edge %s", name)
+}
+
+// CoreUpstreamHostMutation represents an operation that mutates the CoreUpstreamHost nodes in the graph.
+type CoreUpstreamHostMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *string
+	created_at    *time.Time
+	updated_at    *time.Time
+	deleted_at    *time.Time
+	address       *string
+	weight        *int
+	addweight     *int
+	port          *int
+	addport       *int
+	enabled       *constant.YesOrNo
+	addenabled    *constant.YesOrNo
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*CoreUpstreamHost, error)
+	predicates    []predicate.CoreUpstreamHost
+}
+
+var _ ent.Mutation = (*CoreUpstreamHostMutation)(nil)
+
+// coreupstreamhostOption allows management of the mutation configuration using functional options.
+type coreupstreamhostOption func(*CoreUpstreamHostMutation)
+
+// newCoreUpstreamHostMutation creates new mutation for the CoreUpstreamHost entity.
+func newCoreUpstreamHostMutation(c config, op Op, opts ...coreupstreamhostOption) *CoreUpstreamHostMutation {
+	m := &CoreUpstreamHostMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCoreUpstreamHost,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCoreUpstreamHostID sets the ID field of the mutation.
+func withCoreUpstreamHostID(id string) coreupstreamhostOption {
+	return func(m *CoreUpstreamHostMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CoreUpstreamHost
+		)
+		m.oldValue = func(ctx context.Context) (*CoreUpstreamHost, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CoreUpstreamHost.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCoreUpstreamHost sets the old CoreUpstreamHost of the mutation.
+func withCoreUpstreamHost(node *CoreUpstreamHost) coreupstreamhostOption {
+	return func(m *CoreUpstreamHostMutation) {
+		m.oldValue = func(context.Context) (*CoreUpstreamHost, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CoreUpstreamHostMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CoreUpstreamHostMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of CoreUpstreamHost entities.
+func (m *CoreUpstreamHostMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CoreUpstreamHostMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CoreUpstreamHostMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CoreUpstreamHost.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *CoreUpstreamHostMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *CoreUpstreamHostMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the CoreUpstreamHost entity.
+// If the CoreUpstreamHost object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUpstreamHostMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *CoreUpstreamHostMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *CoreUpstreamHostMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *CoreUpstreamHostMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the CoreUpstreamHost entity.
+// If the CoreUpstreamHost object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUpstreamHostMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *CoreUpstreamHostMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *CoreUpstreamHostMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *CoreUpstreamHostMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the CoreUpstreamHost entity.
+// If the CoreUpstreamHost object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUpstreamHostMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *CoreUpstreamHostMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[coreupstreamhost.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *CoreUpstreamHostMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[coreupstreamhost.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *CoreUpstreamHostMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, coreupstreamhost.FieldDeletedAt)
+}
+
+// SetAddress sets the "address" field.
+func (m *CoreUpstreamHostMutation) SetAddress(s string) {
+	m.address = &s
+}
+
+// Address returns the value of the "address" field in the mutation.
+func (m *CoreUpstreamHostMutation) Address() (r string, exists bool) {
+	v := m.address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAddress returns the old "address" field's value of the CoreUpstreamHost entity.
+// If the CoreUpstreamHost object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUpstreamHostMutation) OldAddress(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAddress: %w", err)
+	}
+	return oldValue.Address, nil
+}
+
+// ClearAddress clears the value of the "address" field.
+func (m *CoreUpstreamHostMutation) ClearAddress() {
+	m.address = nil
+	m.clearedFields[coreupstreamhost.FieldAddress] = struct{}{}
+}
+
+// AddressCleared returns if the "address" field was cleared in this mutation.
+func (m *CoreUpstreamHostMutation) AddressCleared() bool {
+	_, ok := m.clearedFields[coreupstreamhost.FieldAddress]
+	return ok
+}
+
+// ResetAddress resets all changes to the "address" field.
+func (m *CoreUpstreamHostMutation) ResetAddress() {
+	m.address = nil
+	delete(m.clearedFields, coreupstreamhost.FieldAddress)
+}
+
+// SetWeight sets the "weight" field.
+func (m *CoreUpstreamHostMutation) SetWeight(i int) {
+	m.weight = &i
+	m.addweight = nil
+}
+
+// Weight returns the value of the "weight" field in the mutation.
+func (m *CoreUpstreamHostMutation) Weight() (r int, exists bool) {
+	v := m.weight
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWeight returns the old "weight" field's value of the CoreUpstreamHost entity.
+// If the CoreUpstreamHost object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUpstreamHostMutation) OldWeight(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWeight is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWeight requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWeight: %w", err)
+	}
+	return oldValue.Weight, nil
+}
+
+// AddWeight adds i to the "weight" field.
+func (m *CoreUpstreamHostMutation) AddWeight(i int) {
+	if m.addweight != nil {
+		*m.addweight += i
+	} else {
+		m.addweight = &i
+	}
+}
+
+// AddedWeight returns the value that was added to the "weight" field in this mutation.
+func (m *CoreUpstreamHostMutation) AddedWeight() (r int, exists bool) {
+	v := m.addweight
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearWeight clears the value of the "weight" field.
+func (m *CoreUpstreamHostMutation) ClearWeight() {
+	m.weight = nil
+	m.addweight = nil
+	m.clearedFields[coreupstreamhost.FieldWeight] = struct{}{}
+}
+
+// WeightCleared returns if the "weight" field was cleared in this mutation.
+func (m *CoreUpstreamHostMutation) WeightCleared() bool {
+	_, ok := m.clearedFields[coreupstreamhost.FieldWeight]
+	return ok
+}
+
+// ResetWeight resets all changes to the "weight" field.
+func (m *CoreUpstreamHostMutation) ResetWeight() {
+	m.weight = nil
+	m.addweight = nil
+	delete(m.clearedFields, coreupstreamhost.FieldWeight)
+}
+
+// SetPort sets the "port" field.
+func (m *CoreUpstreamHostMutation) SetPort(i int) {
+	m.port = &i
+	m.addport = nil
+}
+
+// Port returns the value of the "port" field in the mutation.
+func (m *CoreUpstreamHostMutation) Port() (r int, exists bool) {
+	v := m.port
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPort returns the old "port" field's value of the CoreUpstreamHost entity.
+// If the CoreUpstreamHost object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUpstreamHostMutation) OldPort(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPort is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPort requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPort: %w", err)
+	}
+	return oldValue.Port, nil
+}
+
+// AddPort adds i to the "port" field.
+func (m *CoreUpstreamHostMutation) AddPort(i int) {
+	if m.addport != nil {
+		*m.addport += i
+	} else {
+		m.addport = &i
+	}
+}
+
+// AddedPort returns the value that was added to the "port" field in this mutation.
+func (m *CoreUpstreamHostMutation) AddedPort() (r int, exists bool) {
+	v := m.addport
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearPort clears the value of the "port" field.
+func (m *CoreUpstreamHostMutation) ClearPort() {
+	m.port = nil
+	m.addport = nil
+	m.clearedFields[coreupstreamhost.FieldPort] = struct{}{}
+}
+
+// PortCleared returns if the "port" field was cleared in this mutation.
+func (m *CoreUpstreamHostMutation) PortCleared() bool {
+	_, ok := m.clearedFields[coreupstreamhost.FieldPort]
+	return ok
+}
+
+// ResetPort resets all changes to the "port" field.
+func (m *CoreUpstreamHostMutation) ResetPort() {
+	m.port = nil
+	m.addport = nil
+	delete(m.clearedFields, coreupstreamhost.FieldPort)
+}
+
+// SetEnabled sets the "enabled" field.
+func (m *CoreUpstreamHostMutation) SetEnabled(con constant.YesOrNo) {
+	m.enabled = &con
+	m.addenabled = nil
+}
+
+// Enabled returns the value of the "enabled" field in the mutation.
+func (m *CoreUpstreamHostMutation) Enabled() (r constant.YesOrNo, exists bool) {
+	v := m.enabled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEnabled returns the old "enabled" field's value of the CoreUpstreamHost entity.
+// If the CoreUpstreamHost object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoreUpstreamHostMutation) OldEnabled(ctx context.Context) (v constant.YesOrNo, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEnabled is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEnabled requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEnabled: %w", err)
+	}
+	return oldValue.Enabled, nil
+}
+
+// AddEnabled adds con to the "enabled" field.
+func (m *CoreUpstreamHostMutation) AddEnabled(con constant.YesOrNo) {
+	if m.addenabled != nil {
+		*m.addenabled += con
+	} else {
+		m.addenabled = &con
+	}
+}
+
+// AddedEnabled returns the value that was added to the "enabled" field in this mutation.
+func (m *CoreUpstreamHostMutation) AddedEnabled() (r constant.YesOrNo, exists bool) {
+	v := m.addenabled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearEnabled clears the value of the "enabled" field.
+func (m *CoreUpstreamHostMutation) ClearEnabled() {
+	m.enabled = nil
+	m.addenabled = nil
+	m.clearedFields[coreupstreamhost.FieldEnabled] = struct{}{}
+}
+
+// EnabledCleared returns if the "enabled" field was cleared in this mutation.
+func (m *CoreUpstreamHostMutation) EnabledCleared() bool {
+	_, ok := m.clearedFields[coreupstreamhost.FieldEnabled]
+	return ok
+}
+
+// ResetEnabled resets all changes to the "enabled" field.
+func (m *CoreUpstreamHostMutation) ResetEnabled() {
+	m.enabled = nil
+	m.addenabled = nil
+	delete(m.clearedFields, coreupstreamhost.FieldEnabled)
+}
+
+// Where appends a list predicates to the CoreUpstreamHostMutation builder.
+func (m *CoreUpstreamHostMutation) Where(ps ...predicate.CoreUpstreamHost) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CoreUpstreamHostMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CoreUpstreamHostMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CoreUpstreamHost, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CoreUpstreamHostMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CoreUpstreamHostMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CoreUpstreamHost).
+func (m *CoreUpstreamHostMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CoreUpstreamHostMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.created_at != nil {
+		fields = append(fields, coreupstreamhost.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, coreupstreamhost.FieldUpdatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, coreupstreamhost.FieldDeletedAt)
+	}
+	if m.address != nil {
+		fields = append(fields, coreupstreamhost.FieldAddress)
+	}
+	if m.weight != nil {
+		fields = append(fields, coreupstreamhost.FieldWeight)
+	}
+	if m.port != nil {
+		fields = append(fields, coreupstreamhost.FieldPort)
+	}
+	if m.enabled != nil {
+		fields = append(fields, coreupstreamhost.FieldEnabled)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CoreUpstreamHostMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case coreupstreamhost.FieldCreatedAt:
+		return m.CreatedAt()
+	case coreupstreamhost.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case coreupstreamhost.FieldDeletedAt:
+		return m.DeletedAt()
+	case coreupstreamhost.FieldAddress:
+		return m.Address()
+	case coreupstreamhost.FieldWeight:
+		return m.Weight()
+	case coreupstreamhost.FieldPort:
+		return m.Port()
+	case coreupstreamhost.FieldEnabled:
+		return m.Enabled()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CoreUpstreamHostMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case coreupstreamhost.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case coreupstreamhost.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case coreupstreamhost.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
+	case coreupstreamhost.FieldAddress:
+		return m.OldAddress(ctx)
+	case coreupstreamhost.FieldWeight:
+		return m.OldWeight(ctx)
+	case coreupstreamhost.FieldPort:
+		return m.OldPort(ctx)
+	case coreupstreamhost.FieldEnabled:
+		return m.OldEnabled(ctx)
+	}
+	return nil, fmt.Errorf("unknown CoreUpstreamHost field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoreUpstreamHostMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case coreupstreamhost.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case coreupstreamhost.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case coreupstreamhost.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
+	case coreupstreamhost.FieldAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAddress(v)
+		return nil
+	case coreupstreamhost.FieldWeight:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWeight(v)
+		return nil
+	case coreupstreamhost.FieldPort:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPort(v)
+		return nil
+	case coreupstreamhost.FieldEnabled:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEnabled(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CoreUpstreamHost field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CoreUpstreamHostMutation) AddedFields() []string {
+	var fields []string
+	if m.addweight != nil {
+		fields = append(fields, coreupstreamhost.FieldWeight)
+	}
+	if m.addport != nil {
+		fields = append(fields, coreupstreamhost.FieldPort)
+	}
+	if m.addenabled != nil {
+		fields = append(fields, coreupstreamhost.FieldEnabled)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CoreUpstreamHostMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case coreupstreamhost.FieldWeight:
+		return m.AddedWeight()
+	case coreupstreamhost.FieldPort:
+		return m.AddedPort()
+	case coreupstreamhost.FieldEnabled:
+		return m.AddedEnabled()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoreUpstreamHostMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case coreupstreamhost.FieldWeight:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWeight(v)
+		return nil
+	case coreupstreamhost.FieldPort:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPort(v)
+		return nil
+	case coreupstreamhost.FieldEnabled:
+		v, ok := value.(constant.YesOrNo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddEnabled(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CoreUpstreamHost numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CoreUpstreamHostMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(coreupstreamhost.FieldDeletedAt) {
+		fields = append(fields, coreupstreamhost.FieldDeletedAt)
+	}
+	if m.FieldCleared(coreupstreamhost.FieldAddress) {
+		fields = append(fields, coreupstreamhost.FieldAddress)
+	}
+	if m.FieldCleared(coreupstreamhost.FieldWeight) {
+		fields = append(fields, coreupstreamhost.FieldWeight)
+	}
+	if m.FieldCleared(coreupstreamhost.FieldPort) {
+		fields = append(fields, coreupstreamhost.FieldPort)
+	}
+	if m.FieldCleared(coreupstreamhost.FieldEnabled) {
+		fields = append(fields, coreupstreamhost.FieldEnabled)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CoreUpstreamHostMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CoreUpstreamHostMutation) ClearField(name string) error {
+	switch name {
+	case coreupstreamhost.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	case coreupstreamhost.FieldAddress:
+		m.ClearAddress()
+		return nil
+	case coreupstreamhost.FieldWeight:
+		m.ClearWeight()
+		return nil
+	case coreupstreamhost.FieldPort:
+		m.ClearPort()
+		return nil
+	case coreupstreamhost.FieldEnabled:
+		m.ClearEnabled()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreUpstreamHost nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CoreUpstreamHostMutation) ResetField(name string) error {
+	switch name {
+	case coreupstreamhost.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case coreupstreamhost.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case coreupstreamhost.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
+	case coreupstreamhost.FieldAddress:
+		m.ResetAddress()
+		return nil
+	case coreupstreamhost.FieldWeight:
+		m.ResetWeight()
+		return nil
+	case coreupstreamhost.FieldPort:
+		m.ResetPort()
+		return nil
+	case coreupstreamhost.FieldEnabled:
+		m.ResetEnabled()
+		return nil
+	}
+	return fmt.Errorf("unknown CoreUpstreamHost field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CoreUpstreamHostMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CoreUpstreamHostMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CoreUpstreamHostMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CoreUpstreamHostMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CoreUpstreamHostMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CoreUpstreamHostMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CoreUpstreamHostMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown CoreUpstreamHost unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CoreUpstreamHostMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown CoreUpstreamHost edge %s", name)
 }
 
 // CoreUserMutation represents an operation that mutates the CoreUser nodes in the graph.

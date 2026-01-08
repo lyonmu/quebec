@@ -12,13 +12,19 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/corecert"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coredatarelationship"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewaycluster"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewayhttproute"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewayl4listener"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewayl7listener"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewaynode"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreonlineuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreoperationlog"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreupstream"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreupstreamhost"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 )
 
@@ -80,14 +86,20 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			coredatarelationship.Table: coredatarelationship.ValidColumn,
-			coregatewaycluster.Table:   coregatewaycluster.ValidColumn,
-			coregatewaynode.Table:      coregatewaynode.ValidColumn,
-			coremenu.Table:             coremenu.ValidColumn,
-			coreonlineuser.Table:       coreonlineuser.ValidColumn,
-			coreoperationlog.Table:     coreoperationlog.ValidColumn,
-			corerole.Table:             corerole.ValidColumn,
-			coreuser.Table:             coreuser.ValidColumn,
+			corecert.Table:              corecert.ValidColumn,
+			coredatarelationship.Table:  coredatarelationship.ValidColumn,
+			coregatewaycluster.Table:    coregatewaycluster.ValidColumn,
+			coregatewayhttproute.Table:  coregatewayhttproute.ValidColumn,
+			coregatewayl4listener.Table: coregatewayl4listener.ValidColumn,
+			coregatewayl7listener.Table: coregatewayl7listener.ValidColumn,
+			coregatewaynode.Table:       coregatewaynode.ValidColumn,
+			coremenu.Table:              coremenu.ValidColumn,
+			coreonlineuser.Table:        coreonlineuser.ValidColumn,
+			coreoperationlog.Table:      coreoperationlog.ValidColumn,
+			corerole.Table:              corerole.ValidColumn,
+			coreupstream.Table:          coreupstream.ValidColumn,
+			coreupstreamhost.Table:      coreupstreamhost.ValidColumn,
+			coreuser.Table:              coreuser.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

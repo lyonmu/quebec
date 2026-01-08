@@ -15,13 +15,19 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/corecert"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coredatarelationship"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewaycluster"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewayhttproute"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewayl4listener"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewayl7listener"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewaynode"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreonlineuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreoperationlog"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreupstream"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreupstreamhost"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 
 	stdsql "database/sql"
@@ -32,10 +38,18 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// CoreCert is the client for interacting with the CoreCert builders.
+	CoreCert *CoreCertClient
 	// CoreDataRelationship is the client for interacting with the CoreDataRelationship builders.
 	CoreDataRelationship *CoreDataRelationshipClient
 	// CoreGatewayCluster is the client for interacting with the CoreGatewayCluster builders.
 	CoreGatewayCluster *CoreGatewayClusterClient
+	// CoreGatewayHttpRoute is the client for interacting with the CoreGatewayHttpRoute builders.
+	CoreGatewayHttpRoute *CoreGatewayHttpRouteClient
+	// CoreGatewayL4Listener is the client for interacting with the CoreGatewayL4Listener builders.
+	CoreGatewayL4Listener *CoreGatewayL4ListenerClient
+	// CoreGatewayL7Listener is the client for interacting with the CoreGatewayL7Listener builders.
+	CoreGatewayL7Listener *CoreGatewayL7ListenerClient
 	// CoreGatewayNode is the client for interacting with the CoreGatewayNode builders.
 	CoreGatewayNode *CoreGatewayNodeClient
 	// CoreMenu is the client for interacting with the CoreMenu builders.
@@ -46,6 +60,10 @@ type Client struct {
 	CoreOperationLog *CoreOperationLogClient
 	// CoreRole is the client for interacting with the CoreRole builders.
 	CoreRole *CoreRoleClient
+	// CoreUpstream is the client for interacting with the CoreUpstream builders.
+	CoreUpstream *CoreUpstreamClient
+	// CoreUpstreamHost is the client for interacting with the CoreUpstreamHost builders.
+	CoreUpstreamHost *CoreUpstreamHostClient
 	// CoreUser is the client for interacting with the CoreUser builders.
 	CoreUser *CoreUserClient
 }
@@ -59,13 +77,19 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.CoreCert = NewCoreCertClient(c.config)
 	c.CoreDataRelationship = NewCoreDataRelationshipClient(c.config)
 	c.CoreGatewayCluster = NewCoreGatewayClusterClient(c.config)
+	c.CoreGatewayHttpRoute = NewCoreGatewayHttpRouteClient(c.config)
+	c.CoreGatewayL4Listener = NewCoreGatewayL4ListenerClient(c.config)
+	c.CoreGatewayL7Listener = NewCoreGatewayL7ListenerClient(c.config)
 	c.CoreGatewayNode = NewCoreGatewayNodeClient(c.config)
 	c.CoreMenu = NewCoreMenuClient(c.config)
 	c.CoreOnLineUser = NewCoreOnLineUserClient(c.config)
 	c.CoreOperationLog = NewCoreOperationLogClient(c.config)
 	c.CoreRole = NewCoreRoleClient(c.config)
+	c.CoreUpstream = NewCoreUpstreamClient(c.config)
+	c.CoreUpstreamHost = NewCoreUpstreamHostClient(c.config)
 	c.CoreUser = NewCoreUserClient(c.config)
 }
 
@@ -157,16 +181,22 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                  ctx,
-		config:               cfg,
-		CoreDataRelationship: NewCoreDataRelationshipClient(cfg),
-		CoreGatewayCluster:   NewCoreGatewayClusterClient(cfg),
-		CoreGatewayNode:      NewCoreGatewayNodeClient(cfg),
-		CoreMenu:             NewCoreMenuClient(cfg),
-		CoreOnLineUser:       NewCoreOnLineUserClient(cfg),
-		CoreOperationLog:     NewCoreOperationLogClient(cfg),
-		CoreRole:             NewCoreRoleClient(cfg),
-		CoreUser:             NewCoreUserClient(cfg),
+		ctx:                   ctx,
+		config:                cfg,
+		CoreCert:              NewCoreCertClient(cfg),
+		CoreDataRelationship:  NewCoreDataRelationshipClient(cfg),
+		CoreGatewayCluster:    NewCoreGatewayClusterClient(cfg),
+		CoreGatewayHttpRoute:  NewCoreGatewayHttpRouteClient(cfg),
+		CoreGatewayL4Listener: NewCoreGatewayL4ListenerClient(cfg),
+		CoreGatewayL7Listener: NewCoreGatewayL7ListenerClient(cfg),
+		CoreGatewayNode:       NewCoreGatewayNodeClient(cfg),
+		CoreMenu:              NewCoreMenuClient(cfg),
+		CoreOnLineUser:        NewCoreOnLineUserClient(cfg),
+		CoreOperationLog:      NewCoreOperationLogClient(cfg),
+		CoreRole:              NewCoreRoleClient(cfg),
+		CoreUpstream:          NewCoreUpstreamClient(cfg),
+		CoreUpstreamHost:      NewCoreUpstreamHostClient(cfg),
+		CoreUser:              NewCoreUserClient(cfg),
 	}, nil
 }
 
@@ -184,23 +214,29 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                  ctx,
-		config:               cfg,
-		CoreDataRelationship: NewCoreDataRelationshipClient(cfg),
-		CoreGatewayCluster:   NewCoreGatewayClusterClient(cfg),
-		CoreGatewayNode:      NewCoreGatewayNodeClient(cfg),
-		CoreMenu:             NewCoreMenuClient(cfg),
-		CoreOnLineUser:       NewCoreOnLineUserClient(cfg),
-		CoreOperationLog:     NewCoreOperationLogClient(cfg),
-		CoreRole:             NewCoreRoleClient(cfg),
-		CoreUser:             NewCoreUserClient(cfg),
+		ctx:                   ctx,
+		config:                cfg,
+		CoreCert:              NewCoreCertClient(cfg),
+		CoreDataRelationship:  NewCoreDataRelationshipClient(cfg),
+		CoreGatewayCluster:    NewCoreGatewayClusterClient(cfg),
+		CoreGatewayHttpRoute:  NewCoreGatewayHttpRouteClient(cfg),
+		CoreGatewayL4Listener: NewCoreGatewayL4ListenerClient(cfg),
+		CoreGatewayL7Listener: NewCoreGatewayL7ListenerClient(cfg),
+		CoreGatewayNode:       NewCoreGatewayNodeClient(cfg),
+		CoreMenu:              NewCoreMenuClient(cfg),
+		CoreOnLineUser:        NewCoreOnLineUserClient(cfg),
+		CoreOperationLog:      NewCoreOperationLogClient(cfg),
+		CoreRole:              NewCoreRoleClient(cfg),
+		CoreUpstream:          NewCoreUpstreamClient(cfg),
+		CoreUpstreamHost:      NewCoreUpstreamHostClient(cfg),
+		CoreUser:              NewCoreUserClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		CoreDataRelationship.
+//		CoreCert.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -223,8 +259,10 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.CoreDataRelationship, c.CoreGatewayCluster, c.CoreGatewayNode, c.CoreMenu,
-		c.CoreOnLineUser, c.CoreOperationLog, c.CoreRole, c.CoreUser,
+		c.CoreCert, c.CoreDataRelationship, c.CoreGatewayCluster,
+		c.CoreGatewayHttpRoute, c.CoreGatewayL4Listener, c.CoreGatewayL7Listener,
+		c.CoreGatewayNode, c.CoreMenu, c.CoreOnLineUser, c.CoreOperationLog,
+		c.CoreRole, c.CoreUpstream, c.CoreUpstreamHost, c.CoreUser,
 	} {
 		n.Use(hooks...)
 	}
@@ -234,8 +272,10 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.CoreDataRelationship, c.CoreGatewayCluster, c.CoreGatewayNode, c.CoreMenu,
-		c.CoreOnLineUser, c.CoreOperationLog, c.CoreRole, c.CoreUser,
+		c.CoreCert, c.CoreDataRelationship, c.CoreGatewayCluster,
+		c.CoreGatewayHttpRoute, c.CoreGatewayL4Listener, c.CoreGatewayL7Listener,
+		c.CoreGatewayNode, c.CoreMenu, c.CoreOnLineUser, c.CoreOperationLog,
+		c.CoreRole, c.CoreUpstream, c.CoreUpstreamHost, c.CoreUser,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -244,10 +284,18 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *CoreCertMutation:
+		return c.CoreCert.mutate(ctx, m)
 	case *CoreDataRelationshipMutation:
 		return c.CoreDataRelationship.mutate(ctx, m)
 	case *CoreGatewayClusterMutation:
 		return c.CoreGatewayCluster.mutate(ctx, m)
+	case *CoreGatewayHttpRouteMutation:
+		return c.CoreGatewayHttpRoute.mutate(ctx, m)
+	case *CoreGatewayL4ListenerMutation:
+		return c.CoreGatewayL4Listener.mutate(ctx, m)
+	case *CoreGatewayL7ListenerMutation:
+		return c.CoreGatewayL7Listener.mutate(ctx, m)
 	case *CoreGatewayNodeMutation:
 		return c.CoreGatewayNode.mutate(ctx, m)
 	case *CoreMenuMutation:
@@ -258,10 +306,148 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.CoreOperationLog.mutate(ctx, m)
 	case *CoreRoleMutation:
 		return c.CoreRole.mutate(ctx, m)
+	case *CoreUpstreamMutation:
+		return c.CoreUpstream.mutate(ctx, m)
+	case *CoreUpstreamHostMutation:
+		return c.CoreUpstreamHost.mutate(ctx, m)
 	case *CoreUserMutation:
 		return c.CoreUser.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// CoreCertClient is a client for the CoreCert schema.
+type CoreCertClient struct {
+	config
+}
+
+// NewCoreCertClient returns a client for the CoreCert from the given config.
+func NewCoreCertClient(c config) *CoreCertClient {
+	return &CoreCertClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `corecert.Hooks(f(g(h())))`.
+func (c *CoreCertClient) Use(hooks ...Hook) {
+	c.hooks.CoreCert = append(c.hooks.CoreCert, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `corecert.Intercept(f(g(h())))`.
+func (c *CoreCertClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CoreCert = append(c.inters.CoreCert, interceptors...)
+}
+
+// Create returns a builder for creating a CoreCert entity.
+func (c *CoreCertClient) Create() *CoreCertCreate {
+	mutation := newCoreCertMutation(c.config, OpCreate)
+	return &CoreCertCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CoreCert entities.
+func (c *CoreCertClient) CreateBulk(builders ...*CoreCertCreate) *CoreCertCreateBulk {
+	return &CoreCertCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CoreCertClient) MapCreateBulk(slice any, setFunc func(*CoreCertCreate, int)) *CoreCertCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CoreCertCreateBulk{err: fmt.Errorf("calling to CoreCertClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CoreCertCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CoreCertCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CoreCert.
+func (c *CoreCertClient) Update() *CoreCertUpdate {
+	mutation := newCoreCertMutation(c.config, OpUpdate)
+	return &CoreCertUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CoreCertClient) UpdateOne(_m *CoreCert) *CoreCertUpdateOne {
+	mutation := newCoreCertMutation(c.config, OpUpdateOne, withCoreCert(_m))
+	return &CoreCertUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CoreCertClient) UpdateOneID(id string) *CoreCertUpdateOne {
+	mutation := newCoreCertMutation(c.config, OpUpdateOne, withCoreCertID(id))
+	return &CoreCertUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CoreCert.
+func (c *CoreCertClient) Delete() *CoreCertDelete {
+	mutation := newCoreCertMutation(c.config, OpDelete)
+	return &CoreCertDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CoreCertClient) DeleteOne(_m *CoreCert) *CoreCertDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CoreCertClient) DeleteOneID(id string) *CoreCertDeleteOne {
+	builder := c.Delete().Where(corecert.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CoreCertDeleteOne{builder}
+}
+
+// Query returns a query builder for CoreCert.
+func (c *CoreCertClient) Query() *CoreCertQuery {
+	return &CoreCertQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCoreCert},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CoreCert entity by its id.
+func (c *CoreCertClient) Get(ctx context.Context, id string) (*CoreCert, error) {
+	return c.Query().Where(corecert.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CoreCertClient) GetX(ctx context.Context, id string) *CoreCert {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CoreCertClient) Hooks() []Hook {
+	hooks := c.hooks.CoreCert
+	return append(hooks[:len(hooks):len(hooks)], corecert.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *CoreCertClient) Interceptors() []Interceptor {
+	return c.inters.CoreCert
+}
+
+func (c *CoreCertClient) mutate(ctx context.Context, m *CoreCertMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CoreCertCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CoreCertUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CoreCertUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CoreCertDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CoreCert mutation op: %q", m.Op())
 	}
 }
 
@@ -578,6 +764,408 @@ func (c *CoreGatewayClusterClient) mutate(ctx context.Context, m *CoreGatewayClu
 		return (&CoreGatewayClusterDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown CoreGatewayCluster mutation op: %q", m.Op())
+	}
+}
+
+// CoreGatewayHttpRouteClient is a client for the CoreGatewayHttpRoute schema.
+type CoreGatewayHttpRouteClient struct {
+	config
+}
+
+// NewCoreGatewayHttpRouteClient returns a client for the CoreGatewayHttpRoute from the given config.
+func NewCoreGatewayHttpRouteClient(c config) *CoreGatewayHttpRouteClient {
+	return &CoreGatewayHttpRouteClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `coregatewayhttproute.Hooks(f(g(h())))`.
+func (c *CoreGatewayHttpRouteClient) Use(hooks ...Hook) {
+	c.hooks.CoreGatewayHttpRoute = append(c.hooks.CoreGatewayHttpRoute, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `coregatewayhttproute.Intercept(f(g(h())))`.
+func (c *CoreGatewayHttpRouteClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CoreGatewayHttpRoute = append(c.inters.CoreGatewayHttpRoute, interceptors...)
+}
+
+// Create returns a builder for creating a CoreGatewayHttpRoute entity.
+func (c *CoreGatewayHttpRouteClient) Create() *CoreGatewayHttpRouteCreate {
+	mutation := newCoreGatewayHttpRouteMutation(c.config, OpCreate)
+	return &CoreGatewayHttpRouteCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CoreGatewayHttpRoute entities.
+func (c *CoreGatewayHttpRouteClient) CreateBulk(builders ...*CoreGatewayHttpRouteCreate) *CoreGatewayHttpRouteCreateBulk {
+	return &CoreGatewayHttpRouteCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CoreGatewayHttpRouteClient) MapCreateBulk(slice any, setFunc func(*CoreGatewayHttpRouteCreate, int)) *CoreGatewayHttpRouteCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CoreGatewayHttpRouteCreateBulk{err: fmt.Errorf("calling to CoreGatewayHttpRouteClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CoreGatewayHttpRouteCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CoreGatewayHttpRouteCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CoreGatewayHttpRoute.
+func (c *CoreGatewayHttpRouteClient) Update() *CoreGatewayHttpRouteUpdate {
+	mutation := newCoreGatewayHttpRouteMutation(c.config, OpUpdate)
+	return &CoreGatewayHttpRouteUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CoreGatewayHttpRouteClient) UpdateOne(_m *CoreGatewayHttpRoute) *CoreGatewayHttpRouteUpdateOne {
+	mutation := newCoreGatewayHttpRouteMutation(c.config, OpUpdateOne, withCoreGatewayHttpRoute(_m))
+	return &CoreGatewayHttpRouteUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CoreGatewayHttpRouteClient) UpdateOneID(id string) *CoreGatewayHttpRouteUpdateOne {
+	mutation := newCoreGatewayHttpRouteMutation(c.config, OpUpdateOne, withCoreGatewayHttpRouteID(id))
+	return &CoreGatewayHttpRouteUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CoreGatewayHttpRoute.
+func (c *CoreGatewayHttpRouteClient) Delete() *CoreGatewayHttpRouteDelete {
+	mutation := newCoreGatewayHttpRouteMutation(c.config, OpDelete)
+	return &CoreGatewayHttpRouteDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CoreGatewayHttpRouteClient) DeleteOne(_m *CoreGatewayHttpRoute) *CoreGatewayHttpRouteDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CoreGatewayHttpRouteClient) DeleteOneID(id string) *CoreGatewayHttpRouteDeleteOne {
+	builder := c.Delete().Where(coregatewayhttproute.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CoreGatewayHttpRouteDeleteOne{builder}
+}
+
+// Query returns a query builder for CoreGatewayHttpRoute.
+func (c *CoreGatewayHttpRouteClient) Query() *CoreGatewayHttpRouteQuery {
+	return &CoreGatewayHttpRouteQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCoreGatewayHttpRoute},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CoreGatewayHttpRoute entity by its id.
+func (c *CoreGatewayHttpRouteClient) Get(ctx context.Context, id string) (*CoreGatewayHttpRoute, error) {
+	return c.Query().Where(coregatewayhttproute.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CoreGatewayHttpRouteClient) GetX(ctx context.Context, id string) *CoreGatewayHttpRoute {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CoreGatewayHttpRouteClient) Hooks() []Hook {
+	hooks := c.hooks.CoreGatewayHttpRoute
+	return append(hooks[:len(hooks):len(hooks)], coregatewayhttproute.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *CoreGatewayHttpRouteClient) Interceptors() []Interceptor {
+	return c.inters.CoreGatewayHttpRoute
+}
+
+func (c *CoreGatewayHttpRouteClient) mutate(ctx context.Context, m *CoreGatewayHttpRouteMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CoreGatewayHttpRouteCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CoreGatewayHttpRouteUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CoreGatewayHttpRouteUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CoreGatewayHttpRouteDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CoreGatewayHttpRoute mutation op: %q", m.Op())
+	}
+}
+
+// CoreGatewayL4ListenerClient is a client for the CoreGatewayL4Listener schema.
+type CoreGatewayL4ListenerClient struct {
+	config
+}
+
+// NewCoreGatewayL4ListenerClient returns a client for the CoreGatewayL4Listener from the given config.
+func NewCoreGatewayL4ListenerClient(c config) *CoreGatewayL4ListenerClient {
+	return &CoreGatewayL4ListenerClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `coregatewayl4listener.Hooks(f(g(h())))`.
+func (c *CoreGatewayL4ListenerClient) Use(hooks ...Hook) {
+	c.hooks.CoreGatewayL4Listener = append(c.hooks.CoreGatewayL4Listener, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `coregatewayl4listener.Intercept(f(g(h())))`.
+func (c *CoreGatewayL4ListenerClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CoreGatewayL4Listener = append(c.inters.CoreGatewayL4Listener, interceptors...)
+}
+
+// Create returns a builder for creating a CoreGatewayL4Listener entity.
+func (c *CoreGatewayL4ListenerClient) Create() *CoreGatewayL4ListenerCreate {
+	mutation := newCoreGatewayL4ListenerMutation(c.config, OpCreate)
+	return &CoreGatewayL4ListenerCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CoreGatewayL4Listener entities.
+func (c *CoreGatewayL4ListenerClient) CreateBulk(builders ...*CoreGatewayL4ListenerCreate) *CoreGatewayL4ListenerCreateBulk {
+	return &CoreGatewayL4ListenerCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CoreGatewayL4ListenerClient) MapCreateBulk(slice any, setFunc func(*CoreGatewayL4ListenerCreate, int)) *CoreGatewayL4ListenerCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CoreGatewayL4ListenerCreateBulk{err: fmt.Errorf("calling to CoreGatewayL4ListenerClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CoreGatewayL4ListenerCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CoreGatewayL4ListenerCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CoreGatewayL4Listener.
+func (c *CoreGatewayL4ListenerClient) Update() *CoreGatewayL4ListenerUpdate {
+	mutation := newCoreGatewayL4ListenerMutation(c.config, OpUpdate)
+	return &CoreGatewayL4ListenerUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CoreGatewayL4ListenerClient) UpdateOne(_m *CoreGatewayL4Listener) *CoreGatewayL4ListenerUpdateOne {
+	mutation := newCoreGatewayL4ListenerMutation(c.config, OpUpdateOne, withCoreGatewayL4Listener(_m))
+	return &CoreGatewayL4ListenerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CoreGatewayL4ListenerClient) UpdateOneID(id string) *CoreGatewayL4ListenerUpdateOne {
+	mutation := newCoreGatewayL4ListenerMutation(c.config, OpUpdateOne, withCoreGatewayL4ListenerID(id))
+	return &CoreGatewayL4ListenerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CoreGatewayL4Listener.
+func (c *CoreGatewayL4ListenerClient) Delete() *CoreGatewayL4ListenerDelete {
+	mutation := newCoreGatewayL4ListenerMutation(c.config, OpDelete)
+	return &CoreGatewayL4ListenerDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CoreGatewayL4ListenerClient) DeleteOne(_m *CoreGatewayL4Listener) *CoreGatewayL4ListenerDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CoreGatewayL4ListenerClient) DeleteOneID(id string) *CoreGatewayL4ListenerDeleteOne {
+	builder := c.Delete().Where(coregatewayl4listener.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CoreGatewayL4ListenerDeleteOne{builder}
+}
+
+// Query returns a query builder for CoreGatewayL4Listener.
+func (c *CoreGatewayL4ListenerClient) Query() *CoreGatewayL4ListenerQuery {
+	return &CoreGatewayL4ListenerQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCoreGatewayL4Listener},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CoreGatewayL4Listener entity by its id.
+func (c *CoreGatewayL4ListenerClient) Get(ctx context.Context, id string) (*CoreGatewayL4Listener, error) {
+	return c.Query().Where(coregatewayl4listener.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CoreGatewayL4ListenerClient) GetX(ctx context.Context, id string) *CoreGatewayL4Listener {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CoreGatewayL4ListenerClient) Hooks() []Hook {
+	hooks := c.hooks.CoreGatewayL4Listener
+	return append(hooks[:len(hooks):len(hooks)], coregatewayl4listener.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *CoreGatewayL4ListenerClient) Interceptors() []Interceptor {
+	return c.inters.CoreGatewayL4Listener
+}
+
+func (c *CoreGatewayL4ListenerClient) mutate(ctx context.Context, m *CoreGatewayL4ListenerMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CoreGatewayL4ListenerCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CoreGatewayL4ListenerUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CoreGatewayL4ListenerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CoreGatewayL4ListenerDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CoreGatewayL4Listener mutation op: %q", m.Op())
+	}
+}
+
+// CoreGatewayL7ListenerClient is a client for the CoreGatewayL7Listener schema.
+type CoreGatewayL7ListenerClient struct {
+	config
+}
+
+// NewCoreGatewayL7ListenerClient returns a client for the CoreGatewayL7Listener from the given config.
+func NewCoreGatewayL7ListenerClient(c config) *CoreGatewayL7ListenerClient {
+	return &CoreGatewayL7ListenerClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `coregatewayl7listener.Hooks(f(g(h())))`.
+func (c *CoreGatewayL7ListenerClient) Use(hooks ...Hook) {
+	c.hooks.CoreGatewayL7Listener = append(c.hooks.CoreGatewayL7Listener, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `coregatewayl7listener.Intercept(f(g(h())))`.
+func (c *CoreGatewayL7ListenerClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CoreGatewayL7Listener = append(c.inters.CoreGatewayL7Listener, interceptors...)
+}
+
+// Create returns a builder for creating a CoreGatewayL7Listener entity.
+func (c *CoreGatewayL7ListenerClient) Create() *CoreGatewayL7ListenerCreate {
+	mutation := newCoreGatewayL7ListenerMutation(c.config, OpCreate)
+	return &CoreGatewayL7ListenerCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CoreGatewayL7Listener entities.
+func (c *CoreGatewayL7ListenerClient) CreateBulk(builders ...*CoreGatewayL7ListenerCreate) *CoreGatewayL7ListenerCreateBulk {
+	return &CoreGatewayL7ListenerCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CoreGatewayL7ListenerClient) MapCreateBulk(slice any, setFunc func(*CoreGatewayL7ListenerCreate, int)) *CoreGatewayL7ListenerCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CoreGatewayL7ListenerCreateBulk{err: fmt.Errorf("calling to CoreGatewayL7ListenerClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CoreGatewayL7ListenerCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CoreGatewayL7ListenerCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CoreGatewayL7Listener.
+func (c *CoreGatewayL7ListenerClient) Update() *CoreGatewayL7ListenerUpdate {
+	mutation := newCoreGatewayL7ListenerMutation(c.config, OpUpdate)
+	return &CoreGatewayL7ListenerUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CoreGatewayL7ListenerClient) UpdateOne(_m *CoreGatewayL7Listener) *CoreGatewayL7ListenerUpdateOne {
+	mutation := newCoreGatewayL7ListenerMutation(c.config, OpUpdateOne, withCoreGatewayL7Listener(_m))
+	return &CoreGatewayL7ListenerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CoreGatewayL7ListenerClient) UpdateOneID(id string) *CoreGatewayL7ListenerUpdateOne {
+	mutation := newCoreGatewayL7ListenerMutation(c.config, OpUpdateOne, withCoreGatewayL7ListenerID(id))
+	return &CoreGatewayL7ListenerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CoreGatewayL7Listener.
+func (c *CoreGatewayL7ListenerClient) Delete() *CoreGatewayL7ListenerDelete {
+	mutation := newCoreGatewayL7ListenerMutation(c.config, OpDelete)
+	return &CoreGatewayL7ListenerDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CoreGatewayL7ListenerClient) DeleteOne(_m *CoreGatewayL7Listener) *CoreGatewayL7ListenerDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CoreGatewayL7ListenerClient) DeleteOneID(id string) *CoreGatewayL7ListenerDeleteOne {
+	builder := c.Delete().Where(coregatewayl7listener.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CoreGatewayL7ListenerDeleteOne{builder}
+}
+
+// Query returns a query builder for CoreGatewayL7Listener.
+func (c *CoreGatewayL7ListenerClient) Query() *CoreGatewayL7ListenerQuery {
+	return &CoreGatewayL7ListenerQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCoreGatewayL7Listener},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CoreGatewayL7Listener entity by its id.
+func (c *CoreGatewayL7ListenerClient) Get(ctx context.Context, id string) (*CoreGatewayL7Listener, error) {
+	return c.Query().Where(coregatewayl7listener.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CoreGatewayL7ListenerClient) GetX(ctx context.Context, id string) *CoreGatewayL7Listener {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CoreGatewayL7ListenerClient) Hooks() []Hook {
+	hooks := c.hooks.CoreGatewayL7Listener
+	return append(hooks[:len(hooks):len(hooks)], coregatewayl7listener.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *CoreGatewayL7ListenerClient) Interceptors() []Interceptor {
+	return c.inters.CoreGatewayL7Listener
+}
+
+func (c *CoreGatewayL7ListenerClient) mutate(ctx context.Context, m *CoreGatewayL7ListenerMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CoreGatewayL7ListenerCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CoreGatewayL7ListenerUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CoreGatewayL7ListenerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CoreGatewayL7ListenerDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CoreGatewayL7Listener mutation op: %q", m.Op())
 	}
 }
 
@@ -1379,6 +1967,274 @@ func (c *CoreRoleClient) mutate(ctx context.Context, m *CoreRoleMutation) (Value
 	}
 }
 
+// CoreUpstreamClient is a client for the CoreUpstream schema.
+type CoreUpstreamClient struct {
+	config
+}
+
+// NewCoreUpstreamClient returns a client for the CoreUpstream from the given config.
+func NewCoreUpstreamClient(c config) *CoreUpstreamClient {
+	return &CoreUpstreamClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `coreupstream.Hooks(f(g(h())))`.
+func (c *CoreUpstreamClient) Use(hooks ...Hook) {
+	c.hooks.CoreUpstream = append(c.hooks.CoreUpstream, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `coreupstream.Intercept(f(g(h())))`.
+func (c *CoreUpstreamClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CoreUpstream = append(c.inters.CoreUpstream, interceptors...)
+}
+
+// Create returns a builder for creating a CoreUpstream entity.
+func (c *CoreUpstreamClient) Create() *CoreUpstreamCreate {
+	mutation := newCoreUpstreamMutation(c.config, OpCreate)
+	return &CoreUpstreamCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CoreUpstream entities.
+func (c *CoreUpstreamClient) CreateBulk(builders ...*CoreUpstreamCreate) *CoreUpstreamCreateBulk {
+	return &CoreUpstreamCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CoreUpstreamClient) MapCreateBulk(slice any, setFunc func(*CoreUpstreamCreate, int)) *CoreUpstreamCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CoreUpstreamCreateBulk{err: fmt.Errorf("calling to CoreUpstreamClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CoreUpstreamCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CoreUpstreamCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CoreUpstream.
+func (c *CoreUpstreamClient) Update() *CoreUpstreamUpdate {
+	mutation := newCoreUpstreamMutation(c.config, OpUpdate)
+	return &CoreUpstreamUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CoreUpstreamClient) UpdateOne(_m *CoreUpstream) *CoreUpstreamUpdateOne {
+	mutation := newCoreUpstreamMutation(c.config, OpUpdateOne, withCoreUpstream(_m))
+	return &CoreUpstreamUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CoreUpstreamClient) UpdateOneID(id string) *CoreUpstreamUpdateOne {
+	mutation := newCoreUpstreamMutation(c.config, OpUpdateOne, withCoreUpstreamID(id))
+	return &CoreUpstreamUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CoreUpstream.
+func (c *CoreUpstreamClient) Delete() *CoreUpstreamDelete {
+	mutation := newCoreUpstreamMutation(c.config, OpDelete)
+	return &CoreUpstreamDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CoreUpstreamClient) DeleteOne(_m *CoreUpstream) *CoreUpstreamDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CoreUpstreamClient) DeleteOneID(id string) *CoreUpstreamDeleteOne {
+	builder := c.Delete().Where(coreupstream.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CoreUpstreamDeleteOne{builder}
+}
+
+// Query returns a query builder for CoreUpstream.
+func (c *CoreUpstreamClient) Query() *CoreUpstreamQuery {
+	return &CoreUpstreamQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCoreUpstream},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CoreUpstream entity by its id.
+func (c *CoreUpstreamClient) Get(ctx context.Context, id string) (*CoreUpstream, error) {
+	return c.Query().Where(coreupstream.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CoreUpstreamClient) GetX(ctx context.Context, id string) *CoreUpstream {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CoreUpstreamClient) Hooks() []Hook {
+	hooks := c.hooks.CoreUpstream
+	return append(hooks[:len(hooks):len(hooks)], coreupstream.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *CoreUpstreamClient) Interceptors() []Interceptor {
+	return c.inters.CoreUpstream
+}
+
+func (c *CoreUpstreamClient) mutate(ctx context.Context, m *CoreUpstreamMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CoreUpstreamCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CoreUpstreamUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CoreUpstreamUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CoreUpstreamDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CoreUpstream mutation op: %q", m.Op())
+	}
+}
+
+// CoreUpstreamHostClient is a client for the CoreUpstreamHost schema.
+type CoreUpstreamHostClient struct {
+	config
+}
+
+// NewCoreUpstreamHostClient returns a client for the CoreUpstreamHost from the given config.
+func NewCoreUpstreamHostClient(c config) *CoreUpstreamHostClient {
+	return &CoreUpstreamHostClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `coreupstreamhost.Hooks(f(g(h())))`.
+func (c *CoreUpstreamHostClient) Use(hooks ...Hook) {
+	c.hooks.CoreUpstreamHost = append(c.hooks.CoreUpstreamHost, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `coreupstreamhost.Intercept(f(g(h())))`.
+func (c *CoreUpstreamHostClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CoreUpstreamHost = append(c.inters.CoreUpstreamHost, interceptors...)
+}
+
+// Create returns a builder for creating a CoreUpstreamHost entity.
+func (c *CoreUpstreamHostClient) Create() *CoreUpstreamHostCreate {
+	mutation := newCoreUpstreamHostMutation(c.config, OpCreate)
+	return &CoreUpstreamHostCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CoreUpstreamHost entities.
+func (c *CoreUpstreamHostClient) CreateBulk(builders ...*CoreUpstreamHostCreate) *CoreUpstreamHostCreateBulk {
+	return &CoreUpstreamHostCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CoreUpstreamHostClient) MapCreateBulk(slice any, setFunc func(*CoreUpstreamHostCreate, int)) *CoreUpstreamHostCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CoreUpstreamHostCreateBulk{err: fmt.Errorf("calling to CoreUpstreamHostClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CoreUpstreamHostCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CoreUpstreamHostCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CoreUpstreamHost.
+func (c *CoreUpstreamHostClient) Update() *CoreUpstreamHostUpdate {
+	mutation := newCoreUpstreamHostMutation(c.config, OpUpdate)
+	return &CoreUpstreamHostUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CoreUpstreamHostClient) UpdateOne(_m *CoreUpstreamHost) *CoreUpstreamHostUpdateOne {
+	mutation := newCoreUpstreamHostMutation(c.config, OpUpdateOne, withCoreUpstreamHost(_m))
+	return &CoreUpstreamHostUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CoreUpstreamHostClient) UpdateOneID(id string) *CoreUpstreamHostUpdateOne {
+	mutation := newCoreUpstreamHostMutation(c.config, OpUpdateOne, withCoreUpstreamHostID(id))
+	return &CoreUpstreamHostUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CoreUpstreamHost.
+func (c *CoreUpstreamHostClient) Delete() *CoreUpstreamHostDelete {
+	mutation := newCoreUpstreamHostMutation(c.config, OpDelete)
+	return &CoreUpstreamHostDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CoreUpstreamHostClient) DeleteOne(_m *CoreUpstreamHost) *CoreUpstreamHostDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CoreUpstreamHostClient) DeleteOneID(id string) *CoreUpstreamHostDeleteOne {
+	builder := c.Delete().Where(coreupstreamhost.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CoreUpstreamHostDeleteOne{builder}
+}
+
+// Query returns a query builder for CoreUpstreamHost.
+func (c *CoreUpstreamHostClient) Query() *CoreUpstreamHostQuery {
+	return &CoreUpstreamHostQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCoreUpstreamHost},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CoreUpstreamHost entity by its id.
+func (c *CoreUpstreamHostClient) Get(ctx context.Context, id string) (*CoreUpstreamHost, error) {
+	return c.Query().Where(coreupstreamhost.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CoreUpstreamHostClient) GetX(ctx context.Context, id string) *CoreUpstreamHost {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CoreUpstreamHostClient) Hooks() []Hook {
+	hooks := c.hooks.CoreUpstreamHost
+	return append(hooks[:len(hooks):len(hooks)], coreupstreamhost.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *CoreUpstreamHostClient) Interceptors() []Interceptor {
+	return c.inters.CoreUpstreamHost
+}
+
+func (c *CoreUpstreamHostClient) mutate(ctx context.Context, m *CoreUpstreamHostMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CoreUpstreamHostCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CoreUpstreamHostUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CoreUpstreamHostUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CoreUpstreamHostDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CoreUpstreamHost mutation op: %q", m.Op())
+	}
+}
+
 // CoreUserClient is a client for the CoreUser schema.
 type CoreUserClient struct {
 	config
@@ -1564,12 +2420,16 @@ func (c *CoreUserClient) mutate(ctx context.Context, m *CoreUserMutation) (Value
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		CoreDataRelationship, CoreGatewayCluster, CoreGatewayNode, CoreMenu,
-		CoreOnLineUser, CoreOperationLog, CoreRole, CoreUser []ent.Hook
+		CoreCert, CoreDataRelationship, CoreGatewayCluster, CoreGatewayHttpRoute,
+		CoreGatewayL4Listener, CoreGatewayL7Listener, CoreGatewayNode, CoreMenu,
+		CoreOnLineUser, CoreOperationLog, CoreRole, CoreUpstream, CoreUpstreamHost,
+		CoreUser []ent.Hook
 	}
 	inters struct {
-		CoreDataRelationship, CoreGatewayCluster, CoreGatewayNode, CoreMenu,
-		CoreOnLineUser, CoreOperationLog, CoreRole, CoreUser []ent.Interceptor
+		CoreCert, CoreDataRelationship, CoreGatewayCluster, CoreGatewayHttpRoute,
+		CoreGatewayL4Listener, CoreGatewayL7Listener, CoreGatewayNode, CoreMenu,
+		CoreOnLineUser, CoreOperationLog, CoreRole, CoreUpstream, CoreUpstreamHost,
+		CoreUser []ent.Interceptor
 	}
 )
 

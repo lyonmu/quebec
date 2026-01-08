@@ -6,13 +6,19 @@ import (
 	"time"
 
 	"github.com/lyonmu/quebec/cmd/core/internal/common"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/corecert"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coredatarelationship"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewaycluster"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewayhttproute"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewayl4listener"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewayl7listener"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coregatewaynode"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coremenu"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreonlineuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreoperationlog"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/corerole"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreupstream"
+	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreupstreamhost"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/coreuser"
 	"github.com/lyonmu/quebec/cmd/core/internal/ent/schema"
 	"github.com/lyonmu/quebec/pkg/constant"
@@ -22,6 +28,58 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	corecertMixin := schema.CoreCert{}.Mixin()
+	corecertMixinHooks1 := corecertMixin[1].Hooks()
+	corecert.Hooks[0] = corecertMixinHooks1[0]
+	corecert.Hooks[1] = corecertMixinHooks1[1]
+	corecertMixinFields0 := corecertMixin[0].Fields()
+	_ = corecertMixinFields0
+	corecertMixinFields1 := corecertMixin[1].Fields()
+	_ = corecertMixinFields1
+	corecertFields := schema.CoreCert{}.Fields()
+	_ = corecertFields
+	// corecertDescCreatedAt is the schema descriptor for created_at field.
+	corecertDescCreatedAt := corecertMixinFields1[0].Descriptor()
+	// corecert.DefaultCreatedAt holds the default value on creation for the created_at field.
+	corecert.DefaultCreatedAt = corecertDescCreatedAt.Default.(func() time.Time)
+	// corecertDescUpdatedAt is the schema descriptor for updated_at field.
+	corecertDescUpdatedAt := corecertMixinFields1[1].Descriptor()
+	// corecert.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	corecert.DefaultUpdatedAt = corecertDescUpdatedAt.Default.(func() time.Time)
+	// corecert.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	corecert.UpdateDefaultUpdatedAt = corecertDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// corecertDescSecretType is the schema descriptor for secret_type field.
+	corecertDescSecretType := corecertFields[6].Descriptor()
+	// corecert.DefaultSecretType holds the default value on creation for the secret_type field.
+	corecert.DefaultSecretType = constant.CertType(corecertDescSecretType.Default.(int8))
+	// corecertDescStatus is the schema descriptor for status field.
+	corecertDescStatus := corecertFields[11].Descriptor()
+	// corecert.DefaultStatus holds the default value on creation for the status field.
+	corecert.DefaultStatus = constant.YesOrNo(corecertDescStatus.Default.(int8))
+	// corecertDescIsDefault is the schema descriptor for is_default field.
+	corecertDescIsDefault := corecertFields[12].Descriptor()
+	// corecert.DefaultIsDefault holds the default value on creation for the is_default field.
+	corecert.DefaultIsDefault = constant.YesOrNo(corecertDescIsDefault.Default.(int8))
+	// corecertDescID is the schema descriptor for id field.
+	corecertDescID := corecertMixinFields0[0].Descriptor()
+	// corecert.DefaultID holds the default value on creation for the id field.
+	corecert.DefaultID = corecertDescID.Default.(func() string)
+	// corecert.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	corecert.IDValidator = func() func(string) error {
+		validators := corecertDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	coredatarelationshipMixin := schema.CoreDataRelationship{}.Mixin()
 	coredatarelationshipMixinHooks1 := coredatarelationshipMixin[1].Hooks()
 	coredatarelationship.Hooks[0] = coredatarelationshipMixinHooks1[0]
@@ -97,6 +155,174 @@ func init() {
 	// coregatewaycluster.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	coregatewaycluster.IDValidator = func() func(string) error {
 		validators := coregatewayclusterDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	coregatewayhttprouteMixin := schema.CoreGatewayHttpRoute{}.Mixin()
+	coregatewayhttprouteMixinHooks1 := coregatewayhttprouteMixin[1].Hooks()
+	coregatewayhttproute.Hooks[0] = coregatewayhttprouteMixinHooks1[0]
+	coregatewayhttproute.Hooks[1] = coregatewayhttprouteMixinHooks1[1]
+	coregatewayhttprouteMixinFields0 := coregatewayhttprouteMixin[0].Fields()
+	_ = coregatewayhttprouteMixinFields0
+	coregatewayhttprouteMixinFields1 := coregatewayhttprouteMixin[1].Fields()
+	_ = coregatewayhttprouteMixinFields1
+	coregatewayhttprouteFields := schema.CoreGatewayHttpRoute{}.Fields()
+	_ = coregatewayhttprouteFields
+	// coregatewayhttprouteDescCreatedAt is the schema descriptor for created_at field.
+	coregatewayhttprouteDescCreatedAt := coregatewayhttprouteMixinFields1[0].Descriptor()
+	// coregatewayhttproute.DefaultCreatedAt holds the default value on creation for the created_at field.
+	coregatewayhttproute.DefaultCreatedAt = coregatewayhttprouteDescCreatedAt.Default.(func() time.Time)
+	// coregatewayhttprouteDescUpdatedAt is the schema descriptor for updated_at field.
+	coregatewayhttprouteDescUpdatedAt := coregatewayhttprouteMixinFields1[1].Descriptor()
+	// coregatewayhttproute.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	coregatewayhttproute.DefaultUpdatedAt = coregatewayhttprouteDescUpdatedAt.Default.(func() time.Time)
+	// coregatewayhttproute.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	coregatewayhttproute.UpdateDefaultUpdatedAt = coregatewayhttprouteDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// coregatewayhttprouteDescMatchType is the schema descriptor for match_type field.
+	coregatewayhttprouteDescMatchType := coregatewayhttprouteFields[2].Descriptor()
+	// coregatewayhttproute.DefaultMatchType holds the default value on creation for the match_type field.
+	coregatewayhttproute.DefaultMatchType = constant.ProxyHttpRouteMatchType(coregatewayhttprouteDescMatchType.Default.(int8))
+	// coregatewayhttprouteDescTimeoutMs is the schema descriptor for timeout_ms field.
+	coregatewayhttprouteDescTimeoutMs := coregatewayhttprouteFields[4].Descriptor()
+	// coregatewayhttproute.DefaultTimeoutMs holds the default value on creation for the timeout_ms field.
+	coregatewayhttproute.DefaultTimeoutMs = coregatewayhttprouteDescTimeoutMs.Default.(int)
+	// coregatewayhttprouteDescEnablePathRewrite is the schema descriptor for enable_path_rewrite field.
+	coregatewayhttprouteDescEnablePathRewrite := coregatewayhttprouteFields[5].Descriptor()
+	// coregatewayhttproute.DefaultEnablePathRewrite holds the default value on creation for the enable_path_rewrite field.
+	coregatewayhttproute.DefaultEnablePathRewrite = constant.YesOrNo(coregatewayhttprouteDescEnablePathRewrite.Default.(int8))
+	// coregatewayhttprouteDescEnableRedirect is the schema descriptor for enable_redirect field.
+	coregatewayhttprouteDescEnableRedirect := coregatewayhttprouteFields[7].Descriptor()
+	// coregatewayhttproute.DefaultEnableRedirect holds the default value on creation for the enable_redirect field.
+	coregatewayhttproute.DefaultEnableRedirect = constant.YesOrNo(coregatewayhttprouteDescEnableRedirect.Default.(int8))
+	// coregatewayhttprouteDescRedirectCode is the schema descriptor for redirect_code field.
+	coregatewayhttprouteDescRedirectCode := coregatewayhttprouteFields[9].Descriptor()
+	// coregatewayhttproute.DefaultRedirectCode holds the default value on creation for the redirect_code field.
+	coregatewayhttproute.DefaultRedirectCode = coregatewayhttprouteDescRedirectCode.Default.(int)
+	// coregatewayhttprouteDescStatus is the schema descriptor for status field.
+	coregatewayhttprouteDescStatus := coregatewayhttprouteFields[10].Descriptor()
+	// coregatewayhttproute.DefaultStatus holds the default value on creation for the status field.
+	coregatewayhttproute.DefaultStatus = constant.YesOrNo(coregatewayhttprouteDescStatus.Default.(int8))
+	// coregatewayhttprouteDescID is the schema descriptor for id field.
+	coregatewayhttprouteDescID := coregatewayhttprouteMixinFields0[0].Descriptor()
+	// coregatewayhttproute.DefaultID holds the default value on creation for the id field.
+	coregatewayhttproute.DefaultID = coregatewayhttprouteDescID.Default.(func() string)
+	// coregatewayhttproute.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	coregatewayhttproute.IDValidator = func() func(string) error {
+		validators := coregatewayhttprouteDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	coregatewayl4listenerMixin := schema.CoreGatewayL4Listener{}.Mixin()
+	coregatewayl4listenerMixinHooks1 := coregatewayl4listenerMixin[1].Hooks()
+	coregatewayl4listener.Hooks[0] = coregatewayl4listenerMixinHooks1[0]
+	coregatewayl4listener.Hooks[1] = coregatewayl4listenerMixinHooks1[1]
+	coregatewayl4listenerMixinFields0 := coregatewayl4listenerMixin[0].Fields()
+	_ = coregatewayl4listenerMixinFields0
+	coregatewayl4listenerMixinFields1 := coregatewayl4listenerMixin[1].Fields()
+	_ = coregatewayl4listenerMixinFields1
+	coregatewayl4listenerFields := schema.CoreGatewayL4Listener{}.Fields()
+	_ = coregatewayl4listenerFields
+	// coregatewayl4listenerDescCreatedAt is the schema descriptor for created_at field.
+	coregatewayl4listenerDescCreatedAt := coregatewayl4listenerMixinFields1[0].Descriptor()
+	// coregatewayl4listener.DefaultCreatedAt holds the default value on creation for the created_at field.
+	coregatewayl4listener.DefaultCreatedAt = coregatewayl4listenerDescCreatedAt.Default.(func() time.Time)
+	// coregatewayl4listenerDescUpdatedAt is the schema descriptor for updated_at field.
+	coregatewayl4listenerDescUpdatedAt := coregatewayl4listenerMixinFields1[1].Descriptor()
+	// coregatewayl4listener.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	coregatewayl4listener.DefaultUpdatedAt = coregatewayl4listenerDescUpdatedAt.Default.(func() time.Time)
+	// coregatewayl4listener.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	coregatewayl4listener.UpdateDefaultUpdatedAt = coregatewayl4listenerDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// coregatewayl4listenerDescHost is the schema descriptor for host field.
+	coregatewayl4listenerDescHost := coregatewayl4listenerFields[3].Descriptor()
+	// coregatewayl4listener.DefaultHost holds the default value on creation for the host field.
+	coregatewayl4listener.DefaultHost = coregatewayl4listenerDescHost.Default.(string)
+	// coregatewayl4listenerDescProtocol is the schema descriptor for protocol field.
+	coregatewayl4listenerDescProtocol := coregatewayl4listenerFields[4].Descriptor()
+	// coregatewayl4listener.DefaultProtocol holds the default value on creation for the protocol field.
+	coregatewayl4listener.DefaultProtocol = constant.ProxyProtocolType(coregatewayl4listenerDescProtocol.Default.(int8))
+	// coregatewayl4listenerDescStatus is the schema descriptor for status field.
+	coregatewayl4listenerDescStatus := coregatewayl4listenerFields[5].Descriptor()
+	// coregatewayl4listener.DefaultStatus holds the default value on creation for the status field.
+	coregatewayl4listener.DefaultStatus = constant.YesOrNo(coregatewayl4listenerDescStatus.Default.(int8))
+	// coregatewayl4listenerDescID is the schema descriptor for id field.
+	coregatewayl4listenerDescID := coregatewayl4listenerMixinFields0[0].Descriptor()
+	// coregatewayl4listener.DefaultID holds the default value on creation for the id field.
+	coregatewayl4listener.DefaultID = coregatewayl4listenerDescID.Default.(func() string)
+	// coregatewayl4listener.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	coregatewayl4listener.IDValidator = func() func(string) error {
+		validators := coregatewayl4listenerDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	coregatewayl7listenerMixin := schema.CoreGatewayL7Listener{}.Mixin()
+	coregatewayl7listenerMixinHooks1 := coregatewayl7listenerMixin[1].Hooks()
+	coregatewayl7listener.Hooks[0] = coregatewayl7listenerMixinHooks1[0]
+	coregatewayl7listener.Hooks[1] = coregatewayl7listenerMixinHooks1[1]
+	coregatewayl7listenerMixinFields0 := coregatewayl7listenerMixin[0].Fields()
+	_ = coregatewayl7listenerMixinFields0
+	coregatewayl7listenerMixinFields1 := coregatewayl7listenerMixin[1].Fields()
+	_ = coregatewayl7listenerMixinFields1
+	coregatewayl7listenerFields := schema.CoreGatewayL7Listener{}.Fields()
+	_ = coregatewayl7listenerFields
+	// coregatewayl7listenerDescCreatedAt is the schema descriptor for created_at field.
+	coregatewayl7listenerDescCreatedAt := coregatewayl7listenerMixinFields1[0].Descriptor()
+	// coregatewayl7listener.DefaultCreatedAt holds the default value on creation for the created_at field.
+	coregatewayl7listener.DefaultCreatedAt = coregatewayl7listenerDescCreatedAt.Default.(func() time.Time)
+	// coregatewayl7listenerDescUpdatedAt is the schema descriptor for updated_at field.
+	coregatewayl7listenerDescUpdatedAt := coregatewayl7listenerMixinFields1[1].Descriptor()
+	// coregatewayl7listener.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	coregatewayl7listener.DefaultUpdatedAt = coregatewayl7listenerDescUpdatedAt.Default.(func() time.Time)
+	// coregatewayl7listener.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	coregatewayl7listener.UpdateDefaultUpdatedAt = coregatewayl7listenerDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// coregatewayl7listenerDescHost is the schema descriptor for host field.
+	coregatewayl7listenerDescHost := coregatewayl7listenerFields[3].Descriptor()
+	// coregatewayl7listener.DefaultHost holds the default value on creation for the host field.
+	coregatewayl7listener.DefaultHost = coregatewayl7listenerDescHost.Default.(string)
+	// coregatewayl7listenerDescEnableTLS is the schema descriptor for enable_tls field.
+	coregatewayl7listenerDescEnableTLS := coregatewayl7listenerFields[4].Descriptor()
+	// coregatewayl7listener.DefaultEnableTLS holds the default value on creation for the enable_tls field.
+	coregatewayl7listener.DefaultEnableTLS = constant.YesOrNo(coregatewayl7listenerDescEnableTLS.Default.(int8))
+	// coregatewayl7listenerDescStatus is the schema descriptor for status field.
+	coregatewayl7listenerDescStatus := coregatewayl7listenerFields[5].Descriptor()
+	// coregatewayl7listener.DefaultStatus holds the default value on creation for the status field.
+	coregatewayl7listener.DefaultStatus = constant.YesOrNo(coregatewayl7listenerDescStatus.Default.(int8))
+	// coregatewayl7listenerDescID is the schema descriptor for id field.
+	coregatewayl7listenerDescID := coregatewayl7listenerMixinFields0[0].Descriptor()
+	// coregatewayl7listener.DefaultID holds the default value on creation for the id field.
+	coregatewayl7listener.DefaultID = coregatewayl7listenerDescID.Default.(func() string)
+	// coregatewayl7listener.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	coregatewayl7listener.IDValidator = func() func(string) error {
+		validators := coregatewayl7listenerDescID.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),
@@ -333,6 +559,122 @@ func init() {
 	// corerole.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	corerole.IDValidator = func() func(string) error {
 		validators := coreroleDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	coreupstreamMixin := schema.CoreUpstream{}.Mixin()
+	coreupstreamMixinHooks1 := coreupstreamMixin[1].Hooks()
+	coreupstream.Hooks[0] = coreupstreamMixinHooks1[0]
+	coreupstream.Hooks[1] = coreupstreamMixinHooks1[1]
+	coreupstreamMixinFields0 := coreupstreamMixin[0].Fields()
+	_ = coreupstreamMixinFields0
+	coreupstreamMixinFields1 := coreupstreamMixin[1].Fields()
+	_ = coreupstreamMixinFields1
+	coreupstreamFields := schema.CoreUpstream{}.Fields()
+	_ = coreupstreamFields
+	// coreupstreamDescCreatedAt is the schema descriptor for created_at field.
+	coreupstreamDescCreatedAt := coreupstreamMixinFields1[0].Descriptor()
+	// coreupstream.DefaultCreatedAt holds the default value on creation for the created_at field.
+	coreupstream.DefaultCreatedAt = coreupstreamDescCreatedAt.Default.(func() time.Time)
+	// coreupstreamDescUpdatedAt is the schema descriptor for updated_at field.
+	coreupstreamDescUpdatedAt := coreupstreamMixinFields1[1].Descriptor()
+	// coreupstream.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	coreupstream.DefaultUpdatedAt = coreupstreamDescUpdatedAt.Default.(func() time.Time)
+	// coreupstream.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	coreupstream.UpdateDefaultUpdatedAt = coreupstreamDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// coreupstreamDescLbPolicy is the schema descriptor for lb_policy field.
+	coreupstreamDescLbPolicy := coreupstreamFields[2].Descriptor()
+	// coreupstream.DefaultLbPolicy holds the default value on creation for the lb_policy field.
+	coreupstream.DefaultLbPolicy = constant.ProxyLbPolicy(coreupstreamDescLbPolicy.Default.(int8))
+	// coreupstreamDescConnectTimeoutMs is the schema descriptor for connect_timeout_ms field.
+	coreupstreamDescConnectTimeoutMs := coreupstreamFields[3].Descriptor()
+	// coreupstream.DefaultConnectTimeoutMs holds the default value on creation for the connect_timeout_ms field.
+	coreupstream.DefaultConnectTimeoutMs = coreupstreamDescConnectTimeoutMs.Default.(int)
+	// coreupstreamDescMaxConnections is the schema descriptor for max_connections field.
+	coreupstreamDescMaxConnections := coreupstreamFields[4].Descriptor()
+	// coreupstream.DefaultMaxConnections holds the default value on creation for the max_connections field.
+	coreupstream.DefaultMaxConnections = coreupstreamDescMaxConnections.Default.(int)
+	// coreupstreamDescMaxPendingRequests is the schema descriptor for max_pending_requests field.
+	coreupstreamDescMaxPendingRequests := coreupstreamFields[5].Descriptor()
+	// coreupstream.DefaultMaxPendingRequests holds the default value on creation for the max_pending_requests field.
+	coreupstream.DefaultMaxPendingRequests = coreupstreamDescMaxPendingRequests.Default.(int)
+	// coreupstreamDescMaxRequests is the schema descriptor for max_requests field.
+	coreupstreamDescMaxRequests := coreupstreamFields[6].Descriptor()
+	// coreupstream.DefaultMaxRequests holds the default value on creation for the max_requests field.
+	coreupstream.DefaultMaxRequests = coreupstreamDescMaxRequests.Default.(int)
+	// coreupstreamDescMaxRetries is the schema descriptor for max_retries field.
+	coreupstreamDescMaxRetries := coreupstreamFields[7].Descriptor()
+	// coreupstream.DefaultMaxRetries holds the default value on creation for the max_retries field.
+	coreupstream.DefaultMaxRetries = coreupstreamDescMaxRetries.Default.(int)
+	// coreupstreamDescStatus is the schema descriptor for status field.
+	coreupstreamDescStatus := coreupstreamFields[8].Descriptor()
+	// coreupstream.DefaultStatus holds the default value on creation for the status field.
+	coreupstream.DefaultStatus = constant.YesOrNo(coreupstreamDescStatus.Default.(int8))
+	// coreupstreamDescID is the schema descriptor for id field.
+	coreupstreamDescID := coreupstreamMixinFields0[0].Descriptor()
+	// coreupstream.DefaultID holds the default value on creation for the id field.
+	coreupstream.DefaultID = coreupstreamDescID.Default.(func() string)
+	// coreupstream.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	coreupstream.IDValidator = func() func(string) error {
+		validators := coreupstreamDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	coreupstreamhostMixin := schema.CoreUpstreamHost{}.Mixin()
+	coreupstreamhostMixinHooks1 := coreupstreamhostMixin[1].Hooks()
+	coreupstreamhost.Hooks[0] = coreupstreamhostMixinHooks1[0]
+	coreupstreamhost.Hooks[1] = coreupstreamhostMixinHooks1[1]
+	coreupstreamhostMixinFields0 := coreupstreamhostMixin[0].Fields()
+	_ = coreupstreamhostMixinFields0
+	coreupstreamhostMixinFields1 := coreupstreamhostMixin[1].Fields()
+	_ = coreupstreamhostMixinFields1
+	coreupstreamhostFields := schema.CoreUpstreamHost{}.Fields()
+	_ = coreupstreamhostFields
+	// coreupstreamhostDescCreatedAt is the schema descriptor for created_at field.
+	coreupstreamhostDescCreatedAt := coreupstreamhostMixinFields1[0].Descriptor()
+	// coreupstreamhost.DefaultCreatedAt holds the default value on creation for the created_at field.
+	coreupstreamhost.DefaultCreatedAt = coreupstreamhostDescCreatedAt.Default.(func() time.Time)
+	// coreupstreamhostDescUpdatedAt is the schema descriptor for updated_at field.
+	coreupstreamhostDescUpdatedAt := coreupstreamhostMixinFields1[1].Descriptor()
+	// coreupstreamhost.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	coreupstreamhost.DefaultUpdatedAt = coreupstreamhostDescUpdatedAt.Default.(func() time.Time)
+	// coreupstreamhost.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	coreupstreamhost.UpdateDefaultUpdatedAt = coreupstreamhostDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// coreupstreamhostDescWeight is the schema descriptor for weight field.
+	coreupstreamhostDescWeight := coreupstreamhostFields[1].Descriptor()
+	// coreupstreamhost.DefaultWeight holds the default value on creation for the weight field.
+	coreupstreamhost.DefaultWeight = coreupstreamhostDescWeight.Default.(int)
+	// coreupstreamhostDescEnabled is the schema descriptor for enabled field.
+	coreupstreamhostDescEnabled := coreupstreamhostFields[3].Descriptor()
+	// coreupstreamhost.DefaultEnabled holds the default value on creation for the enabled field.
+	coreupstreamhost.DefaultEnabled = constant.YesOrNo(coreupstreamhostDescEnabled.Default.(int8))
+	// coreupstreamhostDescID is the schema descriptor for id field.
+	coreupstreamhostDescID := coreupstreamhostMixinFields0[0].Descriptor()
+	// coreupstreamhost.DefaultID holds the default value on creation for the id field.
+	coreupstreamhost.DefaultID = coreupstreamhostDescID.Default.(func() string)
+	// coreupstreamhost.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	coreupstreamhost.IDValidator = func() func(string) error {
+		validators := coreupstreamhostDescID.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),

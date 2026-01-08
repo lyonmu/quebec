@@ -6,11 +6,23 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// CoreCert is the predicate function for corecert builders.
+type CoreCert func(*sql.Selector)
+
 // CoreDataRelationship is the predicate function for coredatarelationship builders.
 type CoreDataRelationship func(*sql.Selector)
 
 // CoreGatewayCluster is the predicate function for coregatewaycluster builders.
 type CoreGatewayCluster func(*sql.Selector)
+
+// CoreGatewayHttpRoute is the predicate function for coregatewayhttproute builders.
+type CoreGatewayHttpRoute func(*sql.Selector)
+
+// CoreGatewayL4Listener is the predicate function for coregatewayl4listener builders.
+type CoreGatewayL4Listener func(*sql.Selector)
+
+// CoreGatewayL7Listener is the predicate function for coregatewayl7listener builders.
+type CoreGatewayL7Listener func(*sql.Selector)
 
 // CoreGatewayNode is the predicate function for coregatewaynode builders.
 type CoreGatewayNode func(*sql.Selector)
@@ -26,6 +38,12 @@ type CoreOperationLog func(*sql.Selector)
 
 // CoreRole is the predicate function for corerole builders.
 type CoreRole func(*sql.Selector)
+
+// CoreUpstream is the predicate function for coreupstream builders.
+type CoreUpstream func(*sql.Selector)
+
+// CoreUpstreamHost is the predicate function for coreupstreamhost builders.
+type CoreUpstreamHost func(*sql.Selector)
 
 // CoreUser is the predicate function for coreuser builders.
 type CoreUser func(*sql.Selector)

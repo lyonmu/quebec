@@ -42,7 +42,9 @@ swag:
 
 .PHONY: ent
 ent:
-	cd cmd/core/internal/ent && go run -mod=mod entgo.io/ent/cmd/ent --feature sql/upsert,sql/execquery,sql/modifier generate ./schema
+	cd cmd/core/internal/ent \
+	&& go run -mod=mod entgo.io/ent/cmd/ent --feature sql/upsert,sql/execquery,sql/modifier generate ./schema \
+	&& go run -mod=mod entgo.io/ent/cmd/ent describe ./schema
 
 .PHONY: all
 all: gateway core ui

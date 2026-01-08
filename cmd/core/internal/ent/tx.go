@@ -14,10 +14,18 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// CoreCert is the client for interacting with the CoreCert builders.
+	CoreCert *CoreCertClient
 	// CoreDataRelationship is the client for interacting with the CoreDataRelationship builders.
 	CoreDataRelationship *CoreDataRelationshipClient
 	// CoreGatewayCluster is the client for interacting with the CoreGatewayCluster builders.
 	CoreGatewayCluster *CoreGatewayClusterClient
+	// CoreGatewayHttpRoute is the client for interacting with the CoreGatewayHttpRoute builders.
+	CoreGatewayHttpRoute *CoreGatewayHttpRouteClient
+	// CoreGatewayL4Listener is the client for interacting with the CoreGatewayL4Listener builders.
+	CoreGatewayL4Listener *CoreGatewayL4ListenerClient
+	// CoreGatewayL7Listener is the client for interacting with the CoreGatewayL7Listener builders.
+	CoreGatewayL7Listener *CoreGatewayL7ListenerClient
 	// CoreGatewayNode is the client for interacting with the CoreGatewayNode builders.
 	CoreGatewayNode *CoreGatewayNodeClient
 	// CoreMenu is the client for interacting with the CoreMenu builders.
@@ -28,6 +36,10 @@ type Tx struct {
 	CoreOperationLog *CoreOperationLogClient
 	// CoreRole is the client for interacting with the CoreRole builders.
 	CoreRole *CoreRoleClient
+	// CoreUpstream is the client for interacting with the CoreUpstream builders.
+	CoreUpstream *CoreUpstreamClient
+	// CoreUpstreamHost is the client for interacting with the CoreUpstreamHost builders.
+	CoreUpstreamHost *CoreUpstreamHostClient
 	// CoreUser is the client for interacting with the CoreUser builders.
 	CoreUser *CoreUserClient
 
@@ -161,13 +173,19 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.CoreCert = NewCoreCertClient(tx.config)
 	tx.CoreDataRelationship = NewCoreDataRelationshipClient(tx.config)
 	tx.CoreGatewayCluster = NewCoreGatewayClusterClient(tx.config)
+	tx.CoreGatewayHttpRoute = NewCoreGatewayHttpRouteClient(tx.config)
+	tx.CoreGatewayL4Listener = NewCoreGatewayL4ListenerClient(tx.config)
+	tx.CoreGatewayL7Listener = NewCoreGatewayL7ListenerClient(tx.config)
 	tx.CoreGatewayNode = NewCoreGatewayNodeClient(tx.config)
 	tx.CoreMenu = NewCoreMenuClient(tx.config)
 	tx.CoreOnLineUser = NewCoreOnLineUserClient(tx.config)
 	tx.CoreOperationLog = NewCoreOperationLogClient(tx.config)
 	tx.CoreRole = NewCoreRoleClient(tx.config)
+	tx.CoreUpstream = NewCoreUpstreamClient(tx.config)
+	tx.CoreUpstreamHost = NewCoreUpstreamHostClient(tx.config)
 	tx.CoreUser = NewCoreUserClient(tx.config)
 }
 
@@ -178,7 +196,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: CoreDataRelationship.QueryXXX(), the query will be executed
+// applies a query, for example: CoreCert.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.
